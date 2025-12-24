@@ -1,4 +1,4 @@
-extends Control
+extends CanvasLayer
 ## Spell hotbar UI.
 ## Displays 10 spell slots (1-9, 0) and manages selection.
 
