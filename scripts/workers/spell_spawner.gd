@@ -48,7 +48,7 @@ func _find_pool() -> void:
 
 ## Spawn a fireball in the given direction
 ## Returns the spawned fireball node
-func spawn_fireball(direction: String, spawn_pos: Vector2, z_index_value: int) -> Node:
+func spawn_fireball(direction: String, spawn_pos: Vector2, z_index_value: int, spell_data: SpellData = null) -> Node:
 	_log("🔥 Spawning fireball...")
 	_log("   Direction: " + direction)
 	_log("   Position: " + str(spawn_pos))
@@ -81,8 +81,10 @@ func spawn_fireball(direction: String, spawn_pos: Vector2, z_index_value: int) -
 	_log("   Direction vector: " + str(dir_vec))
 	
 	if fb.has_method("setup"):
-		fb.call("setup", dir_vec, owner_node, z_index_value)
+		fb.call("setup", dir_vec, owner_node, z_index_value, spell_data)
 		_log("   ✓ Fireball setup() called")
+		if spell_data != null:
+			_log("   ✓ SpellData provided: " + spell_data.display_name + " (" + spell_data.element + ")")
 	else:
 		fb.z_index = z_index_value
 		_log("   ⚠️ Fireball has no setup() method - set z_index directly")

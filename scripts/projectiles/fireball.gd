@@ -2,12 +2,14 @@ extends Area2D
 
 @export var speed: float = 500.0  # Faster, more responsive
 @export var lifetime: float = 1.5
-@export var damage: int = 25  # Damage dealt to enemies
+@export var damage: int = 25  # Damage dealt to enemies (fallback if no spell_data)
 @export var impact_scene: PackedScene
 
 @onready var anim: AnimatedSprite2D = get_node_or_null("AnimatedSprite2D")
 @onready var visibility_notifier: VisibleOnScreenNotifier2D = get_node_or_null("VisibleOnScreenNotifier2D")
 
+var spell_data: SpellData = null
+var hue_shift: float = 0.0
 var velocity: Vector2 = Vector2.ZERO
 var travel_dir: Vector2 = Vector2.RIGHT
 var owner_node: Node = null  # Track who shot this fireball
@@ -38,6 +40,7 @@ func _ready() -> void:
 	if anim != null and anim.sprite_frames != null and anim.sprite_frames.has_animation("fireball"):
 		anim.flip_h = false
 		anim.rotation = 0.0
+		anim.modulate = Color.WHITE  # Reset modulate on ready
 		anim.play("fireball")
 
 
@@ -52,8 +55,22 @@ func _find_pool_manager() -> void:
 
 
 # Called by Player right after instancing (or when getting from pool)
-func setup(dir_vec: Vector2, shooter: Node = null, z_index_override: int = -1) -> void:
+func setup(dir_vec: Vector2, shooter: Node = null, z_index_override: int = -1, data: SpellData = null) -> void:
 	travel_dir = dir_vec.normalized()
+	
+	# Set spell data if provided
+	if data != null:
+		spell_data = data
+		hue_shift = data.hue_shift
+		speed = data.projectile_speed
+		_apply_hue()
+	else:
+		spell_data = null
+		hue_shift = 0.0
+		# Reset modulate if no spell data
+		if anim != null:
+			anim.modulate = Color.WHITE
+	
 	velocity = travel_dir * speed
 	owner_node = shooter
 	lifetime_timer = lifetime
@@ -114,8 +131,13 @@ func _on_area_entered(area: Area2D) -> void:
 		if hurtbox.owner_node == owner_node or hurtbox.owner_node.is_in_group("player"):
 			return  # <-- IMPORTANT: Don't fall through!
 		
+		# Calculate damage from spell_data if available, otherwise use fallback
+		var final_damage: int = damage
+		if spell_data != null and SpellSystem != null:
+			final_damage = SpellSystem.get_spell_damage(spell_data)
+		
 		# Hit enemy hurtbox
-		hurtbox.receive_hit(damage, travel_dir * 150.0, owner_node)
+		hurtbox.receive_hit(final_damage, travel_dir * 150.0, owner_node)
 		_spawn_impact()
 		_deactivate()
 		return
@@ -150,11 +172,16 @@ func _deactivate() -> void:
 
 func _deal_damage_to(body: Node) -> void:
 	"""Deal damage to a body if it has a take_damage method or is an enemy"""
+	# Calculate damage from spell_data if available, otherwise use fallback
+	var final_damage: int = damage
+	if spell_data != null and SpellSystem != null:
+		final_damage = SpellSystem.get_spell_damage(spell_data)
+	
 	if body.is_in_group("enemy"):
 		if body.has_method("take_damage"):
-			body.take_damage(damage, owner_node)
+			body.take_damage(final_damage, owner_node)
 	elif body.has_method("take_damage"):
-		body.take_damage(damage, owner_node)
+		body.take_damage(final_damage, owner_node)
 
 
 func _spawn_impact() -> void:
@@ -196,3 +223,17 @@ func _spawn_impact() -> void:
 	else:
 		fx.rotation = desired_angle
 		print("[Fireball]    Impact has no setup(), set rotation directly")
+
+
+func _apply_hue() -> void:
+	"""Applies hue shift to the animated sprite based on spell_data."""
+	if anim == null:
+		return
+	
+	if hue_shift != 0.0:
+		# Shift the modulate color using HSV
+		var color := Color.from_hsv(hue_shift, 0.8, 1.0)
+		anim.modulate = color
+	else:
+		# Reset to white if no hue shift
+		anim.modulate = Color.WHITE

@@ -31,6 +31,9 @@ var cooldown_timer: float = 0.0
 var is_casting: bool = false
 var _stamina_drain_accumulator: float = 0.0  # Fractional accumulator for smooth stamina drain
 
+# Current spell (default to fireball for Commit 3B)
+var current_spell: SpellData = null
+
 # Screen shake
 var _camera: Camera2D = null
 var _shake_tween: Tween = null
@@ -101,6 +104,14 @@ func _ready() -> void:
 		_log("  ✓ Camera2D found (screen shake enabled)")
 	else:
 		_log("  ⚠ No Camera2D found (screen shake disabled)")
+	
+	# Load default fireball spell (Commit 3B: will be replaced by spell selection in 3C)
+	var fireball_resource := load("res://resources/spells/fireball.tres") as SpellData
+	if fireball_resource != null:
+		current_spell = fireball_resource
+		_log("  ✓ Default spell loaded: " + current_spell.display_name)
+	else:
+		_log_error("Failed to load default fireball spell resource!")
 	
 	_log("Player ready! All systems: " + ("GO" if _all_workers_ready() else "SOME MISSING"))
 
@@ -194,12 +205,24 @@ func _physics_process(delta: float) -> void:
 
 
 func _can_cast() -> bool:
-	return cooldown_timer <= 0.0 and not is_casting and PlayerStats.has_mana(fireball_mana_cost)
+	if current_spell == null:
+		# Fallback to hardcoded mana cost if no spell
+		return cooldown_timer <= 0.0 and not is_casting and PlayerStats.has_mana(fireball_mana_cost)
+	
+	# Use spell's mana cost and validate with SpellSystem
+	if SpellSystem != null and not SpellSystem.can_cast(current_spell):
+		return false
+	
+	return cooldown_timer <= 0.0 and not is_casting
 
 
 func _start_fireball_cast(input_vec: Vector2) -> void:
-	# Consume mana for casting
-	if not PlayerStats.consume_mana(fireball_mana_cost):
+	# Consume mana for casting (use spell's mana cost if available)
+	var mana_to_consume: int = fireball_mana_cost
+	if current_spell != null:
+		mana_to_consume = current_spell.mana_cost
+	
+	if not PlayerStats.consume_mana(mana_to_consume):
 		_log_error("Failed to consume mana for fireball cast!")
 		return
 	
@@ -243,9 +266,12 @@ func _spawn_fireball(direction: String) -> void:
 	else:
 		_log("   Facing south/side - fireball spawns ABOVE player (z=" + str(z_index_value) + ")")
 	
-	var fireball := spell_spawner.spawn_fireball(direction, global_position, z_index_value)
+	# Pass current spell data to spawner (null for now will use fallback damage)
+	var fireball := spell_spawner.spawn_fireball(direction, global_position, z_index_value, current_spell)
 	if fireball != null:
 		_log("   ✓ Fireball spawned at " + str(global_position))
+		if current_spell != null:
+			_log("   ✓ Using spell: " + current_spell.display_name + " (" + current_spell.element + ")")
 	else:
 		_log_error("SpellSpawner.spawn_fireball returned null!")
 

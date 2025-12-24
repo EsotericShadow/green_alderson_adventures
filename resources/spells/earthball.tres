@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="SpellData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/spell_data.gd" id="1_spell_data"]
+
+[resource]
+script = ExtResource("1_spell_data")
+id = "earthball"
+display_name = "Earthball"
+description = "An earth spell that deals high damage."
+element = "earth"
+base_damage = 20
+mana_cost = 15
+cooldown = 0.9
+hue_shift = 0.3
+projectile_speed = 500.0
+

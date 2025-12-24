@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="SpellData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/spell_data.gd" id="1_spell_data"]
+
+[resource]
+script = ExtResource("1_spell_data")
+id = "airball"
+display_name = "Airball"
+description = "An air spell that deals low damage but has fast cooldown."
+element = "air"
+base_damage = 10
+mana_cost = 8
+cooldown = 0.4
+hue_shift = 0.75
+projectile_speed = 500.0
+
