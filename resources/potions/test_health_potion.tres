@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="PotionData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/potion_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = "health_potion"
+display_name = "Health Potion"
+description = "Restores 50 health points."
+stackable = true
+max_stack = 99
+item_type = "consumable"
+effect = "restore_health"
+potency = 50
+duration = 0.0
+
