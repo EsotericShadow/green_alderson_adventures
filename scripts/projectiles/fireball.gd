@@ -138,6 +138,13 @@ func _on_area_entered(area: Area2D) -> void:
 		
 		# Hit enemy hurtbox
 		hurtbox.receive_hit(final_damage, travel_dir * 150.0, owner_node)
+		
+		# Gain XP for successful spell hit (Commit 3B: XP tracking)
+		if spell_data != null and SpellSystem != null:
+			# Gain XP equal to damage dealt (scaled for balance)
+			var xp_gain: int = max(1, final_damage / 2)  # Half of damage dealt, minimum 1
+			SpellSystem.gain_xp(spell_data.element, xp_gain)
+		
 		_spawn_impact()
 		_deactivate()
 		return
@@ -177,11 +184,20 @@ func _deal_damage_to(body: Node) -> void:
 	if spell_data != null and SpellSystem != null:
 		final_damage = SpellSystem.get_spell_damage(spell_data)
 	
+	var damage_dealt: bool = false
 	if body.is_in_group("enemy"):
 		if body.has_method("take_damage"):
 			body.take_damage(final_damage, owner_node)
+			damage_dealt = true
 	elif body.has_method("take_damage"):
 		body.take_damage(final_damage, owner_node)
+		damage_dealt = true
+	
+	# Gain XP for successful spell hit (Commit 3B: XP tracking)
+	if damage_dealt and spell_data != null and SpellSystem != null:
+		# Gain XP equal to damage dealt (scaled for balance)
+		var xp_gain: int = max(1, final_damage / 2)  # Half of damage dealt, minimum 1
+		SpellSystem.gain_xp(spell_data.element, xp_gain)
 
 
 func _spawn_impact() -> void:
