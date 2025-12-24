@@ -1,0 +1,18 @@
+[gd_scene load_steps=4 format=3 uid="uid://p1wlou6u74sw"]
+
+[ext_resource type="PackedScene" uid="uid://ca8w8dxhshamw" path="res://scenes/overworld.tscn" id="1_0xm2m"]
+[ext_resource type="PackedScene" uid="uid://c447wb2lmdb0b" path="res://scenes/player.tscn" id="1_ig7tw"]
+[ext_resource type="PackedScene" path="res://scenes/projectile_pool.tscn" id="2_pool"]
+
+[node name="Node2D" type="Node2D"]
+
+[node name="ProjectilePool" parent="." instance=ExtResource("2_pool")]
+
+[node name="overworld" parent="." instance=ExtResource("1_0xm2m")]
+
+[node name="CharacterBody2D" parent="." instance=ExtResource("1_ig7tw")]
+z_index = 1
+position = Vector2(0, -2)
+
+[node name="Camera2D" type="Camera2D" parent="CharacterBody2D"]
+position = Vector2(0, 2)
