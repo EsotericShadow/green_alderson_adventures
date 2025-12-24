@@ -291,12 +291,18 @@ func get_total_stat_bonus(stat_name: String) -> int:
 	# Returns sum of stat bonuses from all equipped items
 	# stat_name: "str", "dex", "int", or "vit"
 	var total: int = 0
-	var bonus_key: String = stat_name + "_bonus"
 	
 	for slot_name in equipment:
 		var item: EquipmentData = equipment[slot_name]
-		if item != null and item.has(bonus_key):
-			total += item.get(bonus_key, 0)
+		if item != null:
+			match stat_name:
+				"str":
+					total += item.str_bonus
+				"dex":
+					total += item.dex_bonus
+				"int":
+					total += item.int_bonus
+				"vit":
+					total += item.vit_bonus
 	
 	return total
-

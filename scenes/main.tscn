@@ -5,6 +5,7 @@
 [ext_resource type="PackedScene" uid="uid://dorc1enemy" path="res://scenes/enemies/orc_1.tscn" id="1_jyhfs"]
 [ext_resource type="PackedScene" path="res://scenes/projectile_pool.tscn" id="2_pool"]
 [ext_resource type="PackedScene" uid="uid://b8k2x3m4n5p6q" path="res://scenes/ui/hud.tscn" id="3_hud"]
+[ext_resource type="PackedScene" uid="uid://inventory_ui_001" path="res://scenes/ui/inventory_ui.tscn" id="4_inventory"]
 
 [node name="Node2D" type="Node2D"]
 
@@ -25,3 +26,5 @@ position = Vector2(0, -2)
 position = Vector2(0, 2)
 
 [node name="HUD" parent="." instance=ExtResource("3_hud")]
+
+[node name="InventoryUI" parent="." instance=ExtResource("4_inventory")]
