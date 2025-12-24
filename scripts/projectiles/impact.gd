@@ -32,18 +32,55 @@ func _find_pool_manager() -> void:
 
 
 func setup(angle: float) -> void:
-	rotation = angle
+	# angle is the direction the fireball came FROM (pointing back toward shooter)
+	# We want the impact to face the direction the fireball was traveling TO
+	var travel_angle := angle + PI  # Reverse direction (180 degrees)
 	is_active = true
 	visible = true
 	
-	_log("💥 SETUP at " + str(global_position) + ", angle: " + str(rad_to_deg(angle)))
+	# Ensure impact appears on top of everything
+	z_index = 100
+	if anim != null:
+		anim.z_index = 100
+	
+	_log("💥 SETUP at " + str(global_position) + ", travel_angle: " + str(rad_to_deg(travel_angle)))
 	
 	if anim != null and anim.sprite_frames != null:
 		if anim.sprite_frames.has_animation("impact_left"):
 			anim.visible = true
 			anim.frame = 0
+			
+			# impact_left animation faces left by default
+			# Determine flip/rotation based on travel direction
+			# Normalize angle to 0-2π range
+			var normalized_angle := fposmod(travel_angle, TAU)
+			
+			# Reset flips and rotation
+			anim.flip_h = false
+			anim.flip_v = false
+			rotation = 0.0
+			
+			# Convert to 4 main directions (left, right, up, down)
+			if normalized_angle >= 7 * PI / 8 and normalized_angle < 9 * PI / 8:
+				# Traveling LEFT (180°) - impact_left already faces left, no change
+				rotation = 0.0
+			elif normalized_angle < PI / 8 or normalized_angle >= 15 * PI / 8:
+				# Traveling RIGHT (0°) - flip horizontally
+				anim.flip_h = true
+				rotation = 0.0
+			elif normalized_angle >= 3 * PI / 8 and normalized_angle < 5 * PI / 8:
+				# Traveling DOWN (90°) - rotate 90° clockwise
+				rotation = PI / 2
+			elif normalized_angle >= 11 * PI / 8 and normalized_angle < 13 * PI / 8:
+				# Traveling UP (270°) - rotate 90° counter-clockwise
+				rotation = -PI / 2
+			else:
+				# Diagonal - rotate to match travel direction
+				# impact_left faces left (180°), so adjust
+				rotation = normalized_angle - PI
+			
 			anim.play("impact_left")
-			_log("   Playing 'impact_left' animation")
+			_log("   Playing 'impact_left' animation (normalized: " + str(int(rad_to_deg(normalized_angle))) + "°, rotation: " + str(int(rad_to_deg(rotation))) + "°)")
 		else:
 			_log("   ❌ Animation 'impact_left' NOT found!")
 	else:

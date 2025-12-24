@@ -33,9 +33,11 @@ animations = [{
 }]
 
 [node name="Node2D" type="Node2D"]
+z_index = 100
 script = ExtResource("1_caylm")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+z_index = 100
 scale = Vector2(0.1, 0.1)
 sprite_frames = SubResource("SpriteFrames_q6r6c")
 animation = &"impact_left"

@@ -115,10 +115,10 @@ func _on_area_entered(area: Area2D) -> void:
 			return  # <-- IMPORTANT: Don't fall through!
 		
 		# Hit enemy hurtbox
-			hurtbox.receive_hit(damage, travel_dir * 150.0, owner_node)
-			_spawn_impact()
-			_deactivate()
-			return
+		hurtbox.receive_hit(damage, travel_dir * 150.0, owner_node)
+		_spawn_impact()
+		_deactivate()
+		return
 	
 	# Only deactivate on terrain/walls, not on random areas
 	# Check if it's a static body area (terrain)
@@ -158,7 +158,12 @@ func _deal_damage_to(body: Node) -> void:
 
 
 func _spawn_impact() -> void:
-	print("[Fireball] 💥 Spawning impact at " + str(global_position))
+	# Calculate impact position at the edge of collision shape in travel direction
+	var collision_radius := 25.0  # Match fireball collision shape radius
+	var impact_offset := travel_dir * collision_radius
+	var impact_position := global_position + impact_offset
+	
+	print("[Fireball] 💥 Spawning impact at " + str(impact_position) + " (fireball was at " + str(global_position) + ")")
 	var fx: Node
 	
 	# Use pool if available (best practice)
@@ -170,13 +175,13 @@ func _spawn_impact() -> void:
 		if current_parent != null:
 			current_parent.remove_child(fx)
 		get_tree().current_scene.add_child(fx)
-		fx.global_position = global_position
+		fx.global_position = impact_position
 	elif impact_scene != null:
 		# Fallback to instantiation
 		fx = impact_scene.instantiate()
 		print("[Fireball]    Source: Instantiate")
 		get_tree().current_scene.add_child(fx)
-		fx.global_position = global_position
+		fx.global_position = impact_position
 	else:
 		print("[Fireball]    ❌ No pool or impact_scene available!")
 		return

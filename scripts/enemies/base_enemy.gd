@@ -1,6 +1,26 @@
 extends CharacterBody2D
 class_name BaseEnemy
 
+## ⚠️⚠️⚠️ LOCKED COMBAT LOGIC - DO NOT ALTER ⚠️⚠️⚠️
+## 
+## This AI combat system has been carefully tuned to prevent:
+## - Lock-on spam attacks
+## - Unavoidable damage chains
+## - Player being unable to escape
+##
+## CRITICAL VALUES (DO NOT CHANGE WITHOUT TESTING):
+## - separation_distance: Prevents enemy from getting too close
+## - post_attack_backoff_time: Prevents immediate re-attack spam
+## - attack_cooldown: Base time between attacks
+##
+## CRITICAL LOGIC (DO NOT MODIFY):
+## - _process_chase() attack conditions (lines ~190-211)
+## - Post-attack backoff timer system (lines ~460-470)
+## - Separation distance enforcement (lines ~213-225)
+##
+## If you need to adjust combat difficulty, modify these in the subclass (e.g., orc_1.gd)
+## DO NOT change the base logic in this file without extensive testing!
+##
 ## COORDINATOR: Base enemy AI controller
 ## Makes ALL decisions about enemy behavior
 ## Delegates actual work to worker nodes
@@ -17,10 +37,14 @@ signal state_changed(old_state: String, new_state: String)
 @export var detection_range: float = 200.0
 
 @export_group("Combat")
-@export var attack_cooldown: float = 1.5
+## ⚠️ LOCKED: These values work together to prevent spam attacks and lock-on behavior
+## Changing these requires careful testing to ensure combat remains fair
+@export var attack_cooldown: float = 1.5  # ⚠️ Base cooldown between attacks
 @export var hurt_duration: float = 0.3
 @export var attack_hit_delay: float = 0.2  # Time into attack anim before hitbox activates
 @export var attack_hit_duration: float = 0.15  # How long hitbox stays active
+@export var separation_distance: float = 25.0  # ⚠️ LOCKED: Minimum distance to maintain (prevents spam attacks) - DO NOT SET BELOW 25
+@export var post_attack_backoff_time: float = 0.3  # ⚠️ LOCKED: Time to wait after attack before attacking again (prevents spam) - DO NOT SET BELOW 0.3
 
 # Worker references
 @onready var mover: Mover = $Mover
@@ -37,6 +61,7 @@ var current_state: State = State.IDLE
 var last_direction: String = "down"
 var attack_cooldown_timer: float = 0.0
 var hurt_timer: float = 0.0
+var post_attack_backoff_timer: float = 0.0
 var is_dead: bool = false
 
 # Logging
@@ -136,6 +161,8 @@ func _physics_process(delta: float) -> void:
 		attack_cooldown_timer -= delta
 	if hurt_timer > 0.0:
 		hurt_timer -= delta
+	if post_attack_backoff_timer > 0.0:
+		post_attack_backoff_timer -= delta
 	
 	# Process current state
 	match current_state:
@@ -182,17 +209,35 @@ func _process_chase() -> void:
 		_change_state(State.RETURN)
 		return
 	
+	# ⚠️⚠️⚠️ LOCKED ATTACK LOGIC - DO NOT MODIFY ⚠️⚠️⚠️
+	# This logic prevents spam attacks and lock-on behavior
+	# All conditions must be met for attack to trigger:
+	# 1. Within attack range
+	# 2. Not too close (separation_distance)
+	# 3. Cooldown expired
+	# 4. Post-attack backoff expired
 	# In attack range and can attack?
 	var dist := target_tracker.get_distance_to_target()
-	if dist <= attack_range and attack_cooldown_timer <= 0.0:
+	# Only attack if: within range, cooldown ready, backoff done, AND not too close (separation distance)
+	# This prevents spam attacks while allowing the orc to stay in combat range
+	if dist <= attack_range and dist >= separation_distance and attack_cooldown_timer <= 0.0 and post_attack_backoff_timer <= 0.0:
 		_log("⚔️ In range (" + str(int(dist)) + " <= " + str(int(attack_range)) + ") - ATTACKING!")
 		_change_state(State.ATTACK)
 		return
 	
-	# Move toward target
+	# ⚠️ LOCKED MOVEMENT LOGIC - Only backs away if too close, otherwise approaches
+	# Move toward target (or back away if too close)
 	var dir := target_tracker.get_direction_to_target()
 	if mover != null:
-		mover.move(dir, move_speed)
+		# Only back away if too close (separation distance)
+		# Don't force retreat during backoff - just prevent attacking
+		if dist < separation_distance:
+			dir = -dir  # Reverse direction to back away
+			mover.move(dir, move_speed * 0.8)  # Back away slower
+			_log("📏 Too close (" + str(int(dist)) + " < " + str(int(separation_distance)) + ") - backing away")
+		else:
+			# Safe to approach or maintain position
+			mover.move(dir, move_speed)
 	
 	# Update facing direction
 	last_direction = _vector_to_dir4(dir)
@@ -441,9 +486,15 @@ func _on_died(killer: Node) -> void:
 func _on_animation_finished(anim_name: String) -> void:
 	_log("🎬 Animation finished: " + anim_name)
 	
+	# ⚠️⚠️⚠️ LOCKED POST-ATTACK LOGIC - DO NOT MODIFY ⚠️⚠️⚠️
+	# This timer system prevents spam attacks by requiring a pause after each attack
+	# Removing or reducing this will cause lock-on spam attack behavior
 	# Attack finished
 	if anim_name.begins_with("attack"):
 		_log("   Attack complete - deciding next action...")
+		# Start post-attack backoff timer (prevents immediate spam attacks)
+		post_attack_backoff_timer = post_attack_backoff_time
+		_log("   Post-attack backoff started (" + str(post_attack_backoff_time) + "s) - can't attack again until timer expires")
 		if target_tracker != null and target_tracker.has_target():
 			_log("   Still have target - continuing chase")
 			_change_state(State.CHASE)
