@@ -36,7 +36,7 @@ func _ready() -> void:
 	attack_hit_delay = 0.2     # Faster wind-up
 	attack_hit_duration = 0.18 # Wider hit window
 	separation_distance = 30.0  # ⚠️ LOCKED: Maintain minimum distance (prevents getting too close) - DO NOT REDUCE BELOW 30
-	post_attack_backoff_time = 0.4  # ⚠️ LOCKED: Brief pause after attack before can attack again (prevents spam) - DO NOT REDUCE BELOW 0.4
+	post_attack_backoff_time = 1.0  # ⚠️ LOCKED: Pause after attack before can attack again (prevents spam) - DO NOT REDUCE BELOW 1.0
 	
 	# Call parent ready
 	super._ready()

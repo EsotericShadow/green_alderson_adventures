@@ -44,7 +44,7 @@ signal state_changed(old_state: String, new_state: String)
 @export var attack_hit_delay: float = 0.2  # Time into attack anim before hitbox activates
 @export var attack_hit_duration: float = 0.15  # How long hitbox stays active
 @export var separation_distance: float = 25.0  # ⚠️ LOCKED: Minimum distance to maintain (prevents spam attacks) - DO NOT SET BELOW 25
-@export var post_attack_backoff_time: float = 0.3  # ⚠️ LOCKED: Time to wait after attack before attacking again (prevents spam) - DO NOT SET BELOW 0.3
+@export var post_attack_backoff_time: float = 1.0  # ⚠️ LOCKED: Time to wait after attack before attacking again (prevents spam) - DO NOT SET BELOW 1.0
 
 # Worker references
 @onready var mover: Mover = $Mover
@@ -186,10 +186,22 @@ func _process_idle() -> void:
 	if animator != null:
 		animator.play("idle", last_direction)
 	
-	# Check if target acquired
+	# Check if target acquired (either from tracker or detection area)
 	if target_tracker != null and target_tracker.has_target():
 		_log("👁️ Target detected! Switching to CHASE")
 		_change_state(State.CHASE)
+		return
+	
+	# Also check detection area for players already inside (in case signal was missed)
+	if detection_area != null:
+		var bodies := detection_area.get_overlapping_bodies()
+		for body in bodies:
+			if body.is_in_group("player"):
+				_log("👁️ Player found in detection area - acquiring target")
+				if target_tracker != null:
+					target_tracker.set_target(body)
+					_change_state(State.CHASE)
+				return
 
 
 func _process_chase() -> void:
@@ -218,9 +230,23 @@ func _process_chase() -> void:
 	# 4. Post-attack backoff expired
 	# In attack range and can attack?
 	var dist := target_tracker.get_distance_to_target()
+	
+	# PROVEN PATTERN: During backoff, enemy backs away to give player escape window
+	if post_attack_backoff_timer > 0.0:
+		# Still in backoff period - BACK AWAY from player (proven anti-lock-on pattern)
+		_log("⏳ Post-attack backoff active (" + str(post_attack_backoff_timer) + "s remaining) - backing away")
+		var dir := target_tracker.get_direction_to_target()
+		if mover != null:
+			# Back away from player during recovery period
+			mover.move(-dir, move_speed * 0.6)  # Back away at 60% speed
+		# Update facing direction (face away from player while backing off)
+		last_direction = _vector_to_dir4(-dir)
+		if animator != null:
+			animator.play("walk", last_direction)
+		return  # Don't check for attacks during backoff
+	
 	# Only attack if: within range, cooldown ready, backoff done, AND not too close (separation distance)
-	# This prevents spam attacks while allowing the orc to stay in combat range
-	if dist <= attack_range and dist >= separation_distance and attack_cooldown_timer <= 0.0 and post_attack_backoff_timer <= 0.0:
+	if dist <= attack_range and dist >= separation_distance and attack_cooldown_timer <= 0.0:
 		_log("⚔️ In range (" + str(int(dist)) + " <= " + str(int(attack_range)) + ") - ATTACKING!")
 		_change_state(State.ATTACK)
 		return
@@ -230,7 +256,6 @@ func _process_chase() -> void:
 	var dir := target_tracker.get_direction_to_target()
 	if mover != null:
 		# Only back away if too close (separation distance)
-		# Don't force retreat during backoff - just prevent attacking
 		if dist < separation_distance:
 			dir = -dir  # Reverse direction to back away
 			mover.move(dir, move_speed * 0.8)  # Back away slower
@@ -248,7 +273,8 @@ func _process_chase() -> void:
 func _process_attack() -> void:
 	if mover != null:
 		mover.stop()
-	# Attack animation and hitbox handled in _start_attack
+	# Attack animation is handled in _start_attack() via play_one_shot
+	# Don't override animation here - let the one-shot play
 
 
 func _process_hurt() -> void:
@@ -272,6 +298,9 @@ func _process_return() -> void:
 	# Reached spawn?
 	if target_tracker.is_at_spawn():
 		_log("🏠 Reached spawn - going idle")
+		# Clear target when returning to spawn to reset aggression
+		if target_tracker != null:
+			target_tracker.clear_target()
 		_change_state(State.IDLE)
 		return
 	
@@ -454,7 +483,7 @@ func _on_hurt(damage: int, knockback: Vector2, attacker: Node) -> void:
 		_log("💢 Hit received but already dead - ignoring")
 		return
 	
-	var attacker_name: String = attacker.name if attacker != null else "unknown"
+	var attacker_name: String = str(attacker.name) if attacker != null else "unknown"
 	_log("💥 HIT! Damage: " + str(damage) + " from " + attacker_name)
 	_log("   Knockback: " + str(knockback))
 	
@@ -478,7 +507,7 @@ func _on_hurt(damage: int, knockback: Vector2, attacker: Node) -> void:
 
 
 func _on_died(killer: Node) -> void:
-	var killer_name: String = killer.name if killer != null else "unknown"
+	var killer_name: String = str(killer.name) if killer != null else "unknown"
 	_log("💀 KILLED by " + killer_name + "!")
 	_change_state(State.DEATH)
 
