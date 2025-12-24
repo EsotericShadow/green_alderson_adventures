@@ -351,14 +351,16 @@ func _select_spell(index: int) -> void:
 
 func _find_spell_bar() -> void:
 	"""Finds the spell bar UI in the scene tree."""
-	var hud := get_tree().current_scene.get_node_or_null("HUD")
-	if hud == null:
-		_log("⚠️ HUD not found - spell bar UI unavailable")
-		return
-	
-	spell_bar = hud.get_node_or_null("SpellBar")
+	# Spell bar is now a CanvasLayer, so find it directly in the scene
+	spell_bar = get_tree().current_scene.get_node_or_null("SpellBar")
 	if spell_bar == null:
-		_log("⚠️ SpellBar not found in HUD")
+		# Try finding it in HUD (if it's still there)
+		var hud := get_tree().current_scene.get_node_or_null("HUD")
+		if hud != null:
+			spell_bar = hud.get_node_or_null("SpellBar")
+	
+	if spell_bar == null:
+		_log("⚠️ SpellBar not found - spell bar UI unavailable")
 		return
 	
 	# Setup spell bar with equipped spells
