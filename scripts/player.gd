@@ -31,8 +31,10 @@ var cooldown_timer: float = 0.0
 var is_casting: bool = false
 var _stamina_drain_accumulator: float = 0.0  # Fractional accumulator for smooth stamina drain
 
-# Current spell (default to fireball for Commit 3B)
-var current_spell: SpellData = null
+# Spell system (Commit 3C: 10 spell slots)
+var equipped_spells: Array[SpellData] = []  # Size 10
+var selected_spell_index: int = 0
+var spell_bar: Control = null  # Reference to spell bar UI
 
 # Screen shake
 var _camera: Camera2D = null
@@ -105,14 +107,18 @@ func _ready() -> void:
 	else:
 		_log("  ⚠ No Camera2D found (screen shake disabled)")
 	
-	# Load default fireball spell (Commit 3B: will be replaced by spell selection in 3C)
-	var fireball_resource := load("res://resources/spells/fireball.tres") as SpellData
-	if fireball_resource != null:
-		current_spell = fireball_resource
-		_log("  ✓ Default spell loaded: " + current_spell.display_name)
-	else:
-		_log_error("Failed to load default fireball spell resource!")
+	# Load default spells (Commit 3C: 10 spell slots)
+	equipped_spells.resize(10)
+	equipped_spells[0] = load("res://resources/spells/fireball.tres") as SpellData
+	equipped_spells[1] = load("res://resources/spells/waterball.tres") as SpellData
+	equipped_spells[2] = load("res://resources/spells/earthball.tres") as SpellData
+	equipped_spells[3] = load("res://resources/spells/airball.tres") as SpellData
+	# Slots 4-9 remain null for now
 	
+	# Find and connect to spell bar UI
+	_find_spell_bar()
+	
+	_log("  ✓ Loaded " + str(_count_equipped_spells()) + " spells")
 	_log("Player ready! All systems: " + ("GO" if _all_workers_ready() else "SOME MISSING"))
 
 
@@ -151,18 +157,33 @@ func _physics_process(delta: float) -> void:
 		# Reset accumulator when not running
 		_stamina_drain_accumulator = 0.0
 	
-	# --- HANDLE SPELL CASTING ---
-	if input_reader.is_action_just_pressed("spell_1"):
-		if _can_cast():
-			_log("🔥 Spell key pressed - CASTING fireball!")
-			_start_fireball_cast(input_vec)
-		else:
-			if is_casting:
-				_log("🔥 Spell key pressed but already casting...")
-			elif cooldown_timer > 0.0:
-				_log("🔥 Spell key pressed but on cooldown (" + str(snappedf(cooldown_timer, 0.1)) + "s left)")
-			elif not PlayerStats.has_mana(fireball_mana_cost):
-				_log("🔥 Spell key pressed but not enough mana!")
+	# --- HANDLE SPELL SELECTION AND CASTING (1-9, 0) ---
+	for i in range(10):
+		var action_name := "spell_" + str(i + 1) if i < 9 else "spell_0"
+		if input_reader.is_action_just_pressed(action_name):
+			# If already selected, cast it; otherwise just select
+			if selected_spell_index == i:
+				# Cast the spell
+				if _can_cast():
+					var spell := get_selected_spell()
+					if spell != null:
+						_log("🔥 Spell key pressed - CASTING " + spell.display_name + "!")
+						_start_fireball_cast(input_vec)
+					else:
+						_log("🔥 Spell key pressed but no spell in slot " + str(i + 1))
+				else:
+					if is_casting:
+						_log("🔥 Spell key pressed but already casting...")
+					elif cooldown_timer > 0.0:
+						_log("🔥 Spell key pressed but on cooldown (" + str(snappedf(cooldown_timer, 0.1)) + "s left)")
+					else:
+						var spell := get_selected_spell()
+						if spell != null and not PlayerStats.has_mana(spell.mana_cost):
+							_log("🔥 Spell key pressed but not enough mana!")
+			else:
+				# Select the spell
+				_select_spell(i)
+			break
 	
 	# --- HANDLE RUN JUMP ---
 	if input_reader.is_action_just_pressed("jump") and wants_run and input_vec.length() > 0.0:
@@ -205,12 +226,13 @@ func _physics_process(delta: float) -> void:
 
 
 func _can_cast() -> bool:
-	if current_spell == null:
+	var spell := get_selected_spell()
+	if spell == null:
 		# Fallback to hardcoded mana cost if no spell
 		return cooldown_timer <= 0.0 and not is_casting and PlayerStats.has_mana(fireball_mana_cost)
 	
 	# Use spell's mana cost and validate with SpellSystem
-	if SpellSystem != null and not SpellSystem.can_cast(current_spell):
+	if SpellSystem != null and not SpellSystem.can_cast(spell):
 		return false
 	
 	return cooldown_timer <= 0.0 and not is_casting
@@ -218,9 +240,10 @@ func _can_cast() -> bool:
 
 func _start_fireball_cast(input_vec: Vector2) -> void:
 	# Consume mana for casting (use spell's mana cost if available)
+	var spell := get_selected_spell()
 	var mana_to_consume: int = fireball_mana_cost
-	if current_spell != null:
-		mana_to_consume = current_spell.mana_cost
+	if spell != null:
+		mana_to_consume = spell.mana_cost
 	
 	if not PlayerStats.consume_mana(mana_to_consume):
 		_log_error("Failed to consume mana for fireball cast!")
@@ -228,8 +251,9 @@ func _start_fireball_cast(input_vec: Vector2) -> void:
 	
 	is_casting = true
 	# Use spell's cooldown if available, otherwise use default
-	if current_spell != null:
-		cooldown_timer = current_spell.cooldown
+	var spell := get_selected_spell()
+	if spell != null:
+		cooldown_timer = spell.cooldown
 	else:
 		cooldown_timer = fireball_cooldown
 	
@@ -270,12 +294,13 @@ func _spawn_fireball(direction: String) -> void:
 	else:
 		_log("   Facing south/side - fireball spawns ABOVE player (z=" + str(z_index_value) + ")")
 	
-	# Pass current spell data to spawner (null for now will use fallback damage)
-	var fireball := spell_spawner.spawn_fireball(direction, global_position, z_index_value, current_spell)
+	# Pass selected spell data to spawner
+	var spell := get_selected_spell()
+	var fireball := spell_spawner.spawn_fireball(direction, global_position, z_index_value, spell)
 	if fireball != null:
 		_log("   ✓ Fireball spawned at " + str(global_position))
-		if current_spell != null:
-			_log("   ✓ Using spell: " + current_spell.display_name + " (" + current_spell.element + ")")
+		if spell != null:
+			_log("   ✓ Using spell: " + spell.display_name + " (" + spell.element + ")")
 	else:
 		_log_error("SpellSpawner.spawn_fireball returned null!")
 
@@ -299,6 +324,60 @@ func _vector_to_dir8(v: Vector2) -> String:
 	elif deg < 270.0: return "nw"
 	elif deg < 315.0: return "up"
 	else: return "ne"
+
+
+func get_selected_spell() -> SpellData:
+	"""Returns the currently selected spell."""
+	if selected_spell_index >= 0 and selected_spell_index < equipped_spells.size():
+		return equipped_spells[selected_spell_index]
+	return null
+
+
+func _select_spell(index: int) -> void:
+	"""Selects a spell slot (0-9)."""
+	if index < 0 or index >= equipped_spells.size():
+		return
+	
+	if equipped_spells[index] == null:
+		_log("⚠️ Spell slot " + str(index + 1) + " is empty")
+		return
+	
+	selected_spell_index = index
+	_log("📖 Selected spell slot " + str(index + 1) + ": " + equipped_spells[index].display_name)
+	
+	# Update spell bar UI
+	if spell_bar != null and spell_bar.has_method("select_slot"):
+		spell_bar.select_slot(index)
+
+
+func _find_spell_bar() -> void:
+	"""Finds the spell bar UI in the scene tree."""
+	var hud := get_tree().current_scene.get_node_or_null("HUD")
+	if hud == null:
+		_log("⚠️ HUD not found - spell bar UI unavailable")
+		return
+	
+	spell_bar = hud.get_node_or_null("SpellBar")
+	if spell_bar == null:
+		_log("⚠️ SpellBar not found in HUD")
+		return
+	
+	# Setup spell bar with equipped spells
+	if spell_bar.has_method("setup_spells"):
+		spell_bar.setup_spells(equipped_spells)
+		spell_bar.select_slot(selected_spell_index)
+		_log("  ✓ Spell bar connected")
+	else:
+		_log_error("SpellBar missing setup_spells() method!")
+
+
+func _count_equipped_spells() -> int:
+	"""Returns the number of equipped spells."""
+	var count := 0
+	for spell in equipped_spells:
+		if spell != null:
+			count += 1
+	return count
 
 
 # --- SIGNAL HANDLERS ---
