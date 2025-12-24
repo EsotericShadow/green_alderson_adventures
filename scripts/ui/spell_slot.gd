@@ -1,4 +1,5 @@
 extends PanelContainer
+class_name SpellSlot
 ## Spell slot UI component.
 ## Displays spell icon with hue shift, handles selection highlighting.
 
@@ -62,17 +63,34 @@ func _load_spell_icon(spell: SpellData) -> void:
 
 func set_selected(is_selected: bool) -> void:
 	# Highlight selected slot with border color change
-	if not theme_override_styles.has("panel"):
-		return
-	
-	var style := theme_override_styles["panel"] as StyleBoxFlat
+	# Get existing style or create new one
+	var style := get_theme_stylebox("panel") as StyleBoxFlat
 	if style == null:
-		return
+		# Create a new style if none exists
+		style = StyleBoxFlat.new()
+		style.bg_color = Color(0.2, 0.2, 0.2, 0.7)
+		style.border_width_left = 2
+		style.border_width_top = 2
+		style.border_width_right = 2
+		style.border_width_bottom = 2
+		style.corner_radius_top_left = 4
+		style.corner_radius_top_right = 4
+		style.corner_radius_bottom_right = 4
+		style.corner_radius_bottom_left = 4
+	else:
+		# Duplicate existing style to avoid modifying the original
+		style = style.duplicate() as StyleBoxFlat
+	
+	if style == null:
+		return  # Failed to get or create style
 	
 	if is_selected:
 		style.border_color = Color(1.0, 0.8, 0.0, 1.0)  # Gold
 	else:
 		style.border_color = Color(0.4, 0.3, 0.25, 1)  # Default brown
+	
+	# Apply the modified style
+	add_theme_stylebox_override("panel", style)
 
 
 func set_cooldown_progress(progress: float) -> void:

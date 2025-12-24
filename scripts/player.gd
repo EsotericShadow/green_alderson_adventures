@@ -251,7 +251,6 @@ func _start_fireball_cast(input_vec: Vector2) -> void:
 	
 	is_casting = true
 	# Use spell's cooldown if available, otherwise use default
-	var spell := get_selected_spell()
 	if spell != null:
 		cooldown_timer = spell.cooldown
 	else:
