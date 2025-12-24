@@ -1,12 +1,18 @@
-[gd_scene load_steps=265 format=3 uid="uid://c447wb2lmdb0b"]
+[gd_scene load_steps=268 format=3 uid="uid://c447wb2lmdb0b"]
 
 [ext_resource type="Script" uid="uid://xlw41kp5imuy" path="res://scripts/player.gd" id="1_2hs0m"]
-[ext_resource type="Texture2D" uid="uid://bar25sypjcjwg" path="res://animations/fireball/fireball-sprite-sheet.png-0.png" id="1_sweqy"]
-[ext_resource type="Texture2D" uid="uid://cn6leg7amn6xg" path="res://animations/breathing-idle/breathing-idle-sprite-sheet.png-0.png" id="2_2hs0m"]
-[ext_resource type="Texture2D" uid="uid://d0qmpnfh40015" path="res://animations/running-8-frames/running-8-frames-sprite-sheet.png-0.png" id="3_1jxqw"]
-[ext_resource type="Texture2D" uid="uid://bg5njn8ej1kkw" path="res://animations/running-jump/running-jump-sprite-sheet.png-0.png" id="4_dw050"]
-[ext_resource type="Texture2D" uid="uid://cc7gvfhskjxf6" path="res://animations/walk/walk-0.png" id="5_b26j0"]
+[ext_resource type="Texture2D" uid="uid://bar25sypjcjwg" path="res://animations/player/fireball/fireball-sprite-sheet.png-0.png" id="1_sweqy"]
+[ext_resource type="Texture2D" uid="uid://cn6leg7amn6xg" path="res://animations/player/breathing-idle/breathing-idle-sprite-sheet.png-0.png" id="2_2hs0m"]
+[ext_resource type="Texture2D" uid="uid://d0qmpnfh40015" path="res://animations/player/running-8-frames/running-8-frames-sprite-sheet.png-0.png" id="3_1jxqw"]
+[ext_resource type="Texture2D" uid="uid://bg5njn8ej1kkw" path="res://animations/player/running-jump/running-jump-sprite-sheet.png-0.png" id="4_dw050"]
+[ext_resource type="Texture2D" uid="uid://cc7gvfhskjxf6" path="res://animations/player/walk/walk-0.png" id="5_b26j0"]
 [ext_resource type="PackedScene" uid="uid://dqwqdhuufptmw" path="res://scenes/fireball.tscn" id="7_1jxqw"]
+[ext_resource type="Script" path="res://scripts/workers/health_tracker.gd" id="8_health"]
+[ext_resource type="Script" path="res://scripts/workers/hurtbox.gd" id="9_hurtbox"]
+[ext_resource type="Script" path="res://scripts/workers/input_reader.gd" id="10_input"]
+[ext_resource type="Script" path="res://scripts/workers/mover.gd" id="11_mover"]
+[ext_resource type="Script" path="res://scripts/workers/animator.gd" id="12_animator"]
+[ext_resource type="Script" path="res://scripts/workers/spell_spawner.gd" id="13_spell"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_n7ghd"]
 atlas = ExtResource("1_sweqy")
@@ -1998,13 +2004,16 @@ animations = [{
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_a8mke"]
 
-[node name="CharacterBody2D" type="CharacterBody2D"]
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_hurtbox"]
+radius = 8.0
+height = 20.0
+
+[node name="CharacterBody2D" type="CharacterBody2D" groups=["player"]]
 script = ExtResource("1_2hs0m")
-fireball_scene = ExtResource("7_1jxqw")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
 sprite_frames = SubResource("SpriteFrames_nl404")
-animation = &"fireball_up"
+animation = &"idle_down"
 autoplay = "idle_down"
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
@@ -2012,3 +2021,29 @@ position = Vector2(1, 5)
 shape = SubResource("CapsuleShape2D_a8mke")
 
 [node name="FirePoint" type="Marker2D" parent="."]
+
+[node name="HealthTracker" type="Node" parent="."]
+script = ExtResource("8_health")
+max_health = 100
+
+[node name="Hurtbox" type="Area2D" parent="."]
+collision_layer = 8
+collision_mask = 4
+script = ExtResource("9_hurtbox")
+invincibility_time = 0.5
+
+[node name="HurtboxShape" type="CollisionShape2D" parent="Hurtbox"]
+shape = SubResource("CapsuleShape2D_hurtbox")
+
+[node name="InputReader" type="Node" parent="."]
+script = ExtResource("10_input")
+
+[node name="Mover" type="Node" parent="."]
+script = ExtResource("11_mover")
+
+[node name="Animator" type="Node" parent="."]
+script = ExtResource("12_animator")
+
+[node name="SpellSpawner" type="Node" parent="."]
+script = ExtResource("13_spell")
+fireball_scene = ExtResource("7_1jxqw")

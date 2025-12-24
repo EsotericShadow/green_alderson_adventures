@@ -1,182 +1,236 @@
 extends CharacterBody2D
 
-@export var walk_speed := 120.0
-@export var run_speed  := 220.0
+## COORDINATOR: Player controller
+## Makes ALL decisions about player behavior
+## Delegates actual work to worker nodes
 
-@export var fireball_scene: PackedScene
-@onready var fire_point: Marker2D = get_node_or_null("FirePoint")
+signal player_died
+signal health_changed(current: int, max_health: int)
 
-@onready var anim: AnimatedSprite2D = get_node_or_null("AnimatedSprite2D")
+@export var walk_speed: float = 120.0
+@export var run_speed: float = 220.0
+@export var max_health: int = 100
+@export var fireball_cooldown: float = 0.6   # Snappier spellcasting
+@export var fireball_cast_delay: float = 0.35  # Faster cast wind-up
 
-var projectile_pool: ProjectilePool = null
+# Worker references
+@onready var mover: Mover = $Mover
+@onready var animator: Animator = $Animator
+@onready var input_reader: InputReader = $InputReader
+@onready var health_tracker: HealthTracker = $HealthTracker
+@onready var hurtbox: Hurtbox = $Hurtbox
+@onready var spell_spawner: SpellSpawner = $SpellSpawner
 
-var last_dir := "down"
-var is_action_locked := false
-var fireball_cooldown_timer: float = 0.0
-var fireball_cooldown: float = 0.8  # Cooldown in seconds
+# State
+var last_direction: String = "down"
+var is_dead: bool = false
+var cooldown_timer: float = 0.0
+var is_casting: bool = false
+
+# Screen shake
+var _camera: Camera2D = null
+var _shake_tween: Tween = null
+
+# Logging
+const LOG_PREFIX := "[PLAYER] "
+var _last_logged_state := ""
+
+
+func _log(msg: String) -> void:
+	print(LOG_PREFIX + msg)
+
+
+func _log_error(msg: String) -> void:
+	push_error(LOG_PREFIX + "ERROR: " + msg)
+	print(LOG_PREFIX + "❌ ERROR: " + msg)
 
 
 func _ready() -> void:
-	if anim == null:
-		push_error("Player.gd: Couldn't find child node 'AnimatedSprite2D'.")
-		set_process(false)
-		set_physics_process(false)
+	add_to_group("player")
+	_log("Player spawned at " + str(global_position))
 	
-	# Find projectile pool (best practice: use pooling for performance)
-	_find_projectile_pool()
+	# Configure workers - log any missing ones
+	_log("Checking workers...")
+	
+	if mover == null:
+		_log_error("Mover worker is MISSING! Movement will not work.")
+	else:
+		_log("  ✓ Mover ready")
+	
+	if animator == null:
+		_log_error("Animator worker is MISSING! Animations will not work.")
+	else:
+		animator.finished.connect(_on_animation_finished)
+		_log("  ✓ Animator ready")
+	
+	if input_reader == null:
+		_log_error("InputReader worker is MISSING! Controls will not work.")
+	else:
+		_log("  ✓ InputReader ready")
+	
+	if health_tracker == null:
+		_log_error("HealthTracker worker is MISSING! Health system disabled.")
+	else:
+		health_tracker.set_max_health(max_health)
+		health_tracker.changed.connect(_on_health_changed)
+		health_tracker.died.connect(_on_died)
+		_log("  ✓ HealthTracker ready (HP: " + str(max_health) + ")")
+	
+	if hurtbox == null:
+		_log_error("Hurtbox worker is MISSING! Player cannot take damage.")
+	else:
+		hurtbox.owner_node = self
+		hurtbox.hurt.connect(_on_hurt)
+		_log("  ✓ Hurtbox ready")
+	
+	if spell_spawner == null:
+		_log_error("SpellSpawner worker is MISSING! Spells will not work.")
+	else:
+		_log("  ✓ SpellSpawner ready")
+	
+	# Find camera for screen shake
+	_camera = get_node_or_null("Camera2D")
+	if _camera != null:
+		_log("  ✓ Camera2D found (screen shake enabled)")
+	else:
+		_log("  ⚠ No Camera2D found (screen shake disabled)")
+	
+	_log("Player ready! All systems: " + ("GO" if _all_workers_ready() else "SOME MISSING"))
 
 
-func _find_projectile_pool() -> void:
-	var current_scene = get_tree().current_scene
-	if current_scene != null:
-		projectile_pool = current_scene.get_node_or_null("ProjectilePool")
-		if projectile_pool == null:
-			projectile_pool = current_scene.find_child("ProjectilePool", true, false)
+func _all_workers_ready() -> bool:
+	return mover != null and animator != null and input_reader != null and health_tracker != null and spell_spawner != null
 
 
 func _physics_process(delta: float) -> void:
-	if anim == null:
+	if is_dead:
 		return
 	
-	# Update cooldown timer
-	if fireball_cooldown_timer > 0.0:
-		fireball_cooldown_timer -= delta
-
-	var input_vec := Vector2(
-		Input.get_action_strength("move_east") - Input.get_action_strength("move_west"),
-		Input.get_action_strength("move_south") - Input.get_action_strength("move_north")
-	)
-
-	if input_vec.length() > 0.0:
-		input_vec = input_vec.normalized()
-
-	var wants_run := (
-		Input.is_action_pressed("run_north")
-		or Input.is_action_pressed("run_south")
-		or Input.is_action_pressed("run_east")
-		or Input.is_action_pressed("run_west")
-	)
-
-	if InputMap.has_action("run") and Input.is_action_pressed("run"):
-		wants_run = true
-
-	# Cast fireball - allow casting while moving and multiple casts
-	if Input.is_action_just_pressed("spell_1") and _can_cast_fireball():
-		# Use current movement direction if moving, otherwise use last direction
-		var cast_dir := last_dir
-		if input_vec.length() > 0.0:
-			cast_dir = _vector_to_dir8(input_vec)
-		
-		# Play cast animation (allows movement but prevents movement anims from overriding)
-		_play_cast_animation("fireball_" + cast_dir)
-		# Delay fireball launch by 0.5 seconds
-		var timer := get_tree().create_timer(0.5)
-		# Capture direction at cast time, but allow it to update if player moves
-		var dir := cast_dir
-		timer.timeout.connect(_spawn_fireball.bind(dir))
-
-	# Run-jump example
-	if Input.is_action_just_pressed("jump") and not is_action_locked and wants_run and input_vec.length() > 0.0:
-		last_dir = _vector_to_dir8(input_vec)
-		_play_one_shot("run_jump_" + last_dir)
-		return
-
-	# Check if we're actively playing a fireball cast animation
-	var is_fireball_anim := false
-	if anim != null and anim.animation != null:
-		is_fireball_anim = anim.animation.begins_with("fireball_") and anim.is_playing()
+	# Update cooldown
+	if cooldown_timer > 0.0:
+		cooldown_timer -= delta
 	
-	# Only lock movement for non-fireball animations (like jump)
-	if is_action_locked and not is_fireball_anim:
-		velocity = Vector2.ZERO
-		move_and_slide()
+	# --- READ INPUT ---
+	if input_reader == null:
 		return
-
-	var speed := run_speed if wants_run else walk_speed
-	velocity = input_vec * speed
-	move_and_slide()
-
-	# Only play movement animations if not in a fireball cast animation
-	if not is_fireball_anim:
-		if input_vec.length() > 0.0:
-			last_dir = _vector_to_dir8(input_vec)
-			_play_loop(("run_" if wants_run else "walk_") + last_dir)
+	
+	var input_vec := input_reader.get_movement()
+	var wants_run := input_reader.is_running()
+	
+	# --- HANDLE SPELL CASTING ---
+	if input_reader.is_action_just_pressed("spell_1"):
+		if _can_cast():
+			_log("🔥 Spell key pressed - CASTING fireball!")
+			_start_fireball_cast(input_vec)
 		else:
-			_play_loop("idle_" + last_dir)
-
-
-func _can_cast_fireball() -> bool:
-	return fireball_cooldown_timer <= 0.0
-
-
-func _is_facing_north(dir_name: String) -> bool:
-	# Check if facing north, northeast, or northwest
-	return dir_name == "up" or dir_name == "ne" or dir_name == "nw"
-
-
-func _spawn_fireball(dir_name: String) -> void:
-	if fireball_scene == null:
-		push_warning("Player.gd: Assign fireball_scene in the Inspector.")
+			if is_casting:
+				_log("🔥 Spell key pressed but already casting...")
+			elif cooldown_timer > 0.0:
+				_log("🔥 Spell key pressed but on cooldown (" + str(snappedf(cooldown_timer, 0.1)) + "s left)")
+	
+	# --- HANDLE RUN JUMP ---
+	if input_reader.is_action_just_pressed("jump") and wants_run and input_vec.length() > 0.0:
+		if animator != null and not animator.is_locked():
+			last_direction = _vector_to_dir8(input_vec)
+			_log("🦘 Run jump! Direction: " + last_direction)
+			animator.play_one_shot("run_jump", last_direction)
+			return
+	
+	# --- MOVEMENT ---
+	if mover != null:
+		var speed := run_speed if wants_run else walk_speed
+		mover.move(input_vec, speed)
+	
+	# --- ANIMATION ---
+	if animator == null:
 		return
 	
-	# Set cooldown
-	fireball_cooldown_timer = fireball_cooldown
-
-	var fb: Node
+	# Log state changes only when they happen
+	var current_state := ""
+	if animator.is_locked():
+		current_state = "locked (one-shot playing)"
+	elif input_vec.length() > 0.0:
+		current_state = ("running" if wants_run else "walking") + " " + _vector_to_dir8(input_vec)
+	else:
+		current_state = "idle " + last_direction
 	
-	# Use pool if available (best practice for performance)
-	if projectile_pool != null and projectile_pool.has_method("get_fireball"):
-		fb = projectile_pool.get_fireball()
-		# Reparent to current scene (remove from pool first)
-		var current_parent = fb.get_parent()
-		if current_parent != null:
-			current_parent.remove_child(fb)
-		get_tree().current_scene.add_child(fb)
+	if current_state != _last_logged_state:
+		_log("State: " + current_state)
+		_last_logged_state = current_state
+	
+	# Don't change animation if one-shot is playing (but movement still works)
+	if not animator.is_locked():
+		if input_vec.length() > 0.0:
+			last_direction = _vector_to_dir8(input_vec)
+			var anim_type := "run" if wants_run else "walk"
+			animator.play(anim_type, last_direction)
+		else:
+			animator.play("idle", last_direction)
+
+
+func _can_cast() -> bool:
+	return cooldown_timer <= 0.0 and not is_casting
+
+
+func _start_fireball_cast(input_vec: Vector2) -> void:
+	is_casting = true
+	cooldown_timer = fireball_cooldown
+	
+	# Use movement direction if moving, else use last direction
+	var cast_dir := last_direction
+	if input_vec.length() > 0.0:
+		cast_dir = _vector_to_dir8(input_vec)
+	
+	_log("🔥 Starting fireball cast facing " + cast_dir)
+	_log("   Animation: fireball_" + cast_dir)
+	_log("   Fireball will spawn in " + str(fireball_cast_delay) + "s")
+	
+	# Play cast animation (one-shot, but doesn't lock movement)
+	if animator != null:
+		animator.play_one_shot("fireball", cast_dir)
 	else:
-		# Fallback to instantiation
-		fb = fireball_scene.instantiate()
-		get_tree().current_scene.add_child(fb)
+		_log_error("Cannot play cast animation - Animator is null!")
+	
+	# Spawn fireball after delay
+	get_tree().create_timer(fireball_cast_delay).timeout.connect(
+		_spawn_fireball.bind(cast_dir)
+	)
 
-	var spawn_pos := global_position
-	if fire_point != null:
-		spawn_pos = fire_point.global_position
-	fb.global_position = spawn_pos
 
-	# Set z_index based on direction: below player when facing north, above when facing south/sides
-	var z_index_value := 2  # Default above player
-	if _is_facing_north(dir_name):
-		z_index_value = 1  # Below player but above tilemap
-
-	var dir_vec := _dir_to_vector(dir_name).normalized()
-
-	# Hand off direction to projectile with z_index
-	if fb.has_method("setup"):
-		fb.call("setup", dir_vec, self, z_index_value)  # Pass self as shooter and z_index
+func _spawn_fireball(direction: String) -> void:
+	is_casting = false
+	_log("🔥 Cast delay complete - spawning fireball!")
+	
+	if spell_spawner == null:
+		_log_error("Cannot spawn fireball - SpellSpawner is null!")
+		return
+	
+	# Z-index: below player when facing north, above when facing south/sides
+	var z_index_value := 2
+	if _is_facing_north(direction):
+		z_index_value = 1
+		_log("   Facing north - fireball spawns BELOW player (z=" + str(z_index_value) + ")")
 	else:
-		# Fallback: set z_index directly
-		fb.z_index = z_index_value
-		var sprite = fb.get_node_or_null("AnimatedSprite2D")
-		if sprite != null:
-			sprite.z_index = z_index_value
+		_log("   Facing south/side - fireball spawns ABOVE player (z=" + str(z_index_value) + ")")
+	
+	var fireball := spell_spawner.spawn_fireball(direction, global_position, z_index_value)
+	if fireball != null:
+		_log("   ✓ Fireball spawned at " + str(global_position))
+	else:
+		_log_error("SpellSpawner.spawn_fireball returned null!")
 
 
-func _dir_to_vector(d: String) -> Vector2:
-	match d:
-		"right": return Vector2.RIGHT
-		"left": return Vector2.LEFT
-		"up": return Vector2.UP
-		"down": return Vector2.DOWN
-		"ne": return Vector2(1, -1)
-		"nw": return Vector2(-1, -1)
-		"se": return Vector2(1, 1)
-		"sw": return Vector2(-1, 1)
-		_: return Vector2.DOWN
+func _is_facing_north(dir: String) -> bool:
+	return dir == "up" or dir == "ne" or dir == "nw"
 
 
 func _vector_to_dir8(v: Vector2) -> String:
+	if v.length() < 0.1:
+		return last_direction
+	
 	var deg := rad_to_deg(atan2(v.y, v.x))
 	deg = fposmod(deg + 22.5, 360.0)
-
+	
 	if deg < 45.0: return "right"
 	elif deg < 90.0: return "se"
 	elif deg < 135.0: return "down"
@@ -187,44 +241,91 @@ func _vector_to_dir8(v: Vector2) -> String:
 	else: return "ne"
 
 
-# ---- Animation helpers (your player directional anims) ----
+# --- SIGNAL HANDLERS ---
 
-func _resolve_anim_and_flip(anim_name: String) -> Dictionary:
-	# All 8 directions exist, no flipping needed
-	return {"name": anim_name, "flip_h": false}
-
-
-func _play_loop(anim_name: String) -> void:
-	var resolved := _resolve_anim_and_flip(anim_name)
-	anim.flip_h = resolved["flip_h"]
-
-	if anim.sprite_frames and anim.sprite_frames.has_animation(resolved["name"]):
-		if anim.animation != resolved["name"]:
-			anim.play(resolved["name"])
+func _on_health_changed(current: int, maximum: int) -> void:
+	_log("💚 Health changed: " + str(current) + "/" + str(maximum))
+	health_changed.emit(current, maximum)
 
 
-func _play_one_shot(anim_name: String) -> void:
-	var resolved := _resolve_anim_and_flip(anim_name)
-	anim.flip_h = resolved["flip_h"]
+func _on_died(killer: Node) -> void:
+	var killer_name: String = killer.name if killer != null else "unknown"
+	_log("💀 PLAYER DIED! Killed by: " + killer_name)
+	is_dead = true
+	if input_reader != null:
+		input_reader.disable()
+		_log("   Input disabled")
+	if mover != null:
+		mover.stop()
+		_log("   Movement stopped")
+	player_died.emit()
 
-	if not (anim.sprite_frames and anim.sprite_frames.has_animation(resolved["name"])):
+
+func _on_hurt(damage: int, knockback: Vector2, attacker: Node) -> void:
+	var attacker_name: String = attacker.name if attacker != null else "unknown"
+	_log("💥 PLAYER HIT! Damage: " + str(damage) + " from " + attacker_name)
+	_log("   Knockback: " + str(knockback))
+	
+	# SCREEN SHAKE!
+	_screen_shake(8.0, 0.2)
+	
+	# Apply knockback
+	if mover != null:
+		mover.apply_knockback(knockback * 0.5)
+		_log("   Applied knockback")
+	
+	# Apply damage
+	if health_tracker != null:
+		health_tracker.take_damage(damage, attacker)
+
+
+func _on_animation_finished(anim_name: String) -> void:
+	_log("🎬 Animation finished: " + anim_name)
+	# One-shot animation finished, casting is done
+	if is_casting:
+		is_casting = false
+		_log("   Cast animation complete, is_casting = false")
+
+
+## Shake the camera for impact feel
+func _screen_shake(intensity: float, duration: float) -> void:
+	if _camera == null:
 		return
+	
+	_log("📳 SCREEN SHAKE! Intensity: " + str(intensity))
+	
+	# Kill any existing shake
+	if _shake_tween != null and _shake_tween.is_valid():
+		_shake_tween.kill()
+	
+	_shake_tween = create_tween()
+	var base_offset := _camera.offset
+	
+	# Do a series of random shakes
+	var shake_count := int(duration * 30)  # ~30 shakes per second
+	var time_per_shake := duration / shake_count
+	
+	for i in shake_count:
+		var random_offset := Vector2(
+			randf_range(-intensity, intensity),
+			randf_range(-intensity, intensity)
+		)
+		# Reduce intensity over time
+		var falloff := 1.0 - (float(i) / shake_count)
+		_shake_tween.tween_property(_camera, "offset", base_offset + random_offset * falloff, time_per_shake)
+	
+	# Return to original position
+	_shake_tween.tween_property(_camera, "offset", base_offset, 0.05)
 
-	is_action_locked = true
-	anim.play(resolved["name"])
 
-	if not anim.animation_finished.is_connected(_on_anim_finished):
-		anim.animation_finished.connect(_on_anim_finished)
+# --- PUBLIC API ---
 
-
-func _play_cast_animation(anim_name: String) -> void:
-	# Play cast animation without locking movement
-	var resolved := _resolve_anim_and_flip(anim_name)
-	anim.flip_h = resolved["flip_h"]
-
-	if anim.sprite_frames and anim.sprite_frames.has_animation(resolved["name"]):
-		anim.play(resolved["name"])
+func take_damage(amount: int, source: Node = null) -> void:
+	if health_tracker != null:
+		health_tracker.take_damage(amount, source)
 
 
-func _on_anim_finished() -> void:
-	is_action_locked = false
+func get_health() -> int:
+	if health_tracker != null:
+		return health_tracker.current_health
+	return 0
