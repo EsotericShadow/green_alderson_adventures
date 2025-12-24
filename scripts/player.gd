@@ -75,6 +75,8 @@ func _ready() -> void:
 		health_tracker.set_max_health(max_hp)
 		health_tracker.changed.connect(_on_health_changed)
 		health_tracker.died.connect(_on_died)
+		# Sync PlayerStats health with HealthTracker initial value
+		PlayerStats.set_health(max_hp)
 		_log("  ✓ HealthTracker ready (HP: " + str(max_hp) + " from PlayerStats)")
 	
 	if hurtbox == null:
@@ -275,7 +277,10 @@ func _on_hurt(damage: int, knockback: Vector2, attacker: Node) -> void:
 		mover.apply_knockback(knockback * 0.5)
 		_log("   Applied knockback")
 	
-	# Apply damage
+	# Apply damage to PlayerStats (global system) - this will emit health_changed signal
+	PlayerStats.take_damage(damage)
+	
+	# Also update HealthTracker for backwards compatibility
 	if health_tracker != null:
 		health_tracker.take_damage(damage, attacker)
 

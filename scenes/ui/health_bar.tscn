@@ -1,0 +1,94 @@
+[gd_scene load_steps=12 format=3 uid="uid://do1u1s42m7uhy"]
+
+[ext_resource type="Script" path="res://scripts/ui/health_bar.gd" id="1_healthbar"]
+[ext_resource type="Texture2D" uid="uid://cqgs5pvmkwgdj" path="res://assets/animations/UI/health_bar/dragonhpbar.png" id="2_m7ell"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_kdjhy"]
+atlas = ExtResource("2_m7ell")
+region = Rect2(0, 0, 112, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_srckl"]
+atlas = ExtResource("2_m7ell")
+region = Rect2(112, 0, 112, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_1r8bn"]
+atlas = ExtResource("2_m7ell")
+region = Rect2(224, 0, 112, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_dxn08"]
+atlas = ExtResource("2_m7ell")
+region = Rect2(336, 0, 112, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_h2qi6"]
+atlas = ExtResource("2_m7ell")
+region = Rect2(448, 0, 112, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_h5b4h"]
+atlas = ExtResource("2_m7ell")
+region = Rect2(560, 0, 112, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_4hq00"]
+atlas = ExtResource("2_m7ell")
+region = Rect2(672, 0, 112, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_8gymc"]
+atlas = ExtResource("2_m7ell")
+region = Rect2(784, 0, 112, 32)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_vyw5x"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_kdjhy")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_srckl")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_1r8bn")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_dxn08")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_h2qi6")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_h5b4h")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_4hq00")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_8gymc")
+}],
+"loop": false,
+"name": &"health_depletion",
+"speed": 5.0
+}]
+
+[node name="HealthBar" type="Control"]
+layout_mode = 0
+anchors_preset = 0
+offset_left = 20.0
+offset_top = 10.0
+offset_right = 132.0
+offset_bottom = 42.0
+grow_horizontal = 0
+grow_vertical = 0
+script = ExtResource("1_healthbar")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 112.0
+offset_bottom = 32.0
+grow_horizontal = 2
+grow_vertical = 2
+sprite_frames = SubResource("SpriteFrames_vyw5x")
+animation = &"health_depletion"
+frame = 0
