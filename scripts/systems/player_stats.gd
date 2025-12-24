@@ -26,8 +26,8 @@ var gold: int = 0
 const HEALTH_PER_VIT: int = 20
 const MANA_PER_INT: int = 15
 const STAMINA_PER_DEX: int = 10
-const MANA_REGEN_RATE: float = 2.0  # Mana per second
-const STAMINA_REGEN_RATE: float = 5.0  # Stamina per second
+const MANA_REGEN_RATE: float = 0.8  # Mana per second (slower regen)
+const STAMINA_REGEN_RATE: float = 3.0  # Stamina per second (slower regen)
 
 
 func _ready() -> void:
@@ -37,16 +37,26 @@ func _ready() -> void:
 	stamina = get_max_stamina()
 
 
+# Fractional accumulation for smooth regeneration
+var _mana_regen_accumulator: float = 0.0
+var _stamina_regen_accumulator: float = 0.0
+
 func _process(delta: float) -> void:
-	# Regenerate mana
+	# Regenerate mana (fractional accumulation for smooth regen)
 	if mana < get_max_mana():
-		var regen_amount: int = int(MANA_REGEN_RATE * delta) + 1  # +1 to ensure progress
-		restore_mana(regen_amount)
+		_mana_regen_accumulator += MANA_REGEN_RATE * delta
+		if _mana_regen_accumulator >= 1.0:
+			var regen_amount: int = int(_mana_regen_accumulator)
+			_mana_regen_accumulator -= float(regen_amount)
+			restore_mana(regen_amount)
 	
-	# Regenerate stamina
+	# Regenerate stamina (fractional accumulation for smooth regen)
 	if stamina < get_max_stamina():
-		var regen_amount: int = int(STAMINA_REGEN_RATE * delta) + 1  # +1 to ensure progress
-		restore_stamina(regen_amount)
+		_stamina_regen_accumulator += STAMINA_REGEN_RATE * delta
+		if _stamina_regen_accumulator >= 1.0:
+			var regen_amount: int = int(_stamina_regen_accumulator)
+			_stamina_regen_accumulator -= float(regen_amount)
+			restore_stamina(regen_amount)
 
 
 # Derived Stats (LOCKED FORMULAS per SPEC.md)

@@ -12,6 +12,9 @@ signal health_changed(current: int, max_health: int)
 # max_health now comes from PlayerStats.get_max_health()
 @export var fireball_cooldown: float = 0.6   # Snappier spellcasting
 @export var fireball_cast_delay: float = 0.35  # Faster cast wind-up
+@export var fireball_mana_cost: int = 15  # Mana consumed per fireball cast (increased)
+@export var stamina_drain_rate: float = 20.0  # Stamina per second while running (increased)
+@export var min_stamina_to_run: int = 5  # Minimum stamina required to run
 
 # Worker references
 @onready var mover: Mover = $Mover
@@ -26,6 +29,7 @@ var last_direction: String = "down"
 var is_dead: bool = false
 var cooldown_timer: float = 0.0
 var is_casting: bool = false
+var _stamina_drain_accumulator: float = 0.0  # Fractional accumulator for smooth stamina drain
 
 # Screen shake
 var _camera: Camera2D = null
@@ -120,6 +124,22 @@ func _physics_process(delta: float) -> void:
 	var input_vec := input_reader.get_movement()
 	var wants_run := input_reader.is_running()
 	
+	# Check if player has enough stamina to run
+	var can_run: bool = wants_run and PlayerStats.has_stamina(min_stamina_to_run)
+	if wants_run and not can_run:
+		wants_run = false  # Force walk if not enough stamina
+	
+	# Consume stamina while running (fractional accumulation for smooth drain)
+	if wants_run and input_vec.length() > 0.0:
+		_stamina_drain_accumulator += stamina_drain_rate * delta
+		if _stamina_drain_accumulator >= 1.0:
+			var stamina_cost: int = int(_stamina_drain_accumulator)
+			_stamina_drain_accumulator -= float(stamina_cost)
+			PlayerStats.consume_stamina(stamina_cost)
+	else:
+		# Reset accumulator when not running
+		_stamina_drain_accumulator = 0.0
+	
 	# --- HANDLE SPELL CASTING ---
 	if input_reader.is_action_just_pressed("spell_1"):
 		if _can_cast():
@@ -130,6 +150,8 @@ func _physics_process(delta: float) -> void:
 				_log("🔥 Spell key pressed but already casting...")
 			elif cooldown_timer > 0.0:
 				_log("🔥 Spell key pressed but on cooldown (" + str(snappedf(cooldown_timer, 0.1)) + "s left)")
+			elif not PlayerStats.has_mana(fireball_mana_cost):
+				_log("🔥 Spell key pressed but not enough mana!")
 	
 	# --- HANDLE RUN JUMP ---
 	if input_reader.is_action_just_pressed("jump") and wants_run and input_vec.length() > 0.0:
@@ -172,10 +194,15 @@ func _physics_process(delta: float) -> void:
 
 
 func _can_cast() -> bool:
-	return cooldown_timer <= 0.0 and not is_casting
+	return cooldown_timer <= 0.0 and not is_casting and PlayerStats.has_mana(fireball_mana_cost)
 
 
 func _start_fireball_cast(input_vec: Vector2) -> void:
+	# Consume mana for casting
+	if not PlayerStats.consume_mana(fireball_mana_cost):
+		_log_error("Failed to consume mana for fireball cast!")
+		return
+	
 	is_casting = true
 	cooldown_timer = fireball_cooldown
 	
