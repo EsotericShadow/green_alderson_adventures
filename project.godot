@@ -19,6 +19,7 @@ config/icon="res://icon.svg"
 
 PlayerStats="*res://scripts/systems/player_stats.gd"
 EventBus="*res://scripts/systems/event_bus.gd"
+InventorySystem="*res://scripts/systems/inventory_system.gd"
 
 [input]
 
