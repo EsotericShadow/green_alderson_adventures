@@ -61,23 +61,31 @@ func _process(delta: float) -> void:
 
 # Derived Stats (LOCKED FORMULAS per SPEC.md)
 func get_total_str() -> int:
-	# Will add equipment bonuses in Commit 2C
-	return base_str
+	var bonus: int = 0
+	if InventorySystem != null:
+		bonus = InventorySystem.get_total_stat_bonus("str")
+	return base_str + bonus
 
 
 func get_total_dex() -> int:
-	# Will add equipment bonuses in Commit 2C
-	return base_dex
+	var bonus: int = 0
+	if InventorySystem != null:
+		bonus = InventorySystem.get_total_stat_bonus("dex")
+	return base_dex + bonus
 
 
 func get_total_int() -> int:
-	# Will add equipment bonuses in Commit 2C
-	return base_int
+	var bonus: int = 0
+	if InventorySystem != null:
+		bonus = InventorySystem.get_total_stat_bonus("int")
+	return base_int + bonus
 
 
 func get_total_vit() -> int:
-	# Will add equipment bonuses in Commit 2C
-	return base_vit
+	var bonus: int = 0
+	if InventorySystem != null:
+		bonus = InventorySystem.get_total_stat_bonus("vit")
+	return base_vit + bonus
 
 
 func get_max_health() -> int:

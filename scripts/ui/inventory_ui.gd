@@ -5,15 +5,17 @@ extends CanvasLayer
 const LOG_PREFIX := "[INVENTORY_UI] "
 
 @onready var control: Control = $Control
-@onready var slot_grid: GridContainer = $Control/PanelContainer/MarginContainer/VBoxContainer/CenterContainer/GridContainer
-@onready var close_button: Button = $Control/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/Button
+@onready var slot_grid: GridContainer = $Control/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/InventoryPanel/CenterContainer/GridContainer
+@onready var equip_grid: GridContainer = $Control/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/EquipmentPanel/CenterContainer/GridContainer
+@onready var close_button: Button = $Control/PanelContainer/MarginContainer/VBoxContainer/ButtonContainer/Button
 
 const SLOT_SCENE: PackedScene = preload("res://scenes/ui/inventory_slot.tscn")
+const EQUIP_SLOT_SCENE: PackedScene = preload("res://scenes/ui/equip_slot.tscn")
 
 
-func _log(msg: String) -> void:
+func _log(_msg: String) -> void:
 	# Debug logging disabled for production
-	# print(LOG_PREFIX + msg)
+	# print(LOG_PREFIX + _msg)
 	pass
 
 
@@ -23,6 +25,9 @@ func _ready() -> void:
 	# Check if nodes exist
 	if slot_grid == null:
 		_log("ERROR: slot_grid is null!")
+		return
+	if equip_grid == null:
+		_log("ERROR: equip_grid is null!")
 		return
 	if close_button == null:
 		_log("ERROR: close_button is null!")
@@ -37,6 +42,7 @@ func _ready() -> void:
 	
 	_log("InventorySystem found, connecting signals...")
 	InventorySystem.inventory_changed.connect(_refresh_slots)
+	InventorySystem.equipment_changed.connect(_refresh_equipment_slots)
 	
 	# Connect close button
 	close_button.pressed.connect(close)
@@ -44,6 +50,7 @@ func _ready() -> void:
 	# Initial refresh (don't await in _ready, slots will be created immediately)
 	_log("Refreshing slots...")
 	_refresh_slots_immediate()
+	_refresh_equipment_slots_immediate()
 	
 	# Start hidden
 	if control != null:
@@ -88,6 +95,7 @@ func open() -> void:
 		_log("ERROR: control is null!")
 		return
 	_refresh_slots()
+	_refresh_equipment_slots()
 	if EventBus != null:
 		EventBus.inventory_opened.emit()
 		_log("Emitted inventory_opened signal")
@@ -196,3 +204,81 @@ func _on_slot_clicked(slot_index: int) -> void:
 	var slot_data: Dictionary = InventorySystem.get_slot(slot_index)
 	if slot_data["item"] != null:
 		print("Clicked slot ", slot_index, ": ", slot_data["item"].display_name, " x", slot_data["count"])
+		# If it's equipment, try to equip it
+		if slot_data["item"] is EquipmentData:
+			var equip_item: EquipmentData = slot_data["item"] as EquipmentData
+			if InventorySystem.equip(equip_item):
+				_refresh_slots()
+				_refresh_equipment_slots()
+
+
+func _refresh_equipment_slots() -> void:
+	_refresh_equipment_slots_async()
+
+
+func _refresh_equipment_slots_async() -> void:
+	if equip_grid == null:
+		return
+	
+	if InventorySystem == null:
+		return
+	
+	# Clear existing equipment slots
+	for child in equip_grid.get_children():
+		equip_grid.remove_child(child)
+		child.queue_free()
+	
+	await get_tree().process_frame
+	
+	# Equipment slot order: head, body, gloves, boots, weapon, shield, ring1, ring2
+	var slot_order: Array[String] = ["head", "body", "gloves", "boots", "weapon", "shield", "ring1", "ring2"]
+	
+	for slot_name in slot_order:
+		var equip_slot: PanelContainer = EQUIP_SLOT_SCENE.instantiate()
+		if equip_slot == null:
+			continue
+		
+		equip_grid.add_child(equip_slot)
+		equip_slot.slot_clicked.connect(_on_equip_slot_clicked)
+		
+		var equipped_item: EquipmentData = InventorySystem.get_equipped(slot_name)
+		equip_slot.setup(slot_name, equipped_item)
+
+
+func _refresh_equipment_slots_immediate() -> void:
+	# Non-async version for _ready()
+	if equip_grid == null:
+		_log("ERROR: equip_grid is null in _refresh_equipment_slots_immediate!")
+		return
+	
+	if InventorySystem == null:
+		_log("ERROR: InventorySystem is null in _refresh_equipment_slots_immediate!")
+		return
+	
+	# Clear existing equipment slots
+	for child in equip_grid.get_children():
+		equip_grid.remove_child(child)
+		child.queue_free()
+	
+	# Equipment slot order: head, body, gloves, boots, weapon, shield, ring1, ring2
+	var slot_order: Array[String] = ["head", "body", "gloves", "boots", "weapon", "shield", "ring1", "ring2"]
+	
+	for slot_name in slot_order:
+		var equip_slot: PanelContainer = EQUIP_SLOT_SCENE.instantiate()
+		if equip_slot == null:
+			continue
+		
+		equip_grid.add_child(equip_slot)
+		equip_slot.slot_clicked.connect(_on_equip_slot_clicked)
+		
+		var equipped_item: EquipmentData = InventorySystem.get_equipped(slot_name)
+		equip_slot.setup(slot_name, equipped_item)
+
+
+func _on_equip_slot_clicked(slot_name: String) -> void:
+	# Unequip item when clicking equipment slot
+	var unequipped: EquipmentData = InventorySystem.unequip(slot_name)
+	if unequipped != null:
+		_refresh_slots()
+		_refresh_equipment_slots()
+		print("Unequipped: ", unequipped.display_name)
