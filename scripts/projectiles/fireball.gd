@@ -115,10 +115,10 @@ func _on_area_entered(area: Area2D) -> void:
 			return  # <-- IMPORTANT: Don't fall through!
 		
 		# Hit enemy hurtbox
-		hurtbox.receive_hit(damage, travel_dir * 150.0, owner_node)
-		_spawn_impact()
-		_deactivate()
-		return
+			hurtbox.receive_hit(damage, travel_dir * 150.0, owner_node)
+			_spawn_impact()
+			_deactivate()
+			return
 	
 	# Only deactivate on terrain/walls, not on random areas
 	# Check if it's a static body area (terrain)

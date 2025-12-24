@@ -9,7 +9,7 @@ signal health_changed(current: int, max_health: int)
 
 @export var walk_speed: float = 120.0
 @export var run_speed: float = 220.0
-@export var max_health: int = 100
+# max_health now comes from PlayerStats.get_max_health()
 @export var fireball_cooldown: float = 0.6   # Snappier spellcasting
 @export var fireball_cast_delay: float = 0.35  # Faster cast wind-up
 
@@ -71,10 +71,11 @@ func _ready() -> void:
 	if health_tracker == null:
 		_log_error("HealthTracker worker is MISSING! Health system disabled.")
 	else:
-		health_tracker.set_max_health(max_health)
+		var max_hp: int = PlayerStats.get_max_health()
+		health_tracker.set_max_health(max_hp)
 		health_tracker.changed.connect(_on_health_changed)
 		health_tracker.died.connect(_on_died)
-		_log("  ✓ HealthTracker ready (HP: " + str(max_health) + ")")
+		_log("  ✓ HealthTracker ready (HP: " + str(max_hp) + " from PlayerStats)")
 	
 	if hurtbox == null:
 		_log_error("Hurtbox worker is MISSING! Player cannot take damage.")
