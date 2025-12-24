@@ -2,7 +2,11 @@
 
 [ext_resource type="Script" path="res://scripts/ui/spell_bar.gd" id="1_spell_bar_script"]
 
-[node name="SpellBar" type="Control"]
+[node name="SpellBar" type="CanvasLayer"]
+layer = 19
+script = ExtResource("1_spell_bar_script")
+
+[node name="Control" type="Control" parent="."]
 layout_mode = 3
 anchors_preset = 7
 anchor_left = 0.5
@@ -15,9 +19,8 @@ offset_right = 320.0
 offset_bottom = -10.0
 grow_horizontal = 2
 grow_vertical = 0
-script = ExtResource("1_spell_bar_script")
 
-[node name="HBoxContainer" type="HBoxContainer" parent="."]
+[node name="HBoxContainer" type="HBoxContainer" parent="Control"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0

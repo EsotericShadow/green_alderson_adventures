@@ -7,7 +7,7 @@ signal spell_selected(slot_index: int)
 const SLOT_SCENE: PackedScene = preload("res://scenes/ui/spell_slot.tscn")
 const NUM_SLOTS: int = 10
 
-@onready var slot_container: HBoxContainer = $HBoxContainer
+@onready var slot_container: HBoxContainer = $Control/HBoxContainer
 
 var slots: Array[SpellSlot] = []
 var selected_index: int = 0
