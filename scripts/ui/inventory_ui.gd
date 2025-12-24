@@ -6,7 +6,7 @@ const LOG_PREFIX := "[INVENTORY_UI] "
 
 @onready var control: Control = $Control
 @onready var slot_grid: GridContainer = $Control/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/InventoryPanel/CenterContainer/GridContainer
-@onready var equip_grid: GridContainer = $Control/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/EquipmentPanel/CenterContainer/GridContainer
+@onready var equip_container: VBoxContainer = $Control/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/EquipmentPanel/VBoxContainer
 @onready var close_button: Button = $Control/PanelContainer/MarginContainer/VBoxContainer/ButtonContainer/Button
 
 const SLOT_SCENE: PackedScene = preload("res://scenes/ui/inventory_slot.tscn")
@@ -26,8 +26,8 @@ func _ready() -> void:
 	if slot_grid == null:
 		_log("ERROR: slot_grid is null!")
 		return
-	if equip_grid == null:
-		_log("ERROR: equip_grid is null!")
+	if equip_container == null:
+		_log("ERROR: equip_container is null!")
 		return
 	if close_button == null:
 		_log("ERROR: close_button is null!")
@@ -217,62 +217,94 @@ func _refresh_equipment_slots() -> void:
 
 
 func _refresh_equipment_slots_async() -> void:
-	if equip_grid == null:
+	if equip_container == null:
 		return
 	
 	if InventorySystem == null:
 		return
 	
-	# Clear existing equipment slots
-	for child in equip_grid.get_children():
-		equip_grid.remove_child(child)
-		child.queue_free()
+	# Clear existing equipment slots from all rows
+	for row in equip_container.get_children():
+		for child in row.get_children():
+			row.remove_child(child)
+			child.queue_free()
 	
 	await get_tree().process_frame
 	
-	# Equipment slot order: head, body, gloves, boots, weapon, shield, ring1, ring2
-	var slot_order: Array[String] = ["head", "body", "gloves", "boots", "weapon", "shield", "ring1", "ring2"]
+	# Get row containers
+	var row1: HBoxContainer = equip_container.get_child(0) as HBoxContainer  # head
+	var row2: HBoxContainer = equip_container.get_child(1) as HBoxContainer  # book, body, weapon
+	var row3: HBoxContainer = equip_container.get_child(2) as HBoxContainer  # ring, legs, gloves
+	var row4: HBoxContainer = equip_container.get_child(3) as HBoxContainer  # amulet, boots
 	
-	for slot_name in slot_order:
-		var equip_slot: PanelContainer = EQUIP_SLOT_SCENE.instantiate()
-		if equip_slot == null:
-			continue
-		
-		equip_grid.add_child(equip_slot)
-		equip_slot.slot_clicked.connect(_on_equip_slot_clicked)
-		
-		var equipped_item: EquipmentData = InventorySystem.get_equipped(slot_name)
-		equip_slot.setup(slot_name, equipped_item)
+	# Row 1: head (centered single column)
+	_create_equip_slot("head", row1)
+	
+	# Row 2: book, body, weapon (3 columns)
+	_create_equip_slot("book", row2)
+	_create_equip_slot("body", row2)
+	_create_equip_slot("weapon", row2)
+	
+	# Row 3: ring, legs, gloves (3 columns)
+	_create_equip_slot("ring1", row3)  # Using ring1 for "ring"
+	_create_equip_slot("legs", row3)
+	_create_equip_slot("gloves", row3)
+	
+	# Row 4: amulet, boots (2 columns)
+	_create_equip_slot("amulet", row4)
+	_create_equip_slot("boots", row4)
 
 
 func _refresh_equipment_slots_immediate() -> void:
 	# Non-async version for _ready()
-	if equip_grid == null:
-		_log("ERROR: equip_grid is null in _refresh_equipment_slots_immediate!")
+	if equip_container == null:
+		_log("ERROR: equip_container is null in _refresh_equipment_slots_immediate!")
 		return
 	
 	if InventorySystem == null:
 		_log("ERROR: InventorySystem is null in _refresh_equipment_slots_immediate!")
 		return
 	
-	# Clear existing equipment slots
-	for child in equip_grid.get_children():
-		equip_grid.remove_child(child)
-		child.queue_free()
+	# Clear existing equipment slots from all rows
+	for row in equip_container.get_children():
+		for child in row.get_children():
+			row.remove_child(child)
+			child.queue_free()
 	
-	# Equipment slot order: head, body, gloves, boots, weapon, shield, ring1, ring2
-	var slot_order: Array[String] = ["head", "body", "gloves", "boots", "weapon", "shield", "ring1", "ring2"]
+	# Get row containers
+	var row1: HBoxContainer = equip_container.get_child(0) as HBoxContainer  # head
+	var row2: HBoxContainer = equip_container.get_child(1) as HBoxContainer  # book, body, weapon
+	var row3: HBoxContainer = equip_container.get_child(2) as HBoxContainer  # ring, legs, gloves
+	var row4: HBoxContainer = equip_container.get_child(3) as HBoxContainer  # amulet, boots
 	
-	for slot_name in slot_order:
-		var equip_slot: PanelContainer = EQUIP_SLOT_SCENE.instantiate()
-		if equip_slot == null:
-			continue
-		
-		equip_grid.add_child(equip_slot)
-		equip_slot.slot_clicked.connect(_on_equip_slot_clicked)
-		
-		var equipped_item: EquipmentData = InventorySystem.get_equipped(slot_name)
-		equip_slot.setup(slot_name, equipped_item)
+	# Row 1: head (centered single column)
+	_create_equip_slot("head", row1)
+	
+	# Row 2: book, body, weapon (3 columns)
+	_create_equip_slot("book", row2)
+	_create_equip_slot("body", row2)
+	_create_equip_slot("weapon", row2)
+	
+	# Row 3: ring, legs, gloves (3 columns)
+	_create_equip_slot("ring1", row3)  # Using ring1 for "ring"
+	_create_equip_slot("legs", row3)
+	_create_equip_slot("gloves", row3)
+	
+	# Row 4: amulet, boots (2 columns)
+	_create_equip_slot("amulet", row4)
+	_create_equip_slot("boots", row4)
+
+
+func _create_equip_slot(slot_name: String, parent: HBoxContainer) -> void:
+	var equip_slot: PanelContainer = EQUIP_SLOT_SCENE.instantiate()
+	if equip_slot == null:
+		return
+	
+	parent.add_child(equip_slot)
+	equip_slot.slot_clicked.connect(_on_equip_slot_clicked)
+	
+	var equipped_item: EquipmentData = InventorySystem.get_equipped(slot_name)
+	equip_slot.setup(slot_name, equipped_item)
 
 
 func _on_equip_slot_clicked(slot_name: String) -> void:

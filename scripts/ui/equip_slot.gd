@@ -17,7 +17,11 @@ func setup(equip_slot_name: String, item: EquipmentData) -> void:
 		return  # Nodes not ready yet
 	
 	# Set slot label (e.g., "Head", "Weapon")
-	label.text = equip_slot_name.capitalize()
+	# Special case: ring1 displays as "Ring"
+	var display_name: String = equip_slot_name.capitalize()
+	if equip_slot_name == "ring1":
+		display_name = "Ring"
+	label.text = display_name
 	
 	if item == null:
 		# Empty slot
