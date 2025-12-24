@@ -227,7 +227,11 @@ func _start_fireball_cast(input_vec: Vector2) -> void:
 		return
 	
 	is_casting = true
-	cooldown_timer = fireball_cooldown
+	# Use spell's cooldown if available, otherwise use default
+	if current_spell != null:
+		cooldown_timer = current_spell.cooldown
+	else:
+		cooldown_timer = fireball_cooldown
 	
 	# Use movement direction if moving, else use last direction
 	var cast_dir := last_direction
