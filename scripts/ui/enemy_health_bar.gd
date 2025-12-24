@@ -109,4 +109,3 @@ func _update_bar() -> void:
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_RESIZED:
 		_update_bar()
-
