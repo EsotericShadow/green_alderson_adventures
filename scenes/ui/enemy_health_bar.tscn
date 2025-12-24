@@ -1,0 +1,59 @@
+[gd_scene load_steps=2 format=3 uid="uid://enemy_health_bar_001"]
+
+[ext_resource type="Script" path="res://scripts/ui/enemy_health_bar.gd" id="1_enemyhealthbar"]
+
+[node name="EnemyHealthBar" type="Control"]
+layout_mode = 0
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -15.0
+offset_top = -40.0
+offset_right = 15.0
+offset_bottom = -37.0
+grow_horizontal = 2
+grow_vertical = 0
+script = ExtResource("1_enemyhealthbar")
+bar_color = Color(1, 0.2, 0.2, 1)
+offset_y = -40.0
+
+[node name="BorderPanel" type="Panel" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="FillContainer" type="Control" parent="."]
+layout_mode = 0
+anchors_preset = 0
+offset_left = 1.0
+offset_top = 0.0
+offset_right = 29.0
+offset_bottom = 3.0
+grow_horizontal = 0
+grow_vertical = 0
+clip_contents = true
+
+[node name="LightFill" type="Panel" parent="FillContainer"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 0.6
+grow_horizontal = 2
+grow_vertical = 0
+offset_bottom = 1.8
+
+[node name="DarkFill" type="Panel" parent="FillContainer"]
+layout_mode = 1
+anchors_preset = 7
+anchor_top = 0.6
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+offset_top = 1.8
+

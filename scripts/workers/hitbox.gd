@@ -42,7 +42,7 @@ func _on_area_entered(area: Area2D) -> void:
 			_log("Hit own hurtbox - ignoring")
 			return
 		
-		var target_name: String = hurtbox.owner_node.name if hurtbox.owner_node != null else "unknown"
+		var target_name: String = str(hurtbox.owner_node.name) if hurtbox.owner_node != null else "unknown"
 		_log("💥 HIT! Target: " + target_name + ", Damage: " + str(damage))
 		
 		# Calculate knockback direction
@@ -76,4 +76,3 @@ func enable_for(duration: float) -> void:
 	_log("⚔️ ENABLED for " + str(duration) + "s")
 	enable()
 	get_tree().create_timer(duration).timeout.connect(disable)
-

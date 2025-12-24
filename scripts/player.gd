@@ -279,7 +279,7 @@ func _on_health_changed(current: int, maximum: int) -> void:
 
 
 func _on_died(killer: Node) -> void:
-	var killer_name: String = killer.name if killer != null else "unknown"
+	var killer_name: String = str(killer.name) if killer != null else "unknown"
 	_log("💀 PLAYER DIED! Killed by: " + killer_name)
 	is_dead = true
 	if input_reader != null:
@@ -292,7 +292,7 @@ func _on_died(killer: Node) -> void:
 
 
 func _on_hurt(damage: int, knockback: Vector2, attacker: Node) -> void:
-	var attacker_name: String = attacker.name if attacker != null else "unknown"
+	var attacker_name: String = str(attacker.name) if attacker != null else "unknown"
 	_log("💥 PLAYER HIT! Damage: " + str(damage) + " from " + attacker_name)
 	_log("   Knockback: " + str(knockback))
 	

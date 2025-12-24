@@ -14,7 +14,7 @@ func _ready() -> void:
 	_update_frame()
 
 
-func _on_health_changed(current: int, maximum: int) -> void:
+func _on_health_changed(_current: int, _maximum: int) -> void:
 	_update_frame()
 
 
@@ -40,4 +40,3 @@ func _update_frame() -> void:
 	
 	# Set the frame directly (don't play animation, just show the correct frame)
 	animated_sprite.frame = frame_index
-

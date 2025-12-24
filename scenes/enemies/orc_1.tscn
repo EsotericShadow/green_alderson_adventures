@@ -1,7 +1,8 @@
-[gd_scene load_steps=234 format=3 uid="uid://dorc1enemy"]
+[gd_scene load_steps=235 format=3 uid="uid://dorc1enemy"]
 
 [ext_resource type="Script" uid="uid://dnrv02tnkev0g" path="res://scripts/enemies/orc_1.gd" id="1_orc1"]
 [ext_resource type="Script" path="res://scripts/workers/health_tracker.gd" id="2_health"]
+[ext_resource type="PackedScene" uid="uid://enemy_health_bar_001" path="res://scenes/ui/enemy_health_bar.tscn" id="8_healthbar"]
 [ext_resource type="Texture2D" uid="uid://dxm62i8gfdc6s" path="res://animations/orc_1/Orc1_attack/orc1_attack_full.png" id="2_t7thm"]
 [ext_resource type="Texture2D" uid="uid://b8iqhiw2suysk" path="res://animations/orc_1/Orc1_death/orc1_death_full.png" id="3_7rdbo"]
 [ext_resource type="Script" path="res://scripts/workers/hurtbox.gd" id="3_hurtbox"]
@@ -1760,3 +1761,5 @@ script = ExtResource("6_mover")
 [node name="Animator" type="Node" parent="."]
 script = ExtResource("7_animator")
 use_4_directions = true
+
+[node name="EnemyHealthBar" parent="." instance=ExtResource("8_healthbar")]

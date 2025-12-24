@@ -33,7 +33,7 @@ func _ready() -> void:
 
 ## Called by Hitbox when it hits us
 func receive_hit(damage: int, knockback: Vector2, attacker: Node) -> void:
-	var attacker_name: String = attacker.name if attacker != null else "unknown"
+	var attacker_name: String = str(attacker.name) if attacker != null else "unknown"
 	
 	if is_invincible:
 		_log("🛡️ Hit received but INVINCIBLE - ignoring (from " + attacker_name + ")")
@@ -97,4 +97,3 @@ func enable() -> void:
 ## Disable the hurtbox (for death, etc.)
 func disable() -> void:
 	set_deferred("monitorable", false)
-

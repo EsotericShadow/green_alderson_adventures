@@ -92,7 +92,13 @@ func force_stop_one_shot() -> void:
 
 
 func _resolve_anim_name(base: String, direction: String) -> String:
-	var full_name := base + "_" + direction
+	# Consistency fix: Use flipped NE animations for NW
+	# This ensures consistent animation quality for northwest-facing animations
+	var resolved_dir := direction
+	if direction == "nw":
+		resolved_dir = "ne"
+	
+	var full_name := base + "_" + resolved_dir
 	
 	if sprite.sprite_frames.has_animation(full_name):
 		return full_name
@@ -124,9 +130,15 @@ func _update_flip(direction: String) -> void:
 	if sprite == null:
 		return
 	
-	# Only flip for 4-directional sprites
-	if use_4_directions:
+	# Consistency fix: Flip NW to use NE animations
+	# Flip horizontally when using NE animation for NW direction
+	if direction == "nw":
+		sprite.flip_h = true
+	# Only flip for 4-directional sprites (left direction)
+	elif use_4_directions:
 		sprite.flip_h = (direction == "left")
+	else:
+		sprite.flip_h = false
 
 
 func _on_animation_finished() -> void:
