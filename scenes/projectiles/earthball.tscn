@@ -1,7 +1,7 @@
 [gd_scene load_steps=11 format=3 uid="uid://ddmcalnqb1xd6"]
 
 [ext_resource type="Script" uid="uid://c7ygdfpblxyut" path="res://scripts/projectiles/spell_projectile.gd" id="1_hnddb"]
-[ext_resource type="PackedScene" uid="uid://da7rqrx4yscna" path="res://scenes/earth_impact.tscn" id="2_mvlo2"]
+[ext_resource type="PackedScene" uid="uid://da7rqrx4yscna" path="res://scenes/effects/earth_impact.tscn" id="2_mvlo2"]
 [ext_resource type="Texture2D" uid="uid://bvcy1g2bqkwoj" path="res://assets/animations/spells/earthball.png" id="3_hnddb"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_smijy"]

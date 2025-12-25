@@ -1,7 +1,7 @@
 class_name ItemData
 extends Resource
-## Base class for all items in the game.
-## Used for materials, consumables, equipment (via subclass), and key items.
+## Placeholder stub class - inventory system not yet implemented
+## TODO: Implement when milestone 4 (Crafting & Chests) is reached
 
 @export var id: String = ""
 @export var display_name: String = ""

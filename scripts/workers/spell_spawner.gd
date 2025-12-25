@@ -59,13 +59,13 @@ func spawn_fireball(direction: String, spawn_pos: Vector2, z_index_value: int, s
 	if spell_data != null:
 		match spell_data.element:
 			"fire":
-				projectile_scene = load("res://scenes/fireball.tscn") as PackedScene
+				projectile_scene = load("res://scenes/projectiles/fireball.tscn") as PackedScene
 			"water":
-				projectile_scene = load("res://scenes/waterball.tscn") as PackedScene
+				projectile_scene = load("res://scenes/projectiles/waterball.tscn") as PackedScene
 			"earth":
-				projectile_scene = load("res://scenes/earthball.tscn") as PackedScene
+				projectile_scene = load("res://scenes/projectiles/earthball.tscn") as PackedScene
 			"air":
-				projectile_scene = load("res://scenes/airball.tscn") as PackedScene
+				projectile_scene = load("res://scenes/projectiles/airball.tscn") as PackedScene
 		
 		if projectile_scene != null:
 			_log("   Using element-specific projectile: " + spell_data.element)
