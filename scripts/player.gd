@@ -34,7 +34,7 @@ var _stamina_drain_accumulator: float = 0.0  # Fractional accumulator for smooth
 # Spell system (Commit 3C: 10 spell slots)
 var equipped_spells: Array[SpellData] = []  # Size 10
 var selected_spell_index: int = 0
-var spell_bar: Control = null  # Reference to spell bar UI
+var spell_bar: Node = null  # Reference to spell bar UI (CanvasLayer)
 
 # Screen shake
 var _camera: Camera2D = null
@@ -360,14 +360,22 @@ func _find_spell_bar() -> void:
 			spell_bar = hud.get_node_or_null("SpellBar")
 	
 	if spell_bar == null:
-		_log("⚠️ SpellBar not found - spell bar UI unavailable")
+		_log_error("⚠️ SpellBar not found - spell bar UI unavailable")
+		_log("   Searching for SpellBar in scene tree...")
+		var scene := get_tree().current_scene
+		if scene != null:
+			_log("   Current scene: " + scene.name)
+			for child in scene.get_children():
+				_log("   - Child: " + child.name + " (type: " + child.get_class() + ")")
 		return
+	
+	_log("  ✓ SpellBar found: " + str(spell_bar.name) + " (type: " + spell_bar.get_class() + ")")
 	
 	# Setup spell bar with equipped spells
 	if spell_bar.has_method("setup_spells"):
 		spell_bar.setup_spells(equipped_spells)
 		spell_bar.select_slot(selected_spell_index)
-		_log("  ✓ Spell bar connected")
+		_log("  ✓ Spell bar connected and spells set up")
 	else:
 		_log_error("SpellBar missing setup_spells() method!")
 

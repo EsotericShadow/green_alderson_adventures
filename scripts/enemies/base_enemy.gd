@@ -235,12 +235,12 @@ func _process_chase() -> void:
 	if post_attack_backoff_timer > 0.0:
 		# Still in backoff period - BACK AWAY from player (proven anti-lock-on pattern)
 		_log("⏳ Post-attack backoff active (" + str(post_attack_backoff_timer) + "s remaining) - backing away")
-		var dir := target_tracker.get_direction_to_target()
+		var backoff_dir := target_tracker.get_direction_to_target()
 		if mover != null:
 			# Back away from player during recovery period
-			mover.move(-dir, move_speed * 0.6)  # Back away at 60% speed
+			mover.move(-backoff_dir, move_speed * 0.6)  # Back away at 60% speed
 		# Update facing direction (face away from player while backing off)
-		last_direction = _vector_to_dir4(-dir)
+		last_direction = _vector_to_dir4(-backoff_dir)
 		if animator != null:
 			animator.play("walk", last_direction)
 		return  # Don't check for attacks during backoff

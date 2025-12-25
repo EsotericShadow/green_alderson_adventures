@@ -29,6 +29,8 @@ grow_horizontal = 2
 grow_vertical = 2
 expand_mode = 1
 stretch_mode = 5
+visible = true
+mouse_filter = 2
 
 [node name="KeyLabel" type="Label" parent="."]
 layout_mode = 1

@@ -142,7 +142,7 @@ func _on_area_entered(area: Area2D) -> void:
 		# Gain XP for successful spell hit (Commit 3B: XP tracking)
 		if spell_data != null and SpellSystem != null:
 			# Gain XP equal to damage dealt (scaled for balance)
-			var xp_gain: int = max(1, final_damage / 2)  # Half of damage dealt, minimum 1
+			var xp_gain: int = max(1, int(final_damage / 2.0))  # Half of damage dealt, minimum 1
 			SpellSystem.gain_xp(spell_data.element, xp_gain)
 		
 		_spawn_impact()
@@ -167,13 +167,20 @@ func _deactivate() -> void:
 	
 	is_active = false
 	
-	# Return to pool if available, otherwise free
-	if pool_manager != null:
-		if pool_manager.has_method("return_fireball"):
-			pool_manager.return_fireball(self)
-		else:
-			queue_free()
+	# Only return to pool if this is a fireball from the pool
+	# Element-specific projectiles are instantiated directly and should be freed
+	# We can check if we're a child of the pool to determine if we came from pool
+	var should_return_to_pool: bool = false
+	if pool_manager != null and pool_manager.has_method("return_fireball"):
+		# Check if we're a fireball (pool only has fireballs)
+		if spell_data != null and spell_data.element == "fire":
+			# Only return fireballs to pool - other elements are instantiated directly
+			should_return_to_pool = true
+	
+	if should_return_to_pool:
+		pool_manager.return_fireball(self)
 	else:
+		# Element-specific projectiles or projectiles without pool - just free them
 		queue_free()
 
 
@@ -196,7 +203,7 @@ func _deal_damage_to(body: Node) -> void:
 	# Gain XP for successful spell hit (Commit 3B: XP tracking)
 	if damage_dealt and spell_data != null and SpellSystem != null:
 		# Gain XP equal to damage dealt (scaled for balance)
-		var xp_gain: int = max(1, final_damage / 2)  # Half of damage dealt, minimum 1
+		var xp_gain: int = max(1, int(final_damage / 2.0))  # Half of damage dealt, minimum 1
 		SpellSystem.gain_xp(spell_data.element, xp_gain)
 
 
@@ -209,24 +216,15 @@ func _spawn_impact() -> void:
 	print("[Fireball] 💥 Spawning impact at " + str(impact_position) + " (fireball was at " + str(global_position) + ")")
 	var fx: Node
 	
-	# Use pool if available (best practice)
-	if pool_manager != null and pool_manager.has_method("get_impact"):
-		fx = pool_manager.get_impact()
-		print("[Fireball]    Source: Pool")
-		# Reparent from pool to scene
-		var current_parent = fx.get_parent()
-		if current_parent != null:
-			current_parent.remove_child(fx)
-		get_tree().current_scene.add_child(fx)
-		fx.global_position = impact_position
-	elif impact_scene != null:
-		# Fallback to instantiation
+	# Always use the projectile's own impact_scene (element-specific impacts)
+	# Don't use pool since each element has its own impact scene
+	if impact_scene != null:
 		fx = impact_scene.instantiate()
-		print("[Fireball]    Source: Instantiate")
+		print("[Fireball]    Source: Instantiate (element-specific impact)")
 		get_tree().current_scene.add_child(fx)
 		fx.global_position = impact_position
 	else:
-		print("[Fireball]    ❌ No pool or impact_scene available!")
+		print("[Fireball]    ❌ No impact_scene available!")
 		return
 
 	# We want the impact to orient based on the direction the fireball traveled.
@@ -243,13 +241,10 @@ func _spawn_impact() -> void:
 
 func _apply_hue() -> void:
 	"""Applies hue shift to the animated sprite based on spell_data."""
+	# Note: Each element now has its own projectile scene with pre-colored sprites
+	# So we don't need to apply hue shift anymore - just reset to white
 	if anim == null:
 		return
 	
-	if hue_shift != 0.0:
-		# Shift the modulate color using HSV
-		var color := Color.from_hsv(hue_shift, 0.8, 1.0)
-		anim.modulate = color
-	else:
-		# Reset to white if no hue shift
-		anim.modulate = Color.WHITE
+	# Reset to white since each projectile scene has its own colored sprites
+	anim.modulate = Color.WHITE

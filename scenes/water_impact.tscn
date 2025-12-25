@@ -1,0 +1,44 @@
+[gd_scene load_steps=7 format=3 uid="uid://dhmibipwwcn53"]
+
+[ext_resource type="Script" uid="uid://b3l277omajc0e" path="res://scripts/projectiles/impact.gd" id="1_1567t"]
+[ext_resource type="Texture2D" uid="uid://6wtl6ltnliwp" path="res://assets/animations/spells/waterball.png" id="2_1567t"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_jkt66"]
+atlas = ExtResource("2_1567t")
+region = Rect2(0, 0, 512, 512)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_j03x6"]
+atlas = ExtResource("2_1567t")
+region = Rect2(512, 0, 512, 512)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_e4yho"]
+atlas = ExtResource("2_1567t")
+region = Rect2(1024, 0, 512, 512)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_q6r6c"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_jkt66")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_j03x6")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_e4yho")
+}],
+"loop": false,
+"name": &"waterball_impact_left",
+"speed": 11.0
+}]
+
+[node name="Node2D" type="Node2D"]
+z_index = 100
+script = ExtResource("1_1567t")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+z_index = 100
+scale = Vector2(0.1, 0.1)
+sprite_frames = SubResource("SpriteFrames_q6r6c")
+animation = &"waterball_impact_left"
+autoplay = "waterball_impact_left"

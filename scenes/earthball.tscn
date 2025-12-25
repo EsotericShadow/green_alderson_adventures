@@ -1,0 +1,70 @@
+[gd_scene load_steps=11 format=3 uid="uid://ddmcalnqb1xd6"]
+
+[ext_resource type="Script" uid="uid://c7ygdfpblxyut" path="res://scripts/projectiles/spell_projectile.gd" id="1_hnddb"]
+[ext_resource type="PackedScene" uid="uid://da7rqrx4yscna" path="res://scenes/earth_impact.tscn" id="2_mvlo2"]
+[ext_resource type="Texture2D" uid="uid://bvcy1g2bqkwoj" path="res://assets/animations/spells/earthball.png" id="3_hnddb"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_smijy"]
+radius = 25.0
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_mvlo2"]
+atlas = ExtResource("3_hnddb")
+region = Rect2(1536, 0, 512, 512)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_cip0k"]
+atlas = ExtResource("3_hnddb")
+region = Rect2(0, 512, 512, 512)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_7icsv"]
+atlas = ExtResource("3_hnddb")
+region = Rect2(512, 512, 512, 512)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_jkisf"]
+atlas = ExtResource("3_hnddb")
+region = Rect2(1024, 512, 512, 512)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_o3wli"]
+atlas = ExtResource("3_hnddb")
+region = Rect2(1536, 512, 512, 512)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_nhpr2"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_mvlo2")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_cip0k")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_7icsv")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_jkisf")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_o3wli")
+}],
+"loop": true,
+"name": &"earthball",
+"speed": 10.0
+}]
+
+[node name="Area2D" type="Area2D" groups=["fireball"]]
+z_index = 2
+collision_layer = 2
+collision_mask = 9
+script = ExtResource("1_hnddb")
+impact_scene = ExtResource("2_mvlo2")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CircleShape2D_smijy")
+
+[node name="VisibleOnScreenNotifier2D" type="VisibleOnScreenNotifier2D" parent="."]
+
+[node name="AnimatedSprite2D2" type="AnimatedSprite2D" parent="."]
+scale = Vector2(0.1, 0.1)
+sprite_frames = SubResource("SpriteFrames_nhpr2")
+animation = &"earthball"
+autoplay = "earthball"
+frame_progress = 0.9320003

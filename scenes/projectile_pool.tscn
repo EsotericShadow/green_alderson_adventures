@@ -1,8 +1,8 @@
-[gd_scene load_steps=4 format=3 uid="uid://projectile_pool"]
+[gd_scene load_steps=4 format=3]
 
-[ext_resource type="Script" path="res://scripts/systems/projectile_pool.gd" id="1_pool"]
+[ext_resource type="Script" uid="uid://cg735q7l4vdgx" path="res://scripts/systems/projectile_pool.gd" id="1_pool"]
 [ext_resource type="PackedScene" uid="uid://dqwqdhuufptmw" path="res://scenes/fireball.tscn" id="2_fireball"]
-[ext_resource type="PackedScene" uid="uid://c6501algqvf0d" path="res://scenes/impact.tscn" id="3_impact"]
+[ext_resource type="PackedScene" uid="uid://c6501algqvf0d" path="res://scenes/fire_impact.tscn" id="3_impact"]
 
 [node name="ProjectilePool" type="Node"]
 script = ExtResource("1_pool")

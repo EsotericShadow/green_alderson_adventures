@@ -46,11 +46,32 @@ func setup(angle: float) -> void:
 	_log("💥 SETUP at " + str(global_position) + ", travel_angle: " + str(rad_to_deg(travel_angle)))
 	
 	if anim != null and anim.sprite_frames != null:
-		if anim.sprite_frames.has_animation("impact_left"):
+		# Find the correct animation name (element-specific impacts have different names)
+		var animation_name: String = ""
+		var animations := anim.sprite_frames.get_animation_names()
+		
+		# Check for element-specific animations first
+		if anim.sprite_frames.has_animation("fireball_impact_left"):
+			animation_name = "fireball_impact_left"
+		elif anim.sprite_frames.has_animation("waterball_impact_left"):
+			animation_name = "waterball_impact_left"
+		elif anim.sprite_frames.has_animation("earthball_impact_left"):
+			animation_name = "earthball_impact_left"
+		elif anim.sprite_frames.has_animation("airball_impact_left"):
+			animation_name = "airball_impact_left"
+		elif anim.sprite_frames.has_animation("impact_left"):
+			animation_name = "impact_left"
+		else:
+			# Fallback to first available animation
+			if animations.size() > 0:
+				animation_name = animations[0]
+				_log("   ⚠️ Using first available animation: " + animation_name)
+		
+		if animation_name != "":
 			anim.visible = true
 			anim.frame = 0
 			
-			# impact_left animation faces left by default
+			# impact animations face left by default
 			# Determine flip/rotation based on travel direction
 			# Normalize angle to 0-2π range
 			var normalized_angle := fposmod(travel_angle, TAU)
@@ -79,10 +100,10 @@ func setup(angle: float) -> void:
 				# impact_left faces left (180°), so adjust
 				rotation = normalized_angle - PI
 			
-			anim.play("impact_left")
-			_log("   Playing 'impact_left' animation (normalized: " + str(int(rad_to_deg(normalized_angle))) + "°, rotation: " + str(int(rad_to_deg(rotation))) + "°)")
+			anim.play(animation_name)
+			_log("   Playing '" + animation_name + "' animation (normalized: " + str(int(rad_to_deg(normalized_angle))) + "°, rotation: " + str(int(rad_to_deg(rotation))) + "°)")
 		else:
-			_log("   ❌ Animation 'impact_left' NOT found!")
+			_log("   ❌ No valid impact animation found! Available: " + str(animations))
 	else:
 		_log("   ❌ anim or sprite_frames is null!")
 

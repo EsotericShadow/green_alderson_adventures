@@ -107,7 +107,7 @@ func _deferred_return_fireball(fireball: Node) -> void:
 	if fireball is Area2D:
 		fireball.monitoring = false
 	
-	# Reset velocity if accessible (fireball.gd has this property)
+	# Reset velocity if accessible (spell_projectile.gd has this property)
 	if "velocity" in fireball:
 		fireball.velocity = Vector2.ZERO
 	

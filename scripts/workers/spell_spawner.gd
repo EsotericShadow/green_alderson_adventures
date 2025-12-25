@@ -49,16 +49,47 @@ func _find_pool() -> void:
 ## Spawn a fireball in the given direction
 ## Returns the spawned fireball node
 func spawn_fireball(direction: String, spawn_pos: Vector2, z_index_value: int, spell_data: SpellData = null) -> Node:
-	_log("🔥 Spawning fireball...")
+	_log("🔥 Spawning projectile...")
 	_log("   Direction: " + direction)
 	_log("   Position: " + str(spawn_pos))
 	_log("   Z-index: " + str(z_index_value))
 	
+	# Determine which projectile scene to use based on element
+	var projectile_scene: PackedScene = null
+	if spell_data != null:
+		match spell_data.element:
+			"fire":
+				projectile_scene = load("res://scenes/fireball.tscn") as PackedScene
+			"water":
+				projectile_scene = load("res://scenes/waterball.tscn") as PackedScene
+			"earth":
+				projectile_scene = load("res://scenes/earthball.tscn") as PackedScene
+			"air":
+				projectile_scene = load("res://scenes/airball.tscn") as PackedScene
+		
+		if projectile_scene != null:
+			_log("   Using element-specific projectile: " + spell_data.element)
+		else:
+			_log("   ⚠️ Element-specific scene not found, using fallback")
+	
+	# Fallback to fireball_scene if element-specific scene not found
+	if projectile_scene == null:
+		projectile_scene = fireball_scene
+	
+	if projectile_scene == null:
+		_log_error("No projectile scene available! Cannot spawn.")
+		return null
+	
 	var fb: Node = null
 	
-	# Try pool first
-	if pool != null and pool.has_method("get_fireball"):
-		_log("   Source: Pool")
+	# Only use pool if we're using the default fireball scene (pool only has fireballs)
+	# For element-specific projectiles, always instantiate directly
+	var use_pool: bool = (pool != null and pool.has_method("get_fireball") and 
+	                      spell_data != null and spell_data.element == "fire" and
+	                      projectile_scene == fireball_scene)
+	
+	if use_pool:
+		_log("   Source: Pool (fireball)")
 		fb = pool.get_fireball()
 		if fb == null:
 			_log_error("Pool.get_fireball() returned null!")
@@ -67,13 +98,10 @@ func spawn_fireball(direction: String, spawn_pos: Vector2, z_index_value: int, s
 		if parent != null:
 			parent.remove_child(fb)
 		get_tree().current_scene.add_child(fb)
-	elif fireball_scene != null:
-		_log("   Source: Instantiate")
-		fb = fireball_scene.instantiate()
-		get_tree().current_scene.add_child(fb)
 	else:
-		_log_error("No fireball scene AND no pool available! Cannot spawn.")
-		return null
+		_log("   Source: Instantiate (element-specific)")
+		fb = projectile_scene.instantiate()
+		get_tree().current_scene.add_child(fb)
 	
 	fb.global_position = spawn_pos
 	
@@ -82,14 +110,14 @@ func spawn_fireball(direction: String, spawn_pos: Vector2, z_index_value: int, s
 	
 	if fb.has_method("setup"):
 		fb.call("setup", dir_vec, owner_node, z_index_value, spell_data)
-		_log("   ✓ Fireball setup() called")
+		_log("   ✓ Projectile setup() called")
 		if spell_data != null:
 			_log("   ✓ SpellData provided: " + spell_data.display_name + " (" + spell_data.element + ")")
 	else:
 		fb.z_index = z_index_value
-		_log("   ⚠️ Fireball has no setup() method - set z_index directly")
+		_log("   ⚠️ Projectile has no setup() method - set z_index directly")
 	
-	_log("   ✓ Fireball spawned successfully!")
+	_log("   ✓ Projectile spawned successfully!")
 	return fb
 
 

@@ -11,6 +11,6 @@ element = "air"
 base_damage = 10
 mana_cost = 8
 cooldown = 0.4
-hue_shift = 0.75
+hue_shift = 0.55
 projectile_speed = 500.0
 

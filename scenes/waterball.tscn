@@ -1,0 +1,69 @@
+[gd_scene load_steps=11 format=3 uid="uid://ji2m8665alww"]
+
+[ext_resource type="Script" uid="uid://c7ygdfpblxyut" path="res://scripts/projectiles/spell_projectile.gd" id="1_q6okr"]
+[ext_resource type="PackedScene" uid="uid://dhmibipwwcn53" path="res://scenes/water_impact.tscn" id="2_td2k8"]
+[ext_resource type="Texture2D" uid="uid://6wtl6ltnliwp" path="res://assets/animations/spells/waterball.png" id="3_q6okr"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_smijy"]
+radius = 25.0
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_td2k8"]
+atlas = ExtResource("3_q6okr")
+region = Rect2(1536, 0, 512, 512)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_foi0u"]
+atlas = ExtResource("3_q6okr")
+region = Rect2(0, 512, 512, 512)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_6ri5i"]
+atlas = ExtResource("3_q6okr")
+region = Rect2(512, 512, 512, 512)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_1b80m"]
+atlas = ExtResource("3_q6okr")
+region = Rect2(1024, 512, 512, 512)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_wq6r3"]
+atlas = ExtResource("3_q6okr")
+region = Rect2(1536, 512, 512, 512)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_0588x"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_td2k8")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_foi0u")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_6ri5i")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_1b80m")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_wq6r3")
+}],
+"loop": true,
+"name": &"waterball",
+"speed": 10.0
+}]
+
+[node name="Area2D" type="Area2D" groups=["fireball"]]
+z_index = 2
+collision_layer = 2
+collision_mask = 9
+script = ExtResource("1_q6okr")
+impact_scene = ExtResource("2_td2k8")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CircleShape2D_smijy")
+
+[node name="VisibleOnScreenNotifier2D" type="VisibleOnScreenNotifier2D" parent="."]
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+scale = Vector2(0.1, 0.1)
+sprite_frames = SubResource("SpriteFrames_0588x")
+animation = &"waterball"
+autoplay = "waterball"

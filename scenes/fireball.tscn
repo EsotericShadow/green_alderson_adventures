@@ -1,8 +1,8 @@
 [gd_scene load_steps=11 format=3 uid="uid://dqwqdhuufptmw"]
 
-[ext_resource type="Script" path="res://scripts/projectiles/fireball.gd" id="1_olwj8"]
-[ext_resource type="Texture2D" uid="uid://7v1q2egwb54w" path="res://animations/spells/fireball_V_1_1/firebal_v1.1-0.png" id="1_sf4mh"]
-[ext_resource type="PackedScene" uid="uid://c6501algqvf0d" path="res://scenes/impact.tscn" id="2_impact"]
+[ext_resource type="Script" path="res://scripts/projectiles/spell_projectile.gd" id="1_olwj8"]
+[ext_resource type="Texture2D" uid="uid://7v1q2egwb54w" path="res://assets/animations/spells/fireball_V_1_1/firebal_v1.1-0.png" id="1_sf4mh"]
+[ext_resource type="PackedScene" uid="uid://c6501algqvf0d" path="res://scenes/fire_impact.tscn" id="2_impact"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_olwj8"]
 atlas = ExtResource("1_sf4mh")
@@ -55,7 +55,6 @@ z_index = 2
 collision_layer = 2
 collision_mask = 9
 script = ExtResource("1_olwj8")
-damage = 25
 impact_scene = ExtResource("2_impact")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]

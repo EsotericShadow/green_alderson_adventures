@@ -1,0 +1,44 @@
+[gd_scene load_steps=7 format=3 uid="uid://da7rqrx4yscna"]
+
+[ext_resource type="Script" uid="uid://b3l277omajc0e" path="res://scripts/projectiles/impact.gd" id="1_7yo27"]
+[ext_resource type="Texture2D" uid="uid://bvcy1g2bqkwoj" path="res://assets/animations/spells/earthball.png" id="2_7yo27"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_4c8i3"]
+atlas = ExtResource("2_7yo27")
+region = Rect2(0, 0, 512, 512)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_60sf0"]
+atlas = ExtResource("2_7yo27")
+region = Rect2(512, 0, 512, 512)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_20mji"]
+atlas = ExtResource("2_7yo27")
+region = Rect2(1024, 0, 512, 512)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_q6r6c"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_4c8i3")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_60sf0")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_20mji")
+}],
+"loop": false,
+"name": &"earthball_impact_left",
+"speed": 11.0
+}]
+
+[node name="Node2D" type="Node2D"]
+z_index = 100
+script = ExtResource("1_7yo27")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+z_index = 100
+scale = Vector2(0.1, 0.1)
+sprite_frames = SubResource("SpriteFrames_q6r6c")
+animation = &"earthball_impact_left"
+autoplay = "earthball_impact_left"

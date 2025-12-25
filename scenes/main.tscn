@@ -1,17 +1,48 @@
-[gd_scene load_steps=6 format=3 uid="uid://p1wlou6u74sw"]
+[gd_scene load_steps=8 format=3 uid="uid://p1wlou6u74sw"]
 
 [ext_resource type="PackedScene" uid="uid://ca8w8dxhshamw" path="res://scenes/overworld.tscn" id="1_0xm2m"]
 [ext_resource type="PackedScene" uid="uid://c447wb2lmdb0b" path="res://scenes/player.tscn" id="1_ig7tw"]
 [ext_resource type="PackedScene" uid="uid://dorc1enemy" path="res://scenes/enemies/orc_1.tscn" id="1_jyhfs"]
 [ext_resource type="PackedScene" path="res://scenes/projectile_pool.tscn" id="2_pool"]
 [ext_resource type="PackedScene" uid="uid://b8k2x3m4n5p6q" path="res://scenes/ui/hud.tscn" id="3_hud"]
-[ext_resource type="PackedScene" uid="uid://inventory_ui_001" path="res://scenes/ui/inventory_ui.tscn" id="4_inventory"]
+[ext_resource type="PackedScene" path="res://scenes/ui/inventory_ui.tscn" id="4_inventory"]
+[ext_resource type="PackedScene" path="res://scenes/ui/spell_bar.tscn" id="5_spellbar"]
 
 [node name="Node2D" type="Node2D"]
 
 [node name="Orc1" parent="." instance=ExtResource("1_jyhfs")]
 z_index = 2
 position = Vector2(-45.48, -201.5)
+scale = Vector2(1.89, 1.89)
+
+[node name="Orc2" parent="." instance=ExtResource("1_jyhfs")]
+z_index = 2
+position = Vector2(1114, 422)
+scale = Vector2(1.89, 1.89)
+
+[node name="Orc3" parent="." instance=ExtResource("1_jyhfs")]
+z_index = 2
+position = Vector2(1276, -780)
+scale = Vector2(1.89, 1.89)
+
+[node name="Orc4" parent="." instance=ExtResource("1_jyhfs")]
+z_index = 2
+position = Vector2(-78, -1318)
+scale = Vector2(1.89, 1.89)
+
+[node name="Orc5" parent="." instance=ExtResource("1_jyhfs")]
+z_index = 2
+position = Vector2(-1092, -872)
+scale = Vector2(1.89, 1.89)
+
+[node name="Orc6" parent="." instance=ExtResource("1_jyhfs")]
+z_index = 2
+position = Vector2(-1234, 208)
+scale = Vector2(1.89, 1.89)
+
+[node name="Orc7" parent="." instance=ExtResource("1_jyhfs")]
+z_index = 2
+position = Vector2(-113, 1111)
 scale = Vector2(1.89, 1.89)
 
 [node name="ProjectilePool" parent="." instance=ExtResource("2_pool")]
@@ -26,5 +57,7 @@ position = Vector2(0, -2)
 position = Vector2(0, 2)
 
 [node name="HUD" parent="." instance=ExtResource("3_hud")]
+
+[node name="SpellBar" parent="." instance=ExtResource("5_spellbar")]
 
 [node name="InventoryUI" parent="." instance=ExtResource("4_inventory")]

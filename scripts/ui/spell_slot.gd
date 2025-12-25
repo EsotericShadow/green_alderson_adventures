@@ -18,7 +18,11 @@ func setup(index: int, spell: SpellData) -> void:
 	spell_data = spell
 	
 	if icon == null or key_label == null:
+		print("[SpellSlot] ⚠️ Slot ", index, ": icon or key_label is null!")
 		return  # Nodes not ready yet
+	
+	# Ensure icon is visible
+	icon.visible = true
 	
 	# Set key label (1-9, 0)
 	if index < 9:
@@ -28,13 +32,17 @@ func setup(index: int, spell: SpellData) -> void:
 	
 	if spell == null:
 		# Empty slot
+		print("[SpellSlot] Slot ", index, ": empty (no spell)")
 		icon.texture = null
 		icon.modulate = Color.WHITE
 		key_label.text = ""
+		icon.visible = false
 	else:
 		# Load spell icon and apply hue shift
+		print("[SpellSlot] Slot ", index, ": setting spell ", spell.display_name)
 		_load_spell_icon(spell)
 		key_label.visible = true
+		icon.visible = true
 	
 	# Reset cooldown overlay
 	if cooldown_overlay != null:
@@ -43,22 +51,62 @@ func setup(index: int, spell: SpellData) -> void:
 
 
 func _load_spell_icon(spell: SpellData) -> void:
-	# Load the blue spell icon
-	var icon_path := "res://assets/animations/UI/spell_hotbar_icons/spell_ball_blast/spell_icon_lvl_1(blue).png"
+	# Determine icon path based on element (using the actual filenames you created)
+	var icon_filename: String = "spell_icon_lvl_1(blue).png"  # Default
+	
+	match spell.element:
+		"fire":
+			icon_filename = "spell_icon_lvl_1(fire).png"
+		"water":
+			icon_filename = "spell_icon_lvl_1(water).png"
+		"earth":
+			icon_filename = "spell_icon_lvl_1(earth).png"
+		"air":
+			icon_filename = "spell_icon_lvl_1(air).png"
+		_:
+			icon_filename = "spell_icon_lvl_1(blue).png"
+	
+	var icon_path := "res://assets/animations/UI/spell_hotbar_icons/spell_ball_blast/" + icon_filename
 	var base_icon := load(icon_path) as Texture2D
 	
+	# Fallback to blue icon if element-specific icon doesn't exist
 	if base_icon == null:
-		push_error("[SpellSlot] Failed to load spell icon: " + icon_path)
-		icon.texture = null
-		return
+		print("[SpellSlot] ⚠️ Element-specific icon not found (", icon_filename, "), using blue icon")
+		icon_path = "res://assets/animations/UI/spell_hotbar_icons/spell_ball_blast/spell_icon_lvl_1(blue).png"
+		base_icon = load(icon_path) as Texture2D
+		
+		if base_icon == null:
+			push_error("[SpellSlot] ❌ Failed to load spell icon: " + icon_path)
+			icon.texture = null
+			icon.visible = false
+			return
+		
+		# Apply color modulation as fallback only
+		var modulate_color: Color
+		match spell.element:
+			"fire":
+				modulate_color = Color(1.0, 0.2, 0.2, 1.0)  # Red
+			"water":
+				modulate_color = Color.from_hsv(0.5, 1.0, 1.0)  # Cyan
+			"earth":
+				modulate_color = Color.from_hsv(0.3, 1.0, 1.0)  # Green
+			"air":
+				modulate_color = Color.from_hsv(0.55, 1.0, 1.0)  # Light blue
+			_:
+				modulate_color = Color.WHITE
+		icon.modulate = modulate_color
+		print("[SpellSlot]   Using fallback modulation: ", modulate_color)
+	else:
+		# Element-specific icon found - use white modulate (icon should already be colored)
+		icon.modulate = Color.WHITE
+		print("[SpellSlot] ✓ Element-specific icon loaded: ", icon_filename)
 	
+	print("[SpellSlot] ✓ Icon loaded for ", spell.display_name, " (", spell.element, ")")
 	icon.texture = base_icon
 	
-	# Apply hue shift based on element
-	# Fire: 0.0 (red), Water: 0.55 (cyan), Earth: 0.3 (brown/green), Air: 0.75 (light blue)
-	var hue: float = spell.hue_shift
-	var color := Color.from_hsv(hue, 1.0, 1.0)
-	icon.modulate = color
+	# Ensure icon is visible after setting texture
+	icon.visible = true
+	print("[SpellSlot]   Icon visible: ", icon.visible, ", texture: ", icon.texture != null)
 
 
 func set_selected(is_selected: bool) -> void:

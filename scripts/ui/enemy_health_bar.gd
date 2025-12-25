@@ -82,27 +82,30 @@ func _on_health_changed(current: int, maximum: int) -> void:
 
 func _update_bar() -> void:
 	if max_value <= 0:
-		fill_container.size.x = 0.0
-		fill_light.size.x = 0.0
-		fill_dark.size.x = 0.0
+		fill_container.set_deferred("size", Vector2(0.0, size.y))
+		fill_light.set_deferred("size", Vector2(0.0, 0.0))
+		fill_dark.set_deferred("size", Vector2(0.0, 0.0))
 		return
 	
 	var percentage: float = float(current_value) / float(max_value)
 	var fill_width: float = (size.x - 2.0) * percentage  # -2 for border padding (1px each side)
 	fill_width = max(0.0, fill_width)
-	fill_container.size.x = fill_width
-	fill_container.size.y = size.y  # Full height to cover border area
+	var container_size := Vector2(fill_width, size.y)
+	fill_container.set_deferred("size", container_size)
 	fill_container.position = Vector2(1.0, 0.0)  # Offset horizontally by border, start at top
 	
 	# Update fill heights for two-tone effect
 	# Light fill takes top 60%, dark fill takes bottom 40%
 	var bar_height: float = size.y  # Full height
-	fill_light.size = Vector2(fill_width, bar_height * 0.6)
+	var light_size := Vector2(fill_width, bar_height * 0.6)
+	var dark_size := Vector2(fill_width, (bar_height - (bar_height * 0.6)) + 0.5)  # Remaining height + buffer
+	
+	# Use set_deferred to avoid size override warnings when anchors are set
+	fill_light.set_deferred("size", light_size)
 	fill_light.position = Vector2(0.0, 0.0)
 	
 	# Dark fill extends to the very bottom to eliminate transparent gap
-	var dark_fill_height: float = bar_height - (bar_height * 0.6)  # Remaining height
-	fill_dark.size = Vector2(fill_width, dark_fill_height + 0.5)  # Add small buffer to cover gap
+	fill_dark.set_deferred("size", dark_size)
 	fill_dark.position = Vector2(0.0, bar_height * 0.6)
 
 
