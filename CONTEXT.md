@@ -1,14 +1,20 @@
 # Context File: Spell Hotbar System Implementation
 
 **Date**: Current Session  
-**Commit**: 3C - Spell Selection & Hotbar  
-**Status**: Implemented and tested
+**Commit**: 3C - Spell Selection & Hotbar (Complete)  
+**Status**: Fully implemented, tested, and refined
 
 ---
 
 ## Overview
 
 This document provides context for the spell hotbar system implementation (Commit 3C). It documents what was built, how it was implemented, and important context for future development.
+
+**Recent Updates**:
+- Element-specific projectile scenes and impacts (no longer hue-shifted)
+- Element-specific spell icons with color modulation
+- Scene directory reorganization (projectiles/, effects/, characters/, etc.)
+- Projectile cleanup system (pooling for fire, queue_free for others)
 
 ---
 
@@ -17,9 +23,9 @@ This document provides context for the spell hotbar system implementation (Commi
 ### 1. Spell Hotbar UI System
 - **10-slot spell hotbar** (keys 1-9, 0)
 - **Visual spell selection** with gold border highlighting
-- **Hue-shifted spell icons** based on element
-- **Cooldown overlay** visualization (not yet fully integrated)
+- **Element-specific spell icons** loaded per element (fire, water, earth, air)
 - **Click-to-select** functionality
+- **Race condition fix**: Pending spells queue for initialization
 
 ### 2. Multi-Element Spell System
 - **SpellData resources** for each element (fire, water, earth, air)
@@ -34,7 +40,8 @@ This document provides context for the spell hotbar system implementation (Commi
 - **Number key selection** (1-9, 0) for spell slots
 - **Visual feedback** when selecting spells
 - **Dynamic mana cost** and cooldown per spell
-- **Hue-shifted projectiles** matching spell element
+- **Element-specific projectiles** (each element has its own scene)
+- **Element-specific impact effects** (each element has its own impact scene)
 
 ---
 
@@ -44,8 +51,8 @@ This document provides context for the spell hotbar system implementation (Commi
 
 ```
 scripts/
-├── data/
-│   └── spell_data.gd              # SpellData resource class
+├── resources/
+│   └── spell_data.gd              # SpellData resource class (moved from data/)
 ├── systems/
 │   └── spell_system.gd            # Autoload singleton for spell progression
 ├── ui/
@@ -53,9 +60,19 @@ scripts/
 │   └── spell_slot.gd              # Individual slot component
 ├── player.gd                      # Player coordinator (modified)
 └── projectiles/
-    └── fireball.gd               # Projectile script (modified for multi-element)
+    └── spell_projectile.gd        # Generic projectile script (renamed from fireball.gd)
 
 scenes/
+├── projectiles/                   # Projectile scenes
+│   ├── fireball.tscn             # Fire projectile scene
+│   ├── waterball.tscn            # Water projectile scene
+│   ├── earthball.tscn            # Earth projectile scene
+│   └── airball.tscn              # Air projectile scene
+├── effects/                       # Impact effect scenes
+│   ├── fire_impact.tscn          # Fire impact effect
+│   ├── water_impact.tscn         # Water impact effect
+│   ├── earth_impact.tscn         # Earth impact effect
+│   └── air_impact.tscn           # Air impact effect
 └── ui/
     ├── spell_bar.tscn            # Hotbar scene (CanvasLayer)
     └── spell_slot.tscn           # Individual slot scene
@@ -70,8 +87,9 @@ resources/
 
 ### Key Components
 
-#### 1. SpellData Resource (`scripts/data/spell_data.gd`)
+#### 1. SpellData Resource (`scripts/resources/spell_data.gd`)
 - Custom resource class defining spell properties
+- **Location**: Moved from `scripts/data/` to `scripts/resources/` during reorganization
 - Properties: `id`, `display_name`, `description`, `icon`, `element`, `base_damage`, `mana_cost`, `cooldown`, `hue_shift`, `projectile_speed`
 - Used as data containers for spell definitions
 
@@ -96,22 +114,27 @@ resources/
   - Manages selection state
   - Connects to player for spell setup
   - Emits `spell_selected` signal
+- **Race Condition Fix**: Implements `_pending_spells` queue to handle spells arriving before `_ready()` completes
 
 #### 4. SpellSlot Component (`scripts/ui/spell_slot.gd` + `scenes/ui/spell_slot.tscn`)
 - **Type**: PanelContainer with `class_name SpellSlot`
 - **Features**:
-  - Displays spell icon with hue shift
+  - Displays element-specific spell icons
   - Shows key label (1-9, 0)
-  - Cooldown overlay (ColorRect)
   - Selection highlighting (gold border)
-- **Icon Loading**: Uses `spell_icon_lvl_1(blue).png` with hue modulation
+- **Icon Loading**: Loads element-specific icon files:
+  - `spell_icon_lvl_1(red).png` for fire
+  - `spell_icon_lvl_1(cyan).png` for water
+  - `spell_icon_lvl_1(green).png` for earth
+  - `spell_icon_lvl_1(lightblue).png` for air
+- **Fallback**: Falls back to blue icon with color modulation if element-specific icon not found
 - **Theme Override**: Uses `get_theme_stylebox()` and `add_theme_stylebox_override()` for border color
 
 #### 5. Player Integration (`scripts/player.gd`)
 - **New Variables**:
   - `equipped_spells: Array[SpellData]` (size 10)
   - `selected_spell_index: int`
-  - `spell_bar: Control` (reference to UI)
+  - `spell_bar: Node` (reference to UI CanvasLayer)
 - **New Methods**:
   - `get_selected_spell() -> SpellData`
   - `_select_spell(index: int)`
@@ -123,17 +146,31 @@ resources/
   - `_start_fireball_cast()`: Uses spell's cooldown
   - `_spawn_fireball()`: Passes SpellData to spawner
 
-#### 6. Projectile System (`scripts/projectiles/fireball.gd`)
-- **Modified to accept SpellData**:
+#### 6. Projectile System (`scripts/projectiles/spell_projectile.gd`)
+- **Renamed**: From `fireball.gd` to `spell_projectile.gd` (element-agnostic)
+- **Properties**:
   - `spell_data: SpellData` property
-  - `hue_shift: float` for visual element representation
+  - `impact_scene: PackedScene` (element-specific impact scene)
 - **Dynamic Damage**: Uses `SpellSystem.get_spell_damage(spell_data)`
-- **XP Gain**: `SpellSystem.gain_xp(spell_data.element, max(1, final_damage / 2))` on hit
-- **Visual**: Applies hue shift to `AnimatedSprite2D.modulate`
+- **XP Gain**: `SpellSystem.gain_xp(spell_data.element, max(1, int(final_damage / 2.0)))` on hit
+- **Visual**: Each projectile scene uses pre-colored sprites (no hue shift)
+- **Cleanup**: 
+  - Fire projectiles return to pool
+  - Other elements use `queue_free()`
 
-#### 7. Spell Spawner (`scripts/workers/spell_spawner.gd`)
-- **Modified `spawn_fireball()`**: Now accepts `data: SpellData` parameter
-- Passes SpellData to fireball's `setup()` method
+#### 7. Impact System (`scripts/projectiles/impact.gd`)
+- **Dynamic Animation**: Determines animation name based on element
+  - `fireball_impact_left`, `waterball_impact_left`, etc.
+- **Element-specific**: Each impact scene has element-specific animations
+
+#### 8. Spell Spawner (`scripts/workers/spell_spawner.gd`)
+- **Modified `spawn_fireball()`**: Loads element-specific projectile scenes
+  - `fireball.tscn` for fire
+  - `waterball.tscn` for water
+  - `earthball.tscn` for earth
+  - `airball.tscn` for air
+- **Pooling**: Only uses pool for fire element (pool pre-filled with fireballs)
+- **Instantiation**: Other elements instantiate directly from scene
 
 ---
 
@@ -151,15 +188,15 @@ resources/
 
 ### Spell Resources
 - **Fireball**: `base_damage=15`, `mana_cost=10`, `cooldown=0.6`, `hue_shift=0.0`
-- **Waterball**: `base_damage=12`, `mana_cost=12`, `cooldown=0.7`, `hue_shift=0.55`
-- **Earthball**: `base_damage=20`, `mana_cost=15`, `cooldown=0.9`, `hue_shift=0.3`
-- **Airball**: `base_damage=10`, `mana_cost=8`, `cooldown=0.4`, `hue_shift=0.75`
+- **Waterball**: `base_damage=12`, `mana_cost=12`, `cooldown=0.7`, `hue_shift=0.5` (cyan)
+- **Earthball**: `base_damage=20`, `mana_cost=15`, `cooldown=0.9`, `hue_shift=0.3` (green)
+- **Airball**: `base_damage=10`, `mana_cost=8`, `cooldown=0.4`, `hue_shift=0.55` (light blue)
 
-### Hue Shift Colors
-- **Fire**: 0.0 (red)
-- **Water**: 0.55 (cyan)
-- **Earth**: 0.3 (brown/green)
-- **Air**: 0.75 (light blue)
+### Element Colors
+- **Fire**: Red (RGB: 1.0, 0.2, 0.2)
+- **Water**: Cyan (HSV: 0.5, 1.0, 1.0)
+- **Earth**: Green (HSV: 0.3, 1.0, 1.0)
+- **Air**: Light Blue (HSV: 0.55, 1.0, 1.0)
 
 ### Damage Formula
 ```
@@ -168,8 +205,9 @@ final_damage = base_damage + (PlayerStats.get_total_int() * 2) + ((element_level
 
 ### XP Gain Formula
 ```
-xp_gained = max(1, final_damage / 2)
+xp_gained = max(1, int(final_damage / 2.0))
 ```
+Note: Uses float division then casts to int to avoid integer division warnings.
 
 ---
 
@@ -180,23 +218,26 @@ xp_gained = max(1, final_damage / 2)
 - Multi-element spell system (fire, water, earth, air)
 - Spell selection via number keys
 - Visual selection highlighting
-- Hue-shifted icons and projectiles
+- Element-specific icons, projectiles, and impacts
 - Element-specific XP and leveling
 - Dynamic damage calculation
 - SpellSystem autoload singleton
+- Projectile cleanup system (pooling + queue_free)
+- Scene directory reorganization
 
 ### ⚠️ Known Issues / Incomplete
-- **Cooldown overlay**: Implemented but not fully connected to player cooldown system
-- **Spell bar positioning**: May need adjustment based on screen size
 - **Default spells**: Currently hardcoded in `player.gd` `_ready()`
 - **Spell unlocking**: No system for unlocking new spells yet
 - **Spell bar visibility**: Always visible (no toggle)
 
 ### 🔧 Recent Fixes
-- Fixed `theme_override_styles` access (use `get_theme_stylebox()` / `add_theme_stylebox_override()`)
-- Added `class_name SpellSlot` for type recognition
-- Fixed duplicate variable declaration in `_start_fireball_cast()`
-- Set spell bar z-index to layer 19 (below inventory)
+- Fixed race condition in spell bar initialization (pending spells queue)
+- Fixed integer division warnings (use float division then cast)
+- Fixed variable shadowing warning in `base_enemy.gd`
+- Fixed UI size override warnings (use `set_deferred()`)
+- Organized scenes directory into logical subdirectories
+- Removed unused script files and directories
+- Created stub classes for ItemData, EquipmentData, MerchantData
 
 ---
 
@@ -204,35 +245,40 @@ xp_gained = max(1, final_damage / 2)
 
 ### Design Decisions
 1. **Element-based progression**: Each element levels independently (not a general "magic" skill)
-2. **Hue shifting**: Reuses same assets with color modulation for different elements
+2. **Element-specific assets**: Each element has its own projectile scene, impact scene, and icon (no longer hue-shifted)
 3. **10-slot hotbar**: Matches standard RPG conventions (1-9, 0)
 4. **CanvasLayer separation**: Spell bar is separate from HUD for proper z-ordering
+5. **Projectile pooling**: Only fire projectiles use the pool (others instantiate directly)
 
 ### Code Patterns
 - **Worker pattern**: Player coordinator delegates to workers (spell_spawner, etc.)
 - **Signal-based communication**: Spell bar emits `spell_selected`, player connects
 - **Resource-based data**: Spells defined as `.tres` resources for easy editing
 - **Autoload singletons**: SpellSystem, PlayerStats, EventBus, InventorySystem
+- **Scene organization**: Logical subdirectories (projectiles/, effects/, characters/, etc.)
 
 ### Asset Requirements
-- **Spell icons**: `assets/animations/UI/spell_hotbar_icons/spell_ball_blast/spell_icon_lvl_1(blue).png`
-- **Projectile animations**: Reuses fireball animation with hue shift
-- **Impact effects**: Reuses impact animation with hue shift
+- **Spell icons**: Element-specific files in `assets/animations/UI/spell_hotbar_icons/spell_ball_blast/`
+  - `spell_icon_lvl_1(red).png` (fire)
+  - `spell_icon_lvl_1(cyan).png` (water)
+  - `spell_icon_lvl_1(green).png` (earth)
+  - `spell_icon_lvl_1(lightblue).png` (air)
+- **Projectile scenes**: Element-specific scenes in `scenes/projectiles/`
+- **Impact scenes**: Element-specific scenes in `scenes/effects/`
 
 ---
 
 ## Next Steps / Future Work
 
 ### Immediate (if needed)
-1. Connect cooldown overlay to actual player cooldown timers
-2. Add spell bar toggle (show/hide)
-3. Test spell selection and casting thoroughly
+1. Spell unlocking system
+2. Spell bar toggle (show/hide)
+3. Spell tooltips/descriptions in UI
 
 ### Short-term
-1. Spell unlocking system
-2. Spell tooltips/descriptions in UI
-3. Spell level display in hotbar
-4. Multiple spell types per element
+1. Spell level display in hotbar
+2. Multiple spell types per element
+3. Cooldown visualization improvements
 
 ### Long-term
 1. Spell crafting/upgrading
@@ -248,12 +294,15 @@ xp_gained = max(1, final_damage / 2)
 - `scripts/systems/spell_system.gd` - Core spell progression logic
 - `scripts/ui/spell_bar.gd` - Hotbar UI controller
 - `scripts/player.gd` - Player spell selection and casting
-- `scripts/projectiles/fireball.gd` - Projectile with SpellData integration
+- `scripts/projectiles/spell_projectile.gd` - Generic projectile script
+- `scripts/workers/spell_spawner.gd` - Element-specific projectile spawning
 
 ### Resource Files
 - `resources/spells/*.tres` - Spell definitions
 - `scenes/ui/spell_bar.tscn` - Hotbar scene
 - `scenes/ui/spell_slot.tscn` - Slot scene
+- `scenes/projectiles/*.tscn` - Projectile scenes
+- `scenes/effects/*.tscn` - Impact effect scenes
 
 ### Configuration
 - `project.godot` - Input actions, autoloads
@@ -268,8 +317,9 @@ xp_gained = max(1, final_damage / 2)
 3. Spell casting with different elements
 4. XP gain on hit (check logs for `[SPELL_SYSTEM] ✨ Fire gained X XP`)
 5. Damage calculation (should increase with INT and level)
-6. Hue shift on icons and projectiles
+6. Element-specific icons, projectiles, and impacts
 7. Z-index ordering (spell bar above game, below inventory)
+8. Projectile cleanup (fire returns to pool, others are freed)
 
 ### Logging
 - SpellSystem logs all XP gains, level-ups, and damage calculations
@@ -282,10 +332,11 @@ xp_gained = max(1, final_damage / 2)
 
 ### Common Issues
 1. **Spell bar not appearing**: Check CanvasLayer layer and node path in player script
-2. **Icons not loading**: Verify asset path in `_load_spell_icon()`
-3. **No XP gain**: Check that `SpellSystem.gain_xp()` is called in `fireball.gd`
+2. **Icons not loading**: Verify asset path in `_load_spell_icon()` - check element-specific files exist
+3. **No XP gain**: Check that `SpellSystem.gain_xp()` is called in `spell_projectile.gd`
 4. **Wrong damage**: Verify INT stat and element level in SpellSystem
 5. **Selection not working**: Check signal connections in `_find_spell_bar()`
+6. **Projectiles not cleaning up**: Check element type - only fire uses pool
 
 ### Debug Commands
 - Check spell bar: `get_tree().current_scene.get_node("SpellBar")`
@@ -296,8 +347,9 @@ xp_gained = max(1, final_damage / 2)
 
 ## Commit History Context
 
-- **Commit 3C**: Spell Selection & Hotbar (current)
-- **Commit 3B**: Multi-Element Projectiles
+- **Latest**: Scene reorganization and compilation fixes
+- **Commit 3C**: Spell Selection & Hotbar (complete)
+- **Commit 3B**: Multi-Element Projectiles (element-specific assets)
 - **Commit 3A**: Spell System Foundation
 - Previous commits: Inventory, Equipment, UI systems
 
@@ -312,9 +364,10 @@ xp_gained = max(1, final_damage / 2)
 5. **Check logs** for debugging (comprehensive logging is in place)
 6. **Respect z-index layers**: HUD=10, SpellBar=19, Inventory=20
 7. **Element independence**: Each element levels separately
-8. **Hue shifting**: Reuse assets with color modulation
+8. **Asset organization**: Element-specific assets (not hue-shifted)
+9. **Scene organization**: Use logical subdirectories (projectiles/, effects/, etc.)
+10. **Race conditions**: Use pending queues if initialization order matters
 
 ---
 
 **End of Context File**
-
