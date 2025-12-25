@@ -44,15 +44,16 @@ func _ready() -> void:
 	InventorySystem.inventory_changed.connect(_refresh_slots)
 	InventorySystem.equipment_changed.connect(_refresh_equipment_slots)
 	
-	# Connect close button
-	close_button.pressed.connect(close)
+	# Connect close button (if it exists - main inventory UI still has close button)
+	if close_button != null:
+		close_button.pressed.connect(close)
 	
 	# Initial refresh (don't await in _ready, slots will be created immediately)
 	_log("Refreshing slots...")
 	_refresh_slots_immediate()
 	_refresh_equipment_slots_immediate()
 	
-	# Start hidden
+	# Start hidden (this is the full-screen modal inventory, sidebar inventory is separate)
 	if control != null:
 		control.visible = false
 		_log("Initialized (control.visible = false)")
@@ -60,30 +61,17 @@ func _ready() -> void:
 		_log("ERROR: control node is null!")
 
 
-func _input(event: InputEvent) -> void:
-	if event.is_action_pressed("open_inventory"):
-		_log("Input detected: open_inventory pressed")
-		var ui_visible: bool = control.visible if control != null else false
-		if ui_visible:
-			_log("Currently visible, closing...")
-			close()
-		else:
-			_log("Currently hidden, opening...")
-			open()
-	else:
-		# Debug: log other input events
-		if event is InputEventKey:
-			var key_event: InputEventKey = event as InputEventKey
-			if key_event.pressed and key_event.keycode == KEY_I:
-				_log("I key pressed but action not detected! Checking input map...")
-				if InputMap.has_action("open_inventory"):
-					_log("Action exists in InputMap")
-					if Input.is_action_pressed("open_inventory"):
-						_log("Action is pressed (via Input.is_action_pressed)")
-					else:
-						_log("Action NOT pressed (via Input.is_action_pressed)")
-				else:
-					_log("ERROR: open_inventory action does NOT exist in InputMap!")
+# Input handling removed - inventory is now always visible in sidebar
+# func _input(event: InputEvent) -> void:
+# 	if event.is_action_pressed("open_inventory"):
+# 		_log("Input detected: open_inventory pressed")
+# 		var ui_visible: bool = control.visible if control != null else false
+# 		if ui_visible:
+# 			_log("Currently visible, closing...")
+# 			close()
+# 		else:
+# 			_log("Currently hidden, opening...")
+# 			open()
 
 
 func open() -> void:

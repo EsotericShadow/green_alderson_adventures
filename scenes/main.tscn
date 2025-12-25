@@ -7,6 +7,8 @@
 [ext_resource type="PackedScene" uid="uid://b8k2x3m4n5p6q" path="res://scenes/ui/hud.tscn" id="3_hud"]
 [ext_resource type="PackedScene" path="res://scenes/ui/inventory_ui.tscn" id="4_inventory"]
 [ext_resource type="PackedScene" path="res://scenes/ui/spell_bar.tscn" id="5_spellbar"]
+[ext_resource type="PackedScene" uid="uid://player_panel_001" path="res://scenes/ui/player_panel.tscn" id="6_player_panel"]
+[ext_resource type="PackedScene" path="res://scenes/ui/tool_belt.tscn" id="7_tool_belt"]
 
 [node name="Node2D" type="Node2D"]
 
@@ -60,4 +62,8 @@ position = Vector2(0, 2)
 
 [node name="SpellBar" parent="." instance=ExtResource("5_spellbar")]
 
+[node name="ToolBelt" parent="." instance=ExtResource("7_tool_belt")]
+
 [node name="InventoryUI" parent="." instance=ExtResource("4_inventory")]
+
+[node name="PlayerPanel" parent="." instance=ExtResource("6_player_panel")]

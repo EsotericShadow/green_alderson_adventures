@@ -1,0 +1,671 @@
+[gd_scene load_steps=11 format=3 uid="uid://player_panel_001"]
+
+[ext_resource type="Script" path="res://scripts/ui/player_panel.gd" id="1_player_panel"]
+[ext_resource type="Script" path="res://scripts/ui/inventory_tab.gd" id="2_inventory_tab"]
+[ext_resource type="Script" path="res://scripts/ui/equipment_tab.gd" id="3_equipment_tab"]
+[ext_resource type="Script" path="res://scripts/ui/stats_tab.gd" id="4_stats_tab"]
+[ext_resource type="Script" path="res://scripts/ui/base_stat_row.gd" id="5_base_stat_row"]
+[ext_resource type="Script" path="res://scripts/ui/element_stat_row.gd" id="6_element_stat_row"]
+[ext_resource type="Texture2D" path="res://assets/ui/icons/skills/Hats_Wizard_Mage_Magician_Sorcerer.png" id="7_wizard_hat"]
+[ext_resource type="Texture2D" path="res://skill_icons/skills.png" id="8_skills_icon"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_panel_bg"]
+bg_color = Color(0.15, 0.15, 0.15, 0.95)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.5, 0.4, 0.3, 1)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[node name="PlayerPanel" type="CanvasLayer"]
+layer = 15
+visible = true
+script = ExtResource("1_player_panel")
+
+[node name="Control" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 2
+anchor_left = 1.0
+anchor_top = 0.0
+anchor_right = 1.0
+anchor_bottom = 0.0
+offset_left = -250.0
+offset_top = 10.0
+offset_right = -10.0
+offset_bottom = 520.0
+grow_horizontal = 0
+grow_vertical = 2
+
+[node name="PanelContainer" type="PanelContainer" parent="Control"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_panel_bg")
+
+[node name="MarginContainer" type="MarginContainer" parent="Control/PanelContainer"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 6
+theme_override_constants/margin_top = 6
+theme_override_constants/margin_right = 6
+theme_override_constants/margin_bottom = 6
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Control/PanelContainer/MarginContainer"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="TabBar" type="HBoxContainer" parent="Control/PanelContainer/MarginContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 0
+theme_override_constants/separation = 2
+
+[node name="InventoryTab" type="Button" parent="Control/PanelContainer/MarginContainer/VBoxContainer/TabBar"]
+layout_mode = 2
+theme_override_constants/margin_left = 2
+theme_override_constants/margin_right = 2
+custom_minimum_size = Vector2(0, 24)
+theme_override_font_sizes/font_size = 11
+text = "Inventory"
+flat = true
+
+[node name="EquipmentTab" type="Button" parent="Control/PanelContainer/MarginContainer/VBoxContainer/TabBar"]
+layout_mode = 2
+theme_override_constants/margin_left = 2
+theme_override_constants/margin_right = 2
+custom_minimum_size = Vector2(0, 24)
+theme_override_font_sizes/font_size = 11
+text = "Equipment"
+flat = true
+
+[node name="SpellsTab" type="Button" parent="Control/PanelContainer/MarginContainer/VBoxContainer/TabBar"]
+layout_mode = 2
+theme_override_constants/margin_left = 2
+theme_override_constants/margin_right = 2
+custom_minimum_size = Vector2(0, 24)
+theme_override_font_sizes/font_size = 11
+text = "Spells"
+flat = true
+
+[node name="StatsTab" type="Button" parent="Control/PanelContainer/MarginContainer/VBoxContainer/TabBar"]
+layout_mode = 2
+theme_override_constants/margin_left = 2
+theme_override_constants/margin_right = 2
+custom_minimum_size = Vector2(0, 24)
+theme_override_font_sizes/font_size = 11
+text = "Stats"
+flat = true
+
+[node name="SettingsTab" type="Button" parent="Control/PanelContainer/MarginContainer/VBoxContainer/TabBar"]
+layout_mode = 2
+theme_override_constants/margin_left = 2
+theme_override_constants/margin_right = 2
+custom_minimum_size = Vector2(0, 24)
+theme_override_font_sizes/font_size = 11
+text = "Settings"
+flat = true
+
+[node name="TabContent" type="Control" parent="Control/PanelContainer/MarginContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="InventoryPanel" type="Control" parent="Control/PanelContainer/MarginContainer/VBoxContainer/TabContent"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+visible = true
+script = ExtResource("2_inventory_tab")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Control/PanelContainer/MarginContainer/VBoxContainer/TabContent/InventoryPanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 6
+
+[node name="Label" type="Label" parent="Control/PanelContainer/MarginContainer/VBoxContainer/TabContent/InventoryPanel/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 0
+theme_override_font_sizes/font_size = 11
+text = "Inventory"
+horizontal_alignment = 1
+
+[node name="GridContainer" type="GridContainer" parent="Control/PanelContainer/MarginContainer/VBoxContainer/TabContent/InventoryPanel/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+columns = 4
+theme_override_constants/h_separation = 4
+theme_override_constants/v_separation = 4
+
+[node name="EquipmentPanel" type="Control" parent="Control/PanelContainer/MarginContainer/VBoxContainer/TabContent"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+visible = false
+script = ExtResource("3_equipment_tab")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Control/PanelContainer/MarginContainer/VBoxContainer/TabContent/EquipmentPanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 6
+
+[node name="Label" type="Label" parent="Control/PanelContainer/MarginContainer/VBoxContainer/TabContent/EquipmentPanel/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 0
+theme_override_font_sizes/font_size = 11
+text = "Equipment"
+horizontal_alignment = 1
+
+[node name="EquipContainer" type="VBoxContainer" parent="Control/PanelContainer/MarginContainer/VBoxContainer/TabContent/EquipmentPanel/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 4
+
+[node name="StatsPanel" type="Control" parent="Control/PanelContainer/MarginContainer/VBoxContainer/TabContent"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+visible = false
+script = ExtResource("4_stats_tab")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Control/PanelContainer/MarginContainer/VBoxContainer/TabContent/StatsPanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 8
+
+[node name="BaseStatsSection" type="VBoxContainer" parent="Control/PanelContainer/MarginContainer/VBoxContainer/TabContent/StatsPanel/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 0
+theme_override_constants/separation = 3
+
+[node name="Header" type="HBoxContainer" parent="Control/PanelContainer/MarginContainer/VBoxContainer/TabContent/StatsPanel/VBoxContainer/BaseStatsSection"]
+layout_mode = 2
+size_flags_vertical = 0
+theme_override_constants/separation = 4
+alignment = 1
+
+[node name="SkillsIcon" type="TextureRect" parent="Control/PanelContainer/MarginContainer/VBoxContainer/TabContent/StatsPanel/VBoxContainer/BaseStatsSection/Header"]
+layout_mode = 2
+size_flags_horizontal = 0
+custom_minimum_size = Vector2(20, 20)
+expand_mode = 0
+stretch_mode = 5
+texture = ExtResource("8_skills_icon")
+texture_filter = 0
+
+[node name="Label" type="Label" parent="Control/PanelContainer/MarginContainer/VBoxContainer/TabContent/StatsPanel/VBoxContainer/BaseStatsSection/Header"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 11
+text = "Base Stats"
+horizontal_alignment = 1
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Control/PanelContainer/MarginContainer/VBoxContainer/TabContent/StatsPanel/VBoxContainer/BaseStatsSection"]
+layout_mode = 2
+size_flags_vertical = 0
+theme_override_constants/separation = 2
+
+[node name="StrRow" type="Control" parent="Control/PanelContainer/MarginContainer/VBoxContainer/TabContent/StatsPanel/VBoxContainer/BaseStatsSection/VBoxContainer"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 30)
+script = ExtResource("5_base_stat_row")
+
+[node name="HBoxContainer" type="HBoxContainer" parent="Control/PanelContainer/MarginContainer/VBoxContainer/TabContent/StatsPanel/VBoxContainer/BaseStatsSection/VBoxContainer/StrRow"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 4
+
+[node name="Icon" type="TextureRect" parent="Control/PanelContainer/MarginContainer/VBoxContainer/TabContent/StatsPanel/VBoxContainer/BaseStatsSection/VBoxContainer/StrRow/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 0
+custom_minimum_size = Vector2(24, 24)
+expand_mode = 0
+stretch_mode = 5
+texture_filter = 0
+
+[node name="NameLabel" type="Label" parent="Control/PanelContainer/MarginContainer/VBoxContainer/TabContent/StatsPanel/VBoxContainer/BaseStatsSection/VBoxContainer/StrRow/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 11
+text = "STR"
+
+[node name="ValueLabel" type="Label" parent="Control/PanelContainer/MarginContainer/VBoxContainer/TabContent/StatsPanel/VBoxContainer/BaseStatsSection/VBoxContainer/StrRow/HBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 11
+text = "5"
+horizontal_alignment = 2
+
+[node name="DexRow" type="Control" parent="Control/PanelContainer/MarginContainer/VBoxContainer/TabContent/StatsPanel/VBoxContainer/BaseStatsSection/VBoxContainer"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 28)
+script = ExtResource("5_base_stat_row")
+
+[node name="HBoxContainer" type="HBoxContainer" parent="Control/PanelContainer/MarginContainer/VBoxContainer/TabContent/StatsPanel/VBoxContainer/BaseStatsSection/VBoxContainer/DexRow"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 4
+
+[node name="Icon" type="TextureRect" parent="Control/PanelContainer/MarginContainer/VBoxContainer/TabContent/StatsPanel/VBoxContainer/BaseStatsSection/VBoxContainer/DexRow/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 0
+custom_minimum_size = Vector2(24, 24)
+expand_mode = 0
+stretch_mode = 5
+texture_filter = 0
+
+[node name="NameLabel" type="Label" parent="Control/PanelContainer/MarginContainer/VBoxContainer/TabContent/StatsPanel/VBoxContainer/BaseStatsSection/VBoxContainer/DexRow/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 11
+text = "DEX"
+
+[node name="ValueLabel" type="Label" parent="Control/PanelContainer/MarginContainer/VBoxContainer/TabContent/StatsPanel/VBoxContainer/BaseStatsSection/VBoxContainer/DexRow/HBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 11
+text = "5"
+horizontal_alignment = 2
+
+[node name="IntRow" type="Control" parent="Control/PanelContainer/MarginContainer/VBoxContainer/TabContent/StatsPanel/VBoxContainer/BaseStatsSection/VBoxContainer"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 28)
+script = ExtResource("5_base_stat_row")
+
+[node name="HBoxContainer" type="HBoxContainer" parent="Control/PanelContainer/MarginContainer/VBoxContainer/TabContent/StatsPanel/VBoxContainer/BaseStatsSection/VBoxContainer/IntRow"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 4
+
+[node name="Icon" type="TextureRect" parent="Control/PanelContainer/MarginContainer/VBoxContainer/TabContent/StatsPanel/VBoxContainer/BaseStatsSection/VBoxContainer/IntRow/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 0
+custom_minimum_size = Vector2(24, 24)
+expand_mode = 0
+stretch_mode = 5
+texture_filter = 0
+
+[node name="NameLabel" type="Label" parent="Control/PanelContainer/MarginContainer/VBoxContainer/TabContent/StatsPanel/VBoxContainer/BaseStatsSection/VBoxContainer/IntRow/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 11
+text = "INT"
+
+[node name="ValueLabel" type="Label" parent="Control/PanelContainer/MarginContainer/VBoxContainer/TabContent/StatsPanel/VBoxContainer/BaseStatsSection/VBoxContainer/IntRow/HBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 11
+text = "5"
+horizontal_alignment = 2
+
+[node name="VitRow" type="Control" parent="Control/PanelContainer/MarginContainer/VBoxContainer/TabContent/StatsPanel/VBoxContainer/BaseStatsSection/VBoxContainer"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 28)
+script = ExtResource("5_base_stat_row")
+
+[node name="HBoxContainer" type="HBoxContainer" parent="Control/PanelContainer/MarginContainer/VBoxContainer/TabContent/StatsPanel/VBoxContainer/BaseStatsSection/VBoxContainer/VitRow"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 4
+
+[node name="Icon" type="TextureRect" parent="Control/PanelContainer/MarginContainer/VBoxContainer/TabContent/StatsPanel/VBoxContainer/BaseStatsSection/VBoxContainer/VitRow/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 0
+custom_minimum_size = Vector2(24, 24)
+expand_mode = 0
+stretch_mode = 5
+texture_filter = 0
+
+[node name="NameLabel" type="Label" parent="Control/PanelContainer/MarginContainer/VBoxContainer/TabContent/StatsPanel/VBoxContainer/BaseStatsSection/VBoxContainer/VitRow/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 11
+text = "VIT"
+
+[node name="ValueLabel" type="Label" parent="Control/PanelContainer/MarginContainer/VBoxContainer/TabContent/StatsPanel/VBoxContainer/BaseStatsSection/VBoxContainer/VitRow/HBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 11
+text = "5"
+horizontal_alignment = 2
+
+[node name="MagicSkillsSection" type="VBoxContainer" parent="Control/PanelContainer/MarginContainer/VBoxContainer/TabContent/StatsPanel/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 11
+
+[node name="Header" type="HBoxContainer" parent="Control/PanelContainer/MarginContainer/VBoxContainer/TabContent/StatsPanel/VBoxContainer/MagicSkillsSection"]
+layout_mode = 2
+size_flags_vertical = 0
+theme_override_constants/separation = 4
+alignment = 1
+
+[node name="WizardHatIcon" type="TextureRect" parent="Control/PanelContainer/MarginContainer/VBoxContainer/TabContent/StatsPanel/VBoxContainer/MagicSkillsSection/Header"]
+layout_mode = 2
+size_flags_horizontal = 0
+custom_minimum_size = Vector2(20, 20)
+expand_mode = 0
+stretch_mode = 5
+texture = ExtResource("7_wizard_hat")
+texture_filter = 0
+
+[node name="Label" type="Label" parent="Control/PanelContainer/MarginContainer/VBoxContainer/TabContent/StatsPanel/VBoxContainer/MagicSkillsSection/Header"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 11
+text = "Magic Skills"
+horizontal_alignment = 1
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Control/PanelContainer/MarginContainer/VBoxContainer/TabContent/StatsPanel/VBoxContainer/MagicSkillsSection"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 22
+
+[node name="FireRow" type="Control" parent="Control/PanelContainer/MarginContainer/VBoxContainer/TabContent/StatsPanel/VBoxContainer/MagicSkillsSection/VBoxContainer"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 48)
+script = ExtResource("6_element_stat_row")
+
+[node name="HBoxContainer" type="HBoxContainer" parent="Control/PanelContainer/MarginContainer/VBoxContainer/TabContent/StatsPanel/VBoxContainer/MagicSkillsSection/VBoxContainer/FireRow"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 8
+
+[node name="Icon" type="TextureRect" parent="Control/PanelContainer/MarginContainer/VBoxContainer/TabContent/StatsPanel/VBoxContainer/MagicSkillsSection/VBoxContainer/FireRow/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 0
+custom_minimum_size = Vector2(28, 28)
+expand_mode = 0
+stretch_mode = 5
+texture_filter = 0
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Control/PanelContainer/MarginContainer/VBoxContainer/TabContent/StatsPanel/VBoxContainer/MagicSkillsSection/VBoxContainer/FireRow/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 3
+
+[node name="NameLabel" type="Label" parent="Control/PanelContainer/MarginContainer/VBoxContainer/TabContent/StatsPanel/VBoxContainer/MagicSkillsSection/VBoxContainer/FireRow/HBoxContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 0
+custom_minimum_size = Vector2(0, 14)
+theme_override_font_sizes/font_size = 11
+text = "Fire"
+
+[node name="LevelLabel" type="Label" parent="Control/PanelContainer/MarginContainer/VBoxContainer/TabContent/StatsPanel/VBoxContainer/MagicSkillsSection/VBoxContainer/FireRow/HBoxContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 0
+custom_minimum_size = Vector2(0, 12)
+theme_override_font_sizes/font_size = 11
+text = "Lv. 1"
+
+[node name="XPBar" type="ProgressBar" parent="Control/PanelContainer/MarginContainer/VBoxContainer/TabContent/StatsPanel/VBoxContainer/MagicSkillsSection/VBoxContainer/FireRow/HBoxContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 0
+custom_minimum_size = Vector2(0, 10)
+max_value = 100.0
+show_percentage = false
+
+[node name="XPLabel" type="Label" parent="Control/PanelContainer/MarginContainer/VBoxContainer/TabContent/StatsPanel/VBoxContainer/MagicSkillsSection/VBoxContainer/FireRow/HBoxContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 11
+text = "0 / 100"
+
+[node name="WaterRow" type="Control" parent="Control/PanelContainer/MarginContainer/VBoxContainer/TabContent/StatsPanel/VBoxContainer/MagicSkillsSection/VBoxContainer"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 48)
+script = ExtResource("6_element_stat_row")
+
+[node name="HBoxContainer" type="HBoxContainer" parent="Control/PanelContainer/MarginContainer/VBoxContainer/TabContent/StatsPanel/VBoxContainer/MagicSkillsSection/VBoxContainer/WaterRow"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 8
+
+[node name="Icon" type="TextureRect" parent="Control/PanelContainer/MarginContainer/VBoxContainer/TabContent/StatsPanel/VBoxContainer/MagicSkillsSection/VBoxContainer/WaterRow/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 0
+custom_minimum_size = Vector2(24, 24)
+expand_mode = 0
+stretch_mode = 5
+texture_filter = 0
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Control/PanelContainer/MarginContainer/VBoxContainer/TabContent/StatsPanel/VBoxContainer/MagicSkillsSection/VBoxContainer/WaterRow/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 3
+
+[node name="NameLabel" type="Label" parent="Control/PanelContainer/MarginContainer/VBoxContainer/TabContent/StatsPanel/VBoxContainer/MagicSkillsSection/VBoxContainer/WaterRow/HBoxContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 0
+custom_minimum_size = Vector2(0, 14)
+theme_override_font_sizes/font_size = 11
+text = "Water"
+
+[node name="LevelLabel" type="Label" parent="Control/PanelContainer/MarginContainer/VBoxContainer/TabContent/StatsPanel/VBoxContainer/MagicSkillsSection/VBoxContainer/WaterRow/HBoxContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 0
+custom_minimum_size = Vector2(0, 12)
+theme_override_font_sizes/font_size = 11
+text = "Lv. 1"
+
+[node name="XPBar" type="ProgressBar" parent="Control/PanelContainer/MarginContainer/VBoxContainer/TabContent/StatsPanel/VBoxContainer/MagicSkillsSection/VBoxContainer/WaterRow/HBoxContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 0
+custom_minimum_size = Vector2(0, 10)
+max_value = 100.0
+show_percentage = false
+
+[node name="XPLabel" type="Label" parent="Control/PanelContainer/MarginContainer/VBoxContainer/TabContent/StatsPanel/VBoxContainer/MagicSkillsSection/VBoxContainer/WaterRow/HBoxContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 0
+custom_minimum_size = Vector2(0, 11)
+text = "0 / 100"
+theme_override_font_sizes/font_size = 11
+
+[node name="EarthRow" type="Control" parent="Control/PanelContainer/MarginContainer/VBoxContainer/TabContent/StatsPanel/VBoxContainer/MagicSkillsSection/VBoxContainer"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 48)
+script = ExtResource("6_element_stat_row")
+
+[node name="HBoxContainer" type="HBoxContainer" parent="Control/PanelContainer/MarginContainer/VBoxContainer/TabContent/StatsPanel/VBoxContainer/MagicSkillsSection/VBoxContainer/EarthRow"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 8
+
+[node name="Icon" type="TextureRect" parent="Control/PanelContainer/MarginContainer/VBoxContainer/TabContent/StatsPanel/VBoxContainer/MagicSkillsSection/VBoxContainer/EarthRow/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 0
+custom_minimum_size = Vector2(24, 24)
+expand_mode = 0
+stretch_mode = 5
+texture_filter = 0
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Control/PanelContainer/MarginContainer/VBoxContainer/TabContent/StatsPanel/VBoxContainer/MagicSkillsSection/VBoxContainer/EarthRow/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 3
+
+[node name="NameLabel" type="Label" parent="Control/PanelContainer/MarginContainer/VBoxContainer/TabContent/StatsPanel/VBoxContainer/MagicSkillsSection/VBoxContainer/EarthRow/HBoxContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 0
+custom_minimum_size = Vector2(0, 14)
+theme_override_font_sizes/font_size = 11
+text = "Earth"
+
+[node name="LevelLabel" type="Label" parent="Control/PanelContainer/MarginContainer/VBoxContainer/TabContent/StatsPanel/VBoxContainer/MagicSkillsSection/VBoxContainer/EarthRow/HBoxContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 0
+custom_minimum_size = Vector2(0, 12)
+theme_override_font_sizes/font_size = 11
+text = "Lv. 1"
+
+[node name="XPBar" type="ProgressBar" parent="Control/PanelContainer/MarginContainer/VBoxContainer/TabContent/StatsPanel/VBoxContainer/MagicSkillsSection/VBoxContainer/EarthRow/HBoxContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 0
+custom_minimum_size = Vector2(0, 10)
+max_value = 100.0
+show_percentage = false
+
+[node name="XPLabel" type="Label" parent="Control/PanelContainer/MarginContainer/VBoxContainer/TabContent/StatsPanel/VBoxContainer/MagicSkillsSection/VBoxContainer/EarthRow/HBoxContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 0
+custom_minimum_size = Vector2(0, 11)
+text = "0 / 100"
+theme_override_font_sizes/font_size = 11
+
+[node name="AirRow" type="Control" parent="Control/PanelContainer/MarginContainer/VBoxContainer/TabContent/StatsPanel/VBoxContainer/MagicSkillsSection/VBoxContainer"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 48)
+script = ExtResource("6_element_stat_row")
+
+[node name="HBoxContainer" type="HBoxContainer" parent="Control/PanelContainer/MarginContainer/VBoxContainer/TabContent/StatsPanel/VBoxContainer/MagicSkillsSection/VBoxContainer/AirRow"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 8
+
+[node name="Icon" type="TextureRect" parent="Control/PanelContainer/MarginContainer/VBoxContainer/TabContent/StatsPanel/VBoxContainer/MagicSkillsSection/VBoxContainer/AirRow/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 0
+custom_minimum_size = Vector2(24, 24)
+expand_mode = 0
+stretch_mode = 5
+texture_filter = 0
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Control/PanelContainer/MarginContainer/VBoxContainer/TabContent/StatsPanel/VBoxContainer/MagicSkillsSection/VBoxContainer/AirRow/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 3
+
+[node name="NameLabel" type="Label" parent="Control/PanelContainer/MarginContainer/VBoxContainer/TabContent/StatsPanel/VBoxContainer/MagicSkillsSection/VBoxContainer/AirRow/HBoxContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 0
+custom_minimum_size = Vector2(0, 14)
+theme_override_font_sizes/font_size = 11
+text = "Air"
+
+[node name="LevelLabel" type="Label" parent="Control/PanelContainer/MarginContainer/VBoxContainer/TabContent/StatsPanel/VBoxContainer/MagicSkillsSection/VBoxContainer/AirRow/HBoxContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 0
+custom_minimum_size = Vector2(0, 12)
+theme_override_font_sizes/font_size = 11
+text = "Lv. 1"
+
+[node name="XPBar" type="ProgressBar" parent="Control/PanelContainer/MarginContainer/VBoxContainer/TabContent/StatsPanel/VBoxContainer/MagicSkillsSection/VBoxContainer/AirRow/HBoxContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 0
+custom_minimum_size = Vector2(0, 10)
+max_value = 100.0
+show_percentage = false
+
+[node name="XPLabel" type="Label" parent="Control/PanelContainer/MarginContainer/VBoxContainer/TabContent/StatsPanel/VBoxContainer/MagicSkillsSection/VBoxContainer/AirRow/HBoxContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 0
+custom_minimum_size = Vector2(0, 11)
+text = "0 / 100"
+theme_override_font_sizes/font_size = 11
+
+[node name="SpellsPanel" type="Control" parent="Control/PanelContainer/MarginContainer/VBoxContainer/TabContent"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+visible = false
+
+[node name="Label" type="Label" parent="Control/PanelContainer/MarginContainer/VBoxContainer/TabContent/SpellsPanel"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -40.0
+offset_top = -10.0
+offset_right = 40.0
+offset_bottom = 10.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "Spell Hotbar\n(Coming Soon)"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="SettingsPanel" type="Control" parent="Control/PanelContainer/MarginContainer/VBoxContainer/TabContent"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+visible = false
+
+[node name="Label" type="Label" parent="Control/PanelContainer/MarginContainer/VBoxContainer/TabContent/SettingsPanel"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -50.0
+offset_top = -10.0
+offset_right = 50.0
+offset_bottom = 10.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "Settings\n(Coming Soon)"
+horizontal_alignment = 1
+vertical_alignment = 1

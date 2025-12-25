@@ -24,10 +24,9 @@ var equipment: Dictionary = {
 	"gloves": null,
 	"boots": null,
 	"weapon": null,
-	"shield": null,
+	"book": null,  # Off-hand spellbook (replaces shield)
 	"ring1": null,
 	"ring2": null,
-	"book": null,  # Off-hand spellbook
 	"legs": null,  # Leg armor
 	"amulet": null  # Necklace/amulet
 }

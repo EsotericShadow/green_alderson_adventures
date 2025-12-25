@@ -1,0 +1,79 @@
+[gd_scene load_steps=3 format=3 uid="uid://quick_belt_slot_001"]
+
+[ext_resource type="Script" path="res://scripts/ui/quick_belt_slot.gd" id="1_slot_script"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_slot_bg"]
+bg_color = Color(0.2, 0.2, 0.2, 0.7)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.4, 0.3, 0.25, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[node name="QuickBeltSlot" type="PanelContainer"]
+custom_minimum_size = Vector2(32, 32)
+theme_override_styles/panel = SubResource("StyleBoxFlat_slot_bg")
+script = ExtResource("1_slot_script")
+mouse_filter = 0
+
+[node name="MarginContainer" type="MarginContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 2
+theme_override_constants/margin_top = 2
+theme_override_constants/margin_right = 2
+theme_override_constants/margin_bottom = 2
+
+[node name="Icon" type="TextureRect" parent="MarginContainer"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+expand_mode = 1
+stretch_mode = 5
+visible = false
+
+[node name="CountLabel" type="Label" parent="MarginContainer"]
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -18.0
+offset_top = -14.0
+offset_right = -2.0
+offset_bottom = -2.0
+grow_horizontal = 0
+grow_vertical = 0
+theme_override_font_sizes/font_size = 10
+text = "99"
+horizontal_alignment = 2
+vertical_alignment = 2
+visible = false
+
+[node name="KeyLabel" type="Label" parent="MarginContainer"]
+layout_mode = 1
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 2.0
+offset_top = -14.0
+offset_right = 18.0
+offset_bottom = -2.0
+grow_vertical = 0
+theme_override_font_sizes/font_size = 10
+text = "F1"
+horizontal_alignment = 1
+vertical_alignment = 1
+
