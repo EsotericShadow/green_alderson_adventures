@@ -10,20 +10,19 @@ class_name SpellSpawner
 var owner_node: Node2D = null
 var pool: Node = null  # ProjectilePool reference
 
-var _log_prefix := "[SpellSpawner] "
+var _logger: GameLogger.GameLoggerInstance
 
 
 func _log(msg: String) -> void:
-	print(_log_prefix + msg)
+	_logger.log(msg)
 
 
 func _log_error(msg: String) -> void:
-	push_error(_log_prefix + "ERROR: " + msg)
-	print(_log_prefix + "❌ ERROR: " + msg)
+	_logger.log_error(msg)
 
 
 func _ready() -> void:
-	_log_prefix = "[" + get_parent().name + "/SpellSpawner] "
+	_logger = GameLogger.create("[" + get_parent().name + "/SpellSpawner] ")
 	owner_node = get_parent() as Node2D
 	_find_pool()
 	
@@ -105,7 +104,7 @@ func spawn_fireball(direction: String, spawn_pos: Vector2, z_index_value: int, s
 	
 	fb.global_position = spawn_pos
 	
-	var dir_vec := _dir_to_vector(direction)
+	var dir_vec := DirectionUtils.dir_to_vector(direction)
 	_log("   Direction vector: " + str(dir_vec))
 	
 	if fb.has_method("setup"):
@@ -121,15 +120,4 @@ func spawn_fireball(direction: String, spawn_pos: Vector2, z_index_value: int, s
 	return fb
 
 
-func _dir_to_vector(d: String) -> Vector2:
-	match d:
-		"right": return Vector2.RIGHT
-		"left": return Vector2.LEFT
-		"up": return Vector2.UP
-		"down": return Vector2.DOWN
-		"ne": return Vector2(1, -1).normalized()
-		"nw": return Vector2(-1, -1).normalized()
-		"se": return Vector2(1, 1).normalized()
-		"sw": return Vector2(-1, 1).normalized()
-		_: return Vector2.DOWN
 

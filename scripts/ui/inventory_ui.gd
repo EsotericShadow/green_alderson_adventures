@@ -2,7 +2,8 @@ extends CanvasLayer
 ## Inventory UI panel.
 ## Displays inventory grid and handles input toggling.
 
-const LOG_PREFIX := "[INVENTORY_UI] "
+# Logging
+var _logger = GameLogger.create("[InventoryUI] ")
 
 @onready var control: Control = $Control
 @onready var slot_grid: GridContainer = $Control/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/InventoryPanel/CenterContainer/GridContainer
@@ -13,34 +14,28 @@ const SLOT_SCENE: PackedScene = preload("res://scenes/ui/inventory_slot.tscn")
 const EQUIP_SLOT_SCENE: PackedScene = preload("res://scenes/ui/equip_slot.tscn")
 
 
-func _log(_msg: String) -> void:
-	# Debug logging disabled for production
-	# print(LOG_PREFIX + _msg)
-	pass
-
-
 func _ready() -> void:
-	_log("_ready() called")
+	_logger.log("_ready() called")
 	
 	# Check if nodes exist
 	if slot_grid == null:
-		_log("ERROR: slot_grid is null!")
+		_logger.log_error("slot_grid is null!")
 		return
 	if equip_container == null:
-		_log("ERROR: equip_container is null!")
+		_logger.log_error("equip_container is null!")
 		return
 	if close_button == null:
-		_log("ERROR: close_button is null!")
+		_logger.log_error("close_button is null!")
 		return
 	
-	_log("All nodes found")
+	_logger.log("All nodes found")
 	
 	# Connect to inventory system signals
 	if InventorySystem == null:
-		_log("ERROR: InventorySystem is null!")
+		_logger.log_error("InventorySystem is null!")
 		return
 	
-	_log("InventorySystem found, connecting signals...")
+	_logger.log("InventorySystem found, connecting signals...")
 	InventorySystem.inventory_changed.connect(_refresh_slots)
 	InventorySystem.equipment_changed.connect(_refresh_equipment_slots)
 	
@@ -49,16 +44,16 @@ func _ready() -> void:
 		close_button.pressed.connect(close)
 	
 	# Initial refresh (don't await in _ready, slots will be created immediately)
-	_log("Refreshing slots...")
+	_logger.log("Refreshing slots...")
 	_refresh_slots_immediate()
 	_refresh_equipment_slots_immediate()
 	
 	# Start hidden (this is the full-screen modal inventory, sidebar inventory is separate)
 	if control != null:
 		control.visible = false
-		_log("Initialized (control.visible = false)")
+		_logger.log("Initialized (control.visible = false)")
 	else:
-		_log("ERROR: control node is null!")
+		_logger.log_error("control node is null!")
 
 
 # Input handling removed - inventory is now always visible in sidebar
@@ -75,34 +70,34 @@ func _ready() -> void:
 
 
 func open() -> void:
-	_log("open() called")
+	_logger.log("open() called")
 	if control != null:
 		control.visible = true
-		_log("Set control.visible = true")
+		_logger.log("Set control.visible = true")
 	else:
-		_log("ERROR: control is null!")
+		_logger.log_error("control is null!")
 		return
 	_refresh_slots()
 	_refresh_equipment_slots()
 	if EventBus != null:
 		EventBus.inventory_opened.emit()
-		_log("Emitted inventory_opened signal")
+		_logger.log("Emitted inventory_opened signal")
 	else:
-		_log("WARNING: EventBus is null!")
+		_logger.log("WARNING: EventBus is null!")
 
 
 func close() -> void:
-	_log("close() called")
+	_logger.log("close() called")
 	if control != null:
 		control.visible = false
-		_log("Set control.visible = false")
+		_logger.log("Set control.visible = false")
 	else:
-		_log("ERROR: control is null!")
+		_logger.log_error("control is null!")
 	if EventBus != null:
 		EventBus.inventory_closed.emit()
-		_log("Emitted inventory_closed signal")
+		_logger.log("Emitted inventory_closed signal")
 	else:
-		_log("WARNING: EventBus is null!")
+		_logger.log("WARNING: EventBus is null!")
 
 
 func _refresh_slots() -> void:
@@ -110,18 +105,18 @@ func _refresh_slots() -> void:
 
 
 func _refresh_slots_async() -> void:
-	_log("_refresh_slots() called")
+	_logger.log("_refresh_slots() called")
 	
 	if slot_grid == null:
-		_log("ERROR: slot_grid is null in _refresh_slots!")
+		_logger.log_error("slot_grid is null in _refresh_slots!")
 		return
 	
 	if InventorySystem == null:
-		_log("ERROR: InventorySystem is null in _refresh_slots!")
+		_logger.log_error("InventorySystem is null in _refresh_slots!")
 		return
 	
 	var existing_count: int = slot_grid.get_child_count()
-	_log("Clearing existing slots (count: " + str(existing_count) + ")")
+	_logger.log("Clearing existing slots (count: " + str(existing_count) + ")")
 	# Clear existing slots immediately (remove_child is immediate, queue_free is deferred)
 	for child in slot_grid.get_children():
 		slot_grid.remove_child(child)
@@ -130,12 +125,12 @@ func _refresh_slots_async() -> void:
 	# Wait one frame to ensure nodes are fully removed
 	await get_tree().process_frame
 	
-	_log("Creating slots for capacity: " + str(InventorySystem.capacity))
+	_logger.log("Creating slots for capacity: " + str(InventorySystem.capacity))
 	# Create slots for current capacity
 	for i in range(InventorySystem.capacity):
 		var slot: PanelContainer = SLOT_SCENE.instantiate()
 		if slot == null:
-			_log("ERROR: Failed to instantiate slot at index " + str(i))
+			_logger.log_error("Failed to instantiate slot at index " + str(i))
 			continue
 		
 		# Add to scene tree first so @onready vars can be initialized
@@ -146,34 +141,34 @@ func _refresh_slots_async() -> void:
 		var slot_data: Dictionary = InventorySystem.get_slot(i)
 		slot.setup(i, slot_data["item"], slot_data["count"])
 	
-	_log("Created " + str(slot_grid.get_child_count()) + " slots")
+	_logger.log("Created " + str(slot_grid.get_child_count()) + " slots")
 
 
 func _refresh_slots_immediate() -> void:
 	# Non-async version for _ready() - doesn't await
-	_log("_refresh_slots_immediate() called")
+	_logger.log("_refresh_slots_immediate() called")
 	
 	if slot_grid == null:
-		_log("ERROR: slot_grid is null in _refresh_slots!")
+		_logger.log_error("slot_grid is null in _refresh_slots!")
 		return
 	
 	if InventorySystem == null:
-		_log("ERROR: InventorySystem is null in _refresh_slots!")
+		_logger.log_error("InventorySystem is null in _refresh_slots!")
 		return
 	
 	var existing_count: int = slot_grid.get_child_count()
-	_log("Clearing existing slots (count: " + str(existing_count) + ")")
+	_logger.log("Clearing existing slots (count: " + str(existing_count) + ")")
 	# Clear existing slots immediately
 	for child in slot_grid.get_children():
 		slot_grid.remove_child(child)
 		child.queue_free()
 	
-	_log("Creating slots for capacity: " + str(InventorySystem.capacity))
+	_logger.log("Creating slots for capacity: " + str(InventorySystem.capacity))
 	# Create slots for current capacity
 	for i in range(InventorySystem.capacity):
 		var slot: PanelContainer = SLOT_SCENE.instantiate()
 		if slot == null:
-			_log("ERROR: Failed to instantiate slot at index " + str(i))
+			_logger.log_error("Failed to instantiate slot at index " + str(i))
 			continue
 		
 		# Add to scene tree first so @onready vars can be initialized
@@ -184,7 +179,7 @@ func _refresh_slots_immediate() -> void:
 		var slot_data: Dictionary = InventorySystem.get_slot(i)
 		slot.setup(i, slot_data["item"], slot_data["count"])
 	
-	_log("Created " + str(slot_grid.get_child_count()) + " slots")
+	_logger.log("Created " + str(slot_grid.get_child_count()) + " slots")
 
 
 func _on_slot_clicked(slot_index: int) -> void:
@@ -246,11 +241,11 @@ func _refresh_equipment_slots_async() -> void:
 func _refresh_equipment_slots_immediate() -> void:
 	# Non-async version for _ready()
 	if equip_container == null:
-		_log("ERROR: equip_container is null in _refresh_equipment_slots_immediate!")
+		_logger.log_error("equip_container is null in _refresh_equipment_slots_immediate!")
 		return
 	
 	if InventorySystem == null:
-		_log("ERROR: InventorySystem is null in _refresh_equipment_slots_immediate!")
+		_logger.log_error("InventorySystem is null in _refresh_equipment_slots_immediate!")
 		return
 	
 	# Clear existing equipment slots from all rows

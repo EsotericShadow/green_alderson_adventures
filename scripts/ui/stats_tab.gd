@@ -4,8 +4,8 @@ extends Control
 const LOG_PREFIX := "[STATS_TAB] "
 
 # Base stat rows
-@onready var str_row: Control = $VBoxContainer/BaseStatsSection/VBoxContainer/StrRow
-@onready var dex_row: Control = $VBoxContainer/BaseStatsSection/VBoxContainer/DexRow
+@onready var resilience_row: Control = $VBoxContainer/BaseStatsSection/VBoxContainer/StrRow  # Node name unchanged for scene compatibility
+@onready var agility_row: Control = $VBoxContainer/BaseStatsSection/VBoxContainer/DexRow  # Node name unchanged for scene compatibility
 @onready var int_row: Control = $VBoxContainer/BaseStatsSection/VBoxContainer/IntRow
 @onready var vit_row: Control = $VBoxContainer/BaseStatsSection/VBoxContainer/VitRow
 
@@ -22,6 +22,11 @@ func _ready() -> void:
 	# Connect to stat change signals
 	if PlayerStats != null:
 		PlayerStats.stat_changed.connect(_on_stat_changed)
+	
+	# Connect to XP/leveling signals from BaseStatLeveling
+	if BaseStatLeveling != null:
+		BaseStatLeveling.base_stat_xp_gained.connect(_on_base_stat_xp_gained)
+		BaseStatLeveling.base_stat_leveled_up.connect(_on_base_stat_leveled_up)
 	
 	if SpellSystem != null:
 		SpellSystem.xp_gained.connect(_on_xp_gained)
@@ -40,23 +45,46 @@ func _update_base_stats() -> void:
 		return
 	
 	# Initialize stat rows with icons on first update
-	if str_row.has_method("setup") and not str_row.get("_initialized"):
-		str_row.setup("STR", "res://assets/ui/icons/skills/stat_str.png")
-	if dex_row.has_method("setup") and not dex_row.get("_initialized"):
-		dex_row.setup("DEX", "res://assets/ui/icons/skills/stat_dex.png")
+	if resilience_row.has_method("setup") and not resilience_row.get("_initialized"):
+		resilience_row.setup("Resilience", "res://assets/ui/icons/skills/stat_str.png")  # Using same icon for now
+	if agility_row.has_method("setup") and not agility_row.get("_initialized"):
+		agility_row.setup("Agility", "res://assets/ui/icons/skills/stat_dex.png")  # Using same icon for now
 	if int_row.has_method("setup") and not int_row.get("_initialized"):
 		int_row.setup("INT", "res://assets/ui/icons/skills/stat_int.png")
 	if vit_row.has_method("setup") and not vit_row.get("_initialized"):
 		vit_row.setup("VIT", "res://assets/ui/icons/skills/stat_vit.png")
 	
-	# Update base stat rows
-	if str_row.has_method("update_stat"):
-		str_row.update_stat("STR", PlayerStats.get_total_str())
-	if dex_row.has_method("update_stat"):
-		dex_row.update_stat("DEX", PlayerStats.get_total_dex())
-	if int_row.has_method("update_stat"):
+	# Update base stat rows with XP information
+	if resilience_row.has_method("update_stat_with_xp"):
+		var level: int = PlayerStats.base_resilience
+		var current_xp: int = PlayerStats.get_base_stat_xp("resilience")
+		var xp_needed: int = PlayerStats.get_base_stat_xp_for_next_level("resilience")
+		resilience_row.update_stat_with_xp("Resilience", level, current_xp, xp_needed)
+	elif resilience_row.has_method("update_stat"):
+		resilience_row.update_stat("Resilience", PlayerStats.get_total_resilience())
+	
+	if agility_row.has_method("update_stat_with_xp"):
+		var level: int = PlayerStats.base_agility
+		var current_xp: int = PlayerStats.get_base_stat_xp("agility")
+		var xp_needed: int = PlayerStats.get_base_stat_xp_for_next_level("agility")
+		agility_row.update_stat_with_xp("Agility", level, current_xp, xp_needed)
+	elif agility_row.has_method("update_stat"):
+		agility_row.update_stat("Agility", PlayerStats.get_total_agility())
+	
+	if int_row.has_method("update_stat_with_xp"):
+		var level: int = PlayerStats.base_int
+		var current_xp: int = PlayerStats.get_base_stat_xp("int")
+		var xp_needed: int = PlayerStats.get_base_stat_xp_for_next_level("int")
+		int_row.update_stat_with_xp("INT", level, current_xp, xp_needed)
+	elif int_row.has_method("update_stat"):
 		int_row.update_stat("INT", PlayerStats.get_total_int())
-	if vit_row.has_method("update_stat"):
+	
+	if vit_row.has_method("update_stat_with_xp"):
+		var level: int = PlayerStats.base_vit
+		var current_xp: int = PlayerStats.get_base_stat_xp("vit")
+		var xp_needed: int = PlayerStats.get_base_stat_xp_for_next_level("vit")
+		vit_row.update_stat_with_xp("VIT", level, current_xp, xp_needed)
+	elif vit_row.has_method("update_stat"):
 		vit_row.update_stat("VIT", PlayerStats.get_total_vit())
 
 
@@ -85,6 +113,14 @@ func _update_element_stats() -> void:
 
 
 func _on_stat_changed(_stat_name: String, _new_value: int) -> void:
+	_update_base_stats()
+
+
+func _on_base_stat_xp_gained(_stat_name: String, _amount: int, _total: int) -> void:
+	_update_base_stats()
+
+
+func _on_base_stat_leveled_up(_stat_name: String, _new_level: int) -> void:
 	_update_base_stats()
 
 

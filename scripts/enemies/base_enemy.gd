@@ -65,23 +65,22 @@ var post_attack_backoff_timer: float = 0.0
 var is_dead: bool = false
 
 # Logging
-var _log_name := "[ENEMY] "
+var _logger: GameLogger.GameLoggerInstance
 
 # Effects
 var _hit_flash_tween: Tween = null
 
 
 func _log(msg: String) -> void:
-	print(_log_name + msg)
+	_logger.log(msg)
 
 
 func _log_error(msg: String) -> void:
-	push_error(_log_name + "ERROR: " + msg)
-	print(_log_name + "❌ ERROR: " + msg)
+	_logger.log_error(msg)
 
 
 func _ready() -> void:
-	_log_name = "[" + name + "] "
+	_logger = GameLogger.create("[" + name + "] ")
 	add_to_group("enemy")
 	_log("Enemy spawned at " + str(global_position))
 	_setup_workers()
@@ -240,7 +239,7 @@ func _process_chase() -> void:
 			# Back away from player during recovery period
 			mover.move(-backoff_dir, move_speed * 0.6)  # Back away at 60% speed
 		# Update facing direction (face away from player while backing off)
-		last_direction = _vector_to_dir4(-backoff_dir)
+		last_direction = DirectionUtils.vector_to_dir4(-backoff_dir, last_direction)
 		if animator != null:
 			animator.play("walk", last_direction)
 		return  # Don't check for attacks during backoff
@@ -265,7 +264,7 @@ func _process_chase() -> void:
 			mover.move(dir, move_speed)
 	
 	# Update facing direction
-	last_direction = _vector_to_dir4(dir)
+	last_direction = DirectionUtils.vector_to_dir4(dir, last_direction)
 	if animator != null:
 		animator.play("walk", last_direction)
 
@@ -309,7 +308,7 @@ func _process_return() -> void:
 	if mover != null:
 		mover.move(dir, move_speed * 0.7)  # Walk back slower
 	
-	last_direction = _vector_to_dir4(dir)
+	last_direction = DirectionUtils.vector_to_dir4(dir, last_direction)
 	if animator != null:
 		animator.play("walk", last_direction)
 
@@ -343,7 +342,7 @@ func _start_attack() -> void:
 	# Face target
 	if target_tracker != null and target_tracker.has_target():
 		var dir := target_tracker.get_direction_to_target()
-		last_direction = _vector_to_dir4(dir)
+		last_direction = DirectionUtils.vector_to_dir4(dir, last_direction)
 		_log("   Facing: " + last_direction)
 	
 	# Play attack animation
@@ -420,17 +419,6 @@ func _start_death() -> void:
 		_log_error("Cannot play death animation - Animator is null!")
 
 
-func _vector_to_dir4(v: Vector2) -> String:
-	if v.length() < 0.1:
-		return last_direction
-	
-	var deg := rad_to_deg(atan2(v.y, v.x))
-	deg = fposmod(deg + 45.0, 360.0)
-	
-	if deg < 90.0: return "right"
-	elif deg < 180.0: return "down"
-	elif deg < 270.0: return "left"
-	else: return "up"
 
 
 func _state_name(state: State) -> String:

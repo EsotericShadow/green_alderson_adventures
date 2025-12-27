@@ -1,4 +1,4 @@
-[gd_scene load_steps=8 format=3 uid="uid://p1wlou6u74sw"]
+[gd_scene load_steps=9 format=3 uid="uid://p1wlou6u74sw"]
 
 [ext_resource type="PackedScene" uid="uid://ca8w8dxhshamw" path="res://scenes/worlds/overworld.tscn" id="1_0xm2m"]
 [ext_resource type="PackedScene" uid="uid://c447wb2lmdb0b" path="res://scenes/characters/player.tscn" id="1_ig7tw"]
@@ -9,6 +9,8 @@
 [ext_resource type="PackedScene" path="res://scenes/ui/spell_bar.tscn" id="5_spellbar"]
 [ext_resource type="PackedScene" uid="uid://player_panel_001" path="res://scenes/ui/player_panel.tscn" id="6_player_panel"]
 [ext_resource type="PackedScene" path="res://scenes/ui/tool_belt.tscn" id="7_tool_belt"]
+[ext_resource type="Script" path="res://scripts/test/system_validator.gd" id="8_validator"]
+[ext_resource type="Script" path="res://scripts/systems/enemy_respawn_manager.gd" id="9_respawn"]
 
 [node name="Node2D" type="Node2D"]
 
@@ -67,3 +69,9 @@ position = Vector2(0, 2)
 [node name="InventoryUI" parent="." instance=ExtResource("4_inventory")]
 
 [node name="PlayerPanel" parent="." instance=ExtResource("6_player_panel")]
+
+[node name="SystemValidator" type="Node" parent="."]
+script = ExtResource("8_validator")
+
+[node name="EnemyRespawnManager" type="Node" parent="."]
+script = ExtResource("9_respawn")

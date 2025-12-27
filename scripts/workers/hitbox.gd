@@ -11,16 +11,16 @@ signal hit_landed(target: Node, damage: int)
 @export var knockback_force: float = 200.0  # More impact!
 
 var owner_node: Node = null
-var _log_prefix := "[Hitbox] "
+var _logger: GameLogger.GameLoggerInstance
 
 
 func _log(msg: String) -> void:
-	print(_log_prefix + msg)
+	_logger.log(msg)
 
 
 func _ready() -> void:
 	owner_node = get_parent()
-	_log_prefix = "[" + owner_node.name + "/Hitbox] "
+	_logger = GameLogger.create("[" + owner_node.name + "/Hitbox] ")
 	
 	# Hitbox layer = 4, detects Hurtbox layer = 8
 	collision_layer = 4

@@ -12,21 +12,20 @@ var is_one_shot_playing: bool = false
 var current_one_shot: String = ""
 var use_4_directions: bool = false  # false = 8 directions, true = 4 directions
 
-var _log_prefix := "[Animator] "
+var _logger: GameLogger.GameLoggerInstance
 var _last_anim := ""
 
 
 func _log(msg: String) -> void:
-	print(_log_prefix + msg)
+	_logger.log(msg)
 
 
 func _log_error(msg: String) -> void:
-	push_error(_log_prefix + "ERROR: " + msg)
-	print(_log_prefix + "❌ ERROR: " + msg)
+	_logger.log_error(msg)
 
 
 func _ready() -> void:
-	_log_prefix = "[" + get_parent().name + "/Animator] "
+	_logger = GameLogger.create("[" + get_parent().name + "/Animator] ")
 	
 	sprite = get_parent().get_node_or_null("AnimatedSprite2D")
 	if sprite == null:
@@ -104,7 +103,7 @@ func _resolve_anim_name(base: String, direction: String) -> String:
 		return full_name
 	
 	# Fallback: try 4-direction version
-	var dir4 := _dir8_to_dir4(direction)
+	var dir4 := DirectionUtils.dir8_to_dir4(direction)
 	var fallback := base + "_" + dir4
 	
 	if sprite.sprite_frames.has_animation(fallback):
@@ -117,13 +116,6 @@ func _resolve_anim_name(base: String, direction: String) -> String:
 	return full_name  # Return original, let Godot handle missing anim
 
 
-func _dir8_to_dir4(dir8: String) -> String:
-	match dir8:
-		"up", "ne", "nw": return "up"
-		"down", "se", "sw": return "down"
-		"left": return "left"
-		"right": return "right"
-		_: return "down"
 
 
 func _update_flip(direction: String) -> void:
@@ -134,9 +126,8 @@ func _update_flip(direction: String) -> void:
 	# Flip horizontally when using NE animation for NW direction
 	if direction == "nw":
 		sprite.flip_h = true
-	# Only flip for 4-directional sprites (left direction)
-	elif use_4_directions:
-		sprite.flip_h = (direction == "left")
+	# For 4-directional sprites, don't flip - use actual left/right animations
+	# (Orc sprites have separate left and right animations)
 	else:
 		sprite.flip_h = false
 

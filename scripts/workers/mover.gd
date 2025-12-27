@@ -5,6 +5,9 @@ class_name Mover
 ## Does ONE thing: applies velocity and calls move_and_slide
 ## Does NOT: decide direction, read input, make any decisions
 
+# Logging
+var _logger: GameLogger.GameLoggerInstance
+
 var body: CharacterBody2D = null
 var current_velocity: Vector2 = Vector2.ZERO
 var knockback_velocity: Vector2 = Vector2.ZERO
@@ -15,6 +18,9 @@ func _ready() -> void:
 	body = get_parent() as CharacterBody2D
 	if body == null:
 		push_error("Mover: Parent must be CharacterBody2D")
+		return
+	_logger = GameLogger.create("[" + body.name + "/Mover] ")
+	_logger.log("Mover initialized")
 
 
 func _physics_process(delta: float) -> void:
@@ -48,6 +54,7 @@ func stop() -> void:
 ## Apply knockback force
 func apply_knockback(force: Vector2) -> void:
 	knockback_velocity = force
+	_logger.log("Knockback applied: " + str(force))
 
 
 ## Check if currently moving (voluntary movement, not knockback)

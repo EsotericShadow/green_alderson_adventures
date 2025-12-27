@@ -5,6 +5,9 @@ class_name TargetTracker
 ## Does ONE thing: provides info about target position/distance
 ## Does NOT: decide to chase, trigger attacks, manage AI state
 
+# Logging
+var _logger: GameLogger.GameLoggerInstance
+
 signal target_acquired(target: Node2D)
 signal target_lost
 
@@ -20,6 +23,8 @@ func _ready() -> void:
 	owner_node = get_parent() as Node2D
 	if owner_node != null:
 		spawn_position = owner_node.global_position
+		_logger = GameLogger.create("[" + owner_node.name + "/TargetTracker] ")
+		_logger.log("TargetTracker initialized (detection: " + str(detection_range) + ", lose: " + str(lose_range) + ")")
 
 
 ## Set the target to track
@@ -27,12 +32,14 @@ func set_target(new_target: Node2D) -> void:
 	if target != new_target:
 		target = new_target
 		if target != null:
+			_logger.log("Target acquired: " + target.name)
 			target_acquired.emit(target)
 
 
 ## Clear the current target
 func clear_target() -> void:
 	if target != null:
+		_logger.log("Target lost")
 		target = null
 		target_lost.emit()
 

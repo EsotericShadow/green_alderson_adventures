@@ -30,6 +30,7 @@ var is_dead: bool = false
 var cooldown_timer: float = 0.0
 var is_casting: bool = false
 var _stamina_drain_accumulator: float = 0.0  # Fractional accumulator for smooth stamina drain
+var _running_enabled: bool = false  # Whether running is currently enabled (separate from run key state)
 
 # Spell system (Commit 3C: 10 spell slots)
 var equipped_spells: Array[SpellData] = []  # Size 10
@@ -41,17 +42,16 @@ var _camera: Camera2D = null
 var _shake_tween: Tween = null
 
 # Logging
-const LOG_PREFIX := "[PLAYER] "
 var _last_logged_state := ""
+var _logger = GameLogger.create("[PLAYER] ")
 
 
 func _log(msg: String) -> void:
-	print(LOG_PREFIX + msg)
+	_logger.log(msg)
 
 
 func _log_error(msg: String) -> void:
-	push_error(LOG_PREFIX + "ERROR: " + msg)
-	print(LOG_PREFIX + "❌ ERROR: " + msg)
+	_logger.log_error(msg)
 
 
 func _ready() -> void:
@@ -139,14 +139,34 @@ func _physics_process(delta: float) -> void:
 		return
 	
 	var input_vec := input_reader.get_movement()
-	var wants_run := input_reader.is_running()
+	var run_key_just_pressed := input_reader.is_run_just_pressed()
+	var run_key_just_released := input_reader.is_run_just_released()
 	
-	# Check if player has enough stamina to run
-	var can_run: bool = wants_run and PlayerStats.has_stamina(min_stamina_to_run)
-	if wants_run and not can_run:
-		wants_run = false  # Force walk if not enough stamina
+	# Handle running state transitions
+	# Enable running when run key is pressed (can happen while already moving)
+	if run_key_just_pressed:
+		if PlayerStats.has_stamina(min_stamina_to_run):
+			_running_enabled = true
+			_log("🏃 Running enabled (run key pressed)")
+		else:
+			_log("🏃 Run key pressed but insufficient stamina (" + str(PlayerStats.stamina) + "/" + str(min_stamina_to_run) + ")")
+	
+	# Disable running when run key is released
+	if run_key_just_released:
+		_running_enabled = false
+		_log("🚶 Running disabled (run key released)")
+	
+	# Auto-disable running when stamina depletes (even if run key is still held)
+	var has_enough_stamina: bool = PlayerStats.has_stamina(min_stamina_to_run)
+	if _running_enabled and not has_enough_stamina:
+		_running_enabled = false
+		_log("🚶 Running auto-disabled (stamina depleted, run key still held)")
+	
+	# Determine if player should actually run
+	var wants_run: bool = _running_enabled and has_enough_stamina
 	
 	# Consume stamina while running (fractional accumulation for smooth drain)
+	# Stamina consumption is already reduced by agility in PlayerStats.consume_stamina()
 	if wants_run and input_vec.length() > 0.0:
 		_stamina_drain_accumulator += stamina_drain_rate * delta
 		if _stamina_drain_accumulator >= 1.0:
@@ -188,14 +208,19 @@ func _physics_process(delta: float) -> void:
 	# --- HANDLE RUN JUMP ---
 	if input_reader.is_action_just_pressed("jump") and wants_run and input_vec.length() > 0.0:
 		if animator != null and not animator.is_locked():
-			last_direction = _vector_to_dir8(input_vec)
+			last_direction = DirectionUtils.vector_to_dir8(input_vec, last_direction)
 			_log("🦘 Run jump! Direction: " + last_direction)
 			animator.play_one_shot("run_jump", last_direction)
 			return
 	
 	# --- MOVEMENT ---
 	if mover != null:
-		var speed := run_speed if wants_run else walk_speed
+		var base_speed := run_speed if wants_run else walk_speed
+		# Apply agility-based speed multiplier
+		var speed_multiplier: float = PlayerStats.get_movement_speed_multiplier() if wants_run else 1.0
+		# Apply carry weight slow down effect (85%+ weight)
+		var carry_slow_multiplier: float = PlayerStats.get_carry_weight_slow_multiplier()
+		var speed := base_speed * speed_multiplier * carry_slow_multiplier
 		mover.move(input_vec, speed)
 	
 	# --- ANIMATION ---
@@ -207,7 +232,7 @@ func _physics_process(delta: float) -> void:
 	if animator.is_locked():
 		current_state = "locked (one-shot playing)"
 	elif input_vec.length() > 0.0:
-		current_state = ("running" if wants_run else "walking") + " " + _vector_to_dir8(input_vec)
+		current_state = ("running" if wants_run else "walking") + " " + DirectionUtils.vector_to_dir8(input_vec, last_direction)
 	else:
 		current_state = "idle " + last_direction
 	
@@ -218,7 +243,7 @@ func _physics_process(delta: float) -> void:
 	# Don't change animation if one-shot is playing (but movement still works)
 	if not animator.is_locked():
 		if input_vec.length() > 0.0:
-			last_direction = _vector_to_dir8(input_vec)
+			last_direction = DirectionUtils.vector_to_dir8(input_vec, last_direction)
 			var anim_type := "run" if wants_run else "walk"
 			animator.play(anim_type, last_direction)
 		else:
@@ -259,7 +284,7 @@ func _start_fireball_cast(input_vec: Vector2) -> void:
 	# Use movement direction if moving, else use last direction
 	var cast_dir := last_direction
 	if input_vec.length() > 0.0:
-		cast_dir = _vector_to_dir8(input_vec)
+		cast_dir = DirectionUtils.vector_to_dir8(input_vec, last_direction)
 	
 	_log("🔥 Starting fireball cast facing " + cast_dir)
 	_log("   Animation: fireball_" + cast_dir)
@@ -287,7 +312,7 @@ func _spawn_fireball(direction: String) -> void:
 	
 	# Z-index: below player when facing north, above when facing south/sides
 	var z_index_value := 2
-	if _is_facing_north(direction):
+	if DirectionUtils.is_facing_north(direction):
 		z_index_value = 1
 		_log("   Facing north - fireball spawns BELOW player (z=" + str(z_index_value) + ")")
 	else:
@@ -304,25 +329,8 @@ func _spawn_fireball(direction: String) -> void:
 		_log_error("SpellSpawner.spawn_fireball returned null!")
 
 
-func _is_facing_north(dir: String) -> bool:
-	return dir == "up" or dir == "ne" or dir == "nw"
 
 
-func _vector_to_dir8(v: Vector2) -> String:
-	if v.length() < 0.1:
-		return last_direction
-	
-	var deg := rad_to_deg(atan2(v.y, v.x))
-	deg = fposmod(deg + 22.5, 360.0)
-	
-	if deg < 45.0: return "right"
-	elif deg < 90.0: return "se"
-	elif deg < 135.0: return "down"
-	elif deg < 180.0: return "sw"
-	elif deg < 225.0: return "left"
-	elif deg < 270.0: return "nw"
-	elif deg < 315.0: return "up"
-	else: return "ne"
 
 
 func get_selected_spell() -> SpellData:

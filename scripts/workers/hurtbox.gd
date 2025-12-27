@@ -12,16 +12,16 @@ signal hurt(damage: int, knockback: Vector2, attacker: Node)
 var owner_node: Node = null
 var is_invincible: bool = false
 var _blink_tween: Tween = null  # Track our own tween
-var _log_prefix := "[Hurtbox] "
+var _logger: GameLogger.GameLoggerInstance
 
 
 func _log(msg: String) -> void:
-	print(_log_prefix + msg)
+	_logger.log(msg)
 
 
 func _ready() -> void:
 	owner_node = get_parent()
-	_log_prefix = "[" + owner_node.name + "/Hurtbox] "
+	_logger = GameLogger.create("[" + owner_node.name + "/Hurtbox] ")
 	
 	# Hurtbox layer = 8, doesn't detect anything (gets detected by hitboxes)
 	collision_layer = 8

@@ -4,6 +4,9 @@ class_name ProjectilePool
 # Object pooling system for projectiles - best practice for performance
 # Reuses projectiles instead of constantly instantiating/destroying them
 
+# Logging
+var _logger = GameLogger.create("[ProjectilePool] ")
+
 @export var pool_size: int = 20
 @export var fireball_scene: PackedScene
 @export var impact_scene: PackedScene
@@ -15,11 +18,15 @@ var active_impacts: Array[Node] = []
 
 
 func _ready() -> void:
+	_logger.log("ProjectilePool initialized")
+	_logger.log("  Pool size: " + str(pool_size))
 	# Pre-instantiate projectiles for better performance
 	if fireball_scene != null:
 		_preload_fireballs()
+		_logger.log("  Preloaded " + str(fireball_pool.size()) + " projectiles")
 	if impact_scene != null:
 		_preload_impacts()
+		_logger.log("  Preloaded " + str(impact_pool.size()) + " impacts")
 
 
 func _preload_fireballs() -> void:
@@ -47,6 +54,7 @@ func get_fireball() -> Node:
 	
 	if fireball_pool.is_empty():
 		# Pool exhausted, create new one (shouldn't happen often)
+		_logger.log("⚠️ Pool exhausted! Creating new projectile (consider increasing pool_size)")
 		fireball = fireball_scene.instantiate()
 		add_child(fireball)
 	else:
@@ -63,6 +71,7 @@ func get_fireball() -> Node:
 		fireball.set_deferred("monitoring", true)
 	
 	active_fireballs.append(fireball)
+	_logger.log("Projectile retrieved from pool (active: " + str(active_fireballs.size()) + ", available: " + str(fireball_pool.size()) + ")")
 	
 	return fireball
 
@@ -74,9 +83,11 @@ func return_fireball(fireball: Node) -> void:
 	# Check if it's in active list (use find instead of has for Array)
 	var index := active_fireballs.find(fireball)
 	if index == -1:
+		_logger.log_error("Tried to return projectile that's not in active list")
 		return
 	
 	active_fireballs.remove_at(index)
+	_logger.log("Projectile returned to pool (active: " + str(active_fireballs.size()) + ", available: " + str(fireball_pool.size() + 1) + ")")
 	
 	# Use call_deferred to avoid physics callback issues
 	call_deferred("_deferred_return_fireball", fireball)

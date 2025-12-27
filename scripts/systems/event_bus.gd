@@ -2,6 +2,9 @@ extends Node
 ## Central signal hub for decoupled communication between game systems.
 ## All UI and game events are broadcast through this singleton.
 
+# Logging
+var _logger = GameLogger.create("[EventBus] ")
+
 # UI Signals (LOCKED NAMES per SPEC.md)
 # These signals are declared for future use - warnings suppressed
 @warning_ignore("unused_signal")
@@ -35,3 +38,9 @@ signal enemy_killed(enemy_name: String, position: Vector2)
 signal spell_cast(spell: SpellData)
 @warning_ignore("unused_signal")
 signal level_up(element: String, new_level: int)
+
+
+func _ready() -> void:
+	_logger.log("EventBus initialized")
+	_logger.log("  UI signals: " + str(8) + " signals")
+	_logger.log("  Game event signals: " + str(5) + " signals")

@@ -2,6 +2,9 @@ extends CanvasLayer
 ## Spell hotbar UI.
 ## Displays 10 spell slots (1-9, 0) and manages selection.
 
+# Logging
+var _logger = GameLogger.create("[SpellBar] ")
+
 signal spell_selected(slot_index: int)
 
 const SLOT_SCENE: PackedScene = preload("res://scenes/ui/spell_slot.tscn")
@@ -15,31 +18,26 @@ var _pending_spells: Array[SpellData] = []  # Spells to apply after _ready()
 
 
 func _ready() -> void:
-	print("[SpellBar] _ready() called")
-	print("[SpellBar] CanvasLayer layer: ", layer)
-	print("[SpellBar] CanvasLayer visible: ", visible)
+	_logger.log("_ready() called")
+	_logger.log("CanvasLayer layer: " + str(layer) + ", visible: " + str(visible))
 	var control := $Control
 	if control != null:
-		print("[SpellBar] Control node found, visible: ", control.visible)
-		print("[SpellBar] Control size: ", control.size)
-		print("[SpellBar] Control position: ", control.position)
-		print("[SpellBar] Control rect: ", control.get_rect())
+		_logger.log("Control node found, visible: " + str(control.visible) + ", size: " + str(control.size))
 		# Force visibility
 		control.visible = true
 	else:
-		push_error("[SpellBar] Control node not found!")
+		_logger.log_error("Control node not found!")
 	
 	if slot_container != null:
-		print("[SpellBar] HBoxContainer found, visible: ", slot_container.visible)
-		print("[SpellBar] HBoxContainer size: ", slot_container.size)
+		_logger.log("HBoxContainer found, visible: " + str(slot_container.visible) + ", size: " + str(slot_container.size))
 	else:
-		push_error("[SpellBar] HBoxContainer not found!")
+		_logger.log_error("HBoxContainer not found!")
 	
 	_create_slots()
 	
 	# Apply any spells that were queued before _ready() completed
 	if _pending_spells.size() > 0:
-		print("[SpellBar] Applying ", _pending_spells.size(), " queued spells...")
+		_logger.log("Applying " + str(_pending_spells.size()) + " queued spells...")
 		var spells_to_apply = _pending_spells.duplicate()
 		_pending_spells.clear()
 		setup_spells(spells_to_apply)
@@ -53,10 +51,10 @@ func _create_slots() -> void:
 	slots.clear()
 	
 	if slot_container == null:
-		push_error("[SpellBar] slot_container is null! Cannot create slots.")
+		_logger.log_error("slot_container is null! Cannot create slots.")
 		return
 	
-	print("[SpellBar] Creating ", NUM_SLOTS, " spell slots...")
+	_logger.log("Creating " + str(NUM_SLOTS) + " spell slots...")
 	
 	# Create 10 slots
 	for i in range(NUM_SLOTS):
@@ -65,45 +63,45 @@ func _create_slots() -> void:
 		slot.setup(i, null)  # Start with no spell
 		slot.slot_clicked.connect(_on_slot_clicked)
 		slots.append(slot)
-		print("[SpellBar]   Created slot ", i + 1, " (index ", i, ")")
+		_logger.log("  Created slot " + str(i + 1) + " (index " + str(i) + ")")
 	
-	print("[SpellBar] Total slots created: ", slots.size())
+	_logger.log("Total slots created: " + str(slots.size()))
 	
 	# Select first slot by default
 	if slots.size() > 0:
 		select_slot(0)
-		print("[SpellBar] Selected slot 0 by default")
+		_logger.log("Selected slot 0 by default")
 	else:
-		push_error("[SpellBar] No slots created!")
+		_logger.log_error("No slots created!")
 
 
 func setup_spells(spell_list: Array[SpellData]) -> void:
-	print("[SpellBar] setup_spells() called with ", spell_list.size(), " spells")
-	print("[SpellBar] Current slots array size: ", slots.size())
+	_logger.log("setup_spells() called with " + str(spell_list.size()) + " spells")
+	_logger.log("Current slots array size: " + str(slots.size()))
 	
 	# If nodes aren't ready yet, queue the spells for later
 	if slot_container == null:
-		print("[SpellBar] slot_container not ready yet - queuing spells to apply after _ready()")
+		_logger.log("slot_container not ready yet - queuing spells to apply after _ready()")
 		_pending_spells = spell_list.duplicate()
 		return
 	
 	# Ensure slots are created first
 	if slots.size() == 0:
-		print("[SpellBar] No slots yet - creating them now...")
+		_logger.log("No slots yet - creating them now...")
 		_create_slots()
 	
 	# Set spells for each slot
 	for i in range(min(spell_list.size(), NUM_SLOTS)):
 		if i >= slots.size():
-			push_error("[SpellBar] Slot index ", i, " out of bounds! Slots size: ", slots.size())
+			_logger.log_error("Slot index " + str(i) + " out of bounds! Slots size: " + str(slots.size()))
 			continue
 		
 		if slots[i] != null:
 			if spell_list[i] != null:
-				print("[SpellBar]   Setting spell ", i, ": ", spell_list[i].display_name)
+				_logger.log("  Setting spell " + str(i) + ": " + spell_list[i].display_name)
 			slots[i].setup(i, spell_list[i])
 		else:
-			push_error("[SpellBar] Slot ", i, " is null!")
+			_logger.log_error("Slot " + str(i) + " is null!")
 
 
 func _select_slot(index: int) -> void:

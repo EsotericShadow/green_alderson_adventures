@@ -2,6 +2,9 @@ extends Node
 ## Global inventory and equipment system (autoload singleton).
 ## Manages slot-based inventory and equipment slots with stat bonuses.
 
+# Logging
+var _logger = GameLogger.create("[InventorySystem] ")
+
 # Constants (LOCKED per SPEC.md)
 const DEFAULT_CAPACITY: int = 12
 const MAX_CAPACITY: int = 48
@@ -33,7 +36,11 @@ var equipment: Dictionary = {
 
 
 func _ready() -> void:
+	_logger.log("InventorySystem initialized")
+	_logger.log("  Capacity: " + str(capacity))
+	_logger.log("  Equipment slots: " + str(equipment.keys()))
 	_init_slots()
+	_logger.log("  Initialized " + str(slots.size()) + " inventory slots")
 
 
 func _init_slots() -> void:
@@ -48,8 +55,10 @@ func _init_slots() -> void:
 func add_item(item: ItemData, count: int = 1) -> int:
 	# Returns leftover count (items that couldn't be added)
 	if item == null:
+		_logger.log_error("add_item() called with null item")
 		return count
 	
+	_logger.log("Adding item: " + item.display_name + " x" + str(count))
 	var remaining: int = count
 	
 	# If item is stackable, try to add to existing stack first
@@ -62,6 +71,7 @@ func add_item(item: ItemData, count: int = 1) -> int:
 				var to_add: int = min(space_available, remaining)
 				slot["count"] += to_add
 				remaining -= to_add
+				_logger.log("  Added " + str(to_add) + " to existing stack in slot " + str(existing_slot))
 				item_added.emit(item, to_add, existing_slot)
 				inventory_changed.emit()
 	
@@ -70,6 +80,7 @@ func add_item(item: ItemData, count: int = 1) -> int:
 		var empty_slot: int = find_empty_slot()
 		if empty_slot == -1:
 			# Inventory full
+			_logger.log("  Inventory full! " + str(remaining) + " items could not be added")
 			break
 		
 		var slot: Dictionary = slots[empty_slot]
@@ -77,8 +88,12 @@ func add_item(item: ItemData, count: int = 1) -> int:
 		slot["item"] = item
 		slot["count"] = to_add
 		remaining -= to_add
+		_logger.log("  Added " + str(to_add) + " to new slot " + str(empty_slot))
 		item_added.emit(item, to_add, empty_slot)
 		inventory_changed.emit()
+	
+	if remaining > 0:
+		_logger.log("  ⚠️ " + str(remaining) + " items could not be added (inventory full)")
 	
 	return remaining
 
@@ -86,8 +101,10 @@ func add_item(item: ItemData, count: int = 1) -> int:
 func remove_item(item: ItemData, count: int = 1) -> bool:
 	# Returns true if all items were removed, false otherwise
 	if item == null:
+		_logger.log_error("remove_item() called with null item")
 		return false
 	
+	_logger.log("Removing item: " + item.display_name + " x" + str(count))
 	var remaining: int = count
 	
 	# Find all slots with this item
@@ -98,6 +115,8 @@ func remove_item(item: ItemData, count: int = 1) -> bool:
 			slot["count"] -= to_remove
 			remaining -= to_remove
 			
+			_logger.log("  Removed " + str(to_remove) + " from slot " + str(i))
+			
 			if slot["count"] <= 0:
 				slot["item"] = null
 				slot["count"] = 0
@@ -107,6 +126,9 @@ func remove_item(item: ItemData, count: int = 1) -> bool:
 			
 			if remaining <= 0:
 				break
+	
+	if remaining > 0:
+		_logger.log("  ⚠️ Could not remove " + str(remaining) + " items (not enough in inventory)")
 	
 	return remaining <= 0
 
@@ -223,8 +245,10 @@ func expand_capacity(additional_slots: int) -> void:
 func equip(item: EquipmentData) -> bool:
 	# Returns false if wrong slot type or inventory full when unequipping
 	if item == null:
+		_logger.log_error("equip() called with null item")
 		return false
 	
+	_logger.log("Equipping: " + item.display_name + " (slot: " + item.slot + ")")
 	var slot_name: String = item.slot
 	
 	# Handle ring slots (ring1 or ring2)
@@ -236,8 +260,10 @@ func equip(item: EquipmentData) -> bool:
 			slot_name = "ring2"
 		else:
 			# Both rings full, unequip ring1
+			_logger.log("  Both ring slots full, unequipping ring1")
 			var unequipped: EquipmentData = unequip("ring1")
 			if unequipped == null:
+				_logger.log_error("  Failed to unequip ring1 (inventory full)")
 				return false  # Failed to unequip (inventory full)
 			slot_name = "ring1"
 	else:
@@ -247,17 +273,21 @@ func equip(item: EquipmentData) -> bool:
 	# Validate slot type (for non-ring items, slot_name should equal item.slot)
 	# For ring items, slot_name will be "ring1" or "ring2" and item.slot will be "ring"
 	if item.slot != "ring" and slot_name != item.slot:
+		_logger.log_error("  Invalid slot type: " + item.slot + " != " + slot_name)
 		return false
 	
 	# Unequip existing item if any
 	var old_item: EquipmentData = equipment[slot_name]
 	if old_item != null:
+		_logger.log("  Unequipping existing item: " + old_item.display_name)
 		var unequipped: EquipmentData = unequip(slot_name)
 		if unequipped == null:
+			_logger.log_error("  Failed to unequip existing item (inventory full)")
 			return false  # Failed to unequip (inventory full)
 	
 	# Equip new item
 	equipment[slot_name] = item
+	_logger.log("  ✓ Equipped " + item.display_name + " to " + slot_name)
 	equipment_changed.emit(slot_name)
 	return true
 
@@ -265,20 +295,26 @@ func equip(item: EquipmentData) -> bool:
 func unequip(slot_name: String) -> EquipmentData:
 	# Returns unequipped item or null if slot empty or inventory full
 	if not equipment.has(slot_name):
+		_logger.log_error("unequip() called with invalid slot: " + slot_name)
 		return null
 	
 	var item: EquipmentData = equipment[slot_name]
 	if item == null:
+		_logger.log("  Slot " + slot_name + " is already empty")
 		return null
+	
+	_logger.log("Unequipping: " + item.display_name + " from " + slot_name)
 	
 	# Try to add to inventory
 	var leftover: int = add_item(item, 1)
 	if leftover > 0:
 		# Inventory full, can't unequip
+		_logger.log_error("  Failed to unequip (inventory full)")
 		return null
 	
 	# Remove from equipment slot
 	equipment[slot_name] = null
+	_logger.log("  ✓ Unequipped " + item.display_name)
 	equipment_changed.emit(slot_name)
 	return item
 
@@ -291,20 +327,40 @@ func get_equipped(slot_name: String) -> EquipmentData:
 
 func get_total_stat_bonus(stat_name: String) -> int:
 	# Returns sum of stat bonuses from all equipped items
-	# stat_name: "str", "dex", "int", or "vit"
+	# stat_name: "resilience", "agility", "int", or "vit" (also supports "str"/"dex" for backwards compat)
 	var total: int = 0
 	
 	for slot_name in equipment:
 		var item: EquipmentData = equipment[slot_name]
 		if item != null:
 			match stat_name:
-				"str":
-					total += item.str_bonus
-				"dex":
-					total += item.dex_bonus
+				"resilience", "str":  # Support both for backwards compatibility
+					total += item.resilience_bonus
+				"agility", "dex":  # Support both for backwards compatibility
+					total += item.agility_bonus
 				"int":
 					total += item.int_bonus
 				"vit":
 					total += item.vit_bonus
 	
+	return total
+
+
+func get_total_damage_bonus() -> int:
+	"""Returns sum of flat damage bonuses from all equipped items."""
+	var total: int = 0
+	for slot_name in equipment:
+		var item: EquipmentData = equipment[slot_name]
+		if item != null:
+			total += item.flat_damage_bonus
+	return total
+
+
+func get_total_damage_percentage() -> float:
+	"""Returns sum of percentage damage bonuses from all equipped items."""
+	var total: float = 0.0
+	for slot_name in equipment:
+		var item: EquipmentData = equipment[slot_name]
+		if item != null:
+			total += item.damage_percentage_bonus
 	return total

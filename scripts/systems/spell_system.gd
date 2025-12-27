@@ -3,7 +3,7 @@ extends Node
 ## Manages element levels, XP tracking, spell damage calculation, and spell validation.
 
 # Logging
-const LOG_PREFIX := "[SPELL_SYSTEM] "
+var _logger = GameLogger.create("[SPELL_SYSTEM] ")
 
 # Constants (LOCKED per SPEC.md)
 const ELEMENTS: Array[String] = ["fire", "water", "earth", "air"]
@@ -15,12 +15,11 @@ signal xp_gained(element: String, amount: int, total: int)
 
 
 func _log(msg: String) -> void:
-	print(LOG_PREFIX + msg)
+	_logger.log(msg)
 
 
 func _log_error(msg: String) -> void:
-	push_error(LOG_PREFIX + "ERROR: " + msg)
-	print(LOG_PREFIX + "❌ ERROR: " + msg)
+	_logger.log_error(msg)
 
 # Element Levels (LOCKED STRUCTURE per SPEC.md)
 var element_levels: Dictionary = {
@@ -136,7 +135,7 @@ func _check_level_up(element: String) -> void:
 
 
 func get_spell_damage(spell: SpellData) -> int:
-	"""Calculates spell damage using the locked formula per SPEC.md."""
+	"""Calculates spell damage: base + level bonus + equipment modifiers."""
 	if spell == null:
 		_log_error("get_spell_damage() called with null spell")
 		return 0
@@ -145,20 +144,38 @@ func get_spell_damage(spell: SpellData) -> int:
 		_log_error("get_spell_damage() called with unknown element: " + spell.element)
 		return spell.base_damage  # Return base damage only
 	
-	var base: int = spell.base_damage
-	var int_bonus: int = PlayerStats.get_total_int() * 2
-	var level_bonus: int = (element_levels[spell.element] - 1) * 5
-	var total_damage: int = base + int_bonus + level_bonus
+	var element_level: int = element_levels[spell.element]
 	
-	_log("⚔️ Damage calc for " + spell.display_name + " (" + spell.element + "): base=" + str(base) + " + int_bonus=" + str(int_bonus) + " + level_bonus=" + str(level_bonus) + " = " + str(total_damage) + " [Level " + str(element_levels[spell.element]) + "]")
+	# Equipment modifiers (flat + percentage)
+	var flat_bonus: int = 0
+	var percentage_bonus: float = 0.0
+	if InventorySystem != null:
+		flat_bonus = InventorySystem.get_total_damage_bonus()
+		percentage_bonus = InventorySystem.get_total_damage_percentage()
+	
+	# Calculate damage using utility
+	var total_damage: int = DamageCalculator.calculate_spell_damage(
+		spell.base_damage,
+		element_level,
+		5,  # level_bonus_per_level
+		flat_bonus,
+		percentage_bonus
+	)
+	
+	_log("⚔️ Damage calc for " + spell.display_name + " (" + spell.element + "): base=" + str(spell.base_damage) + " + level_bonus=" + str((element_level - 1) * 5) + " + flat_bonus=" + str(flat_bonus) + " * (1 + " + str(percentage_bonus) + ") = " + str(total_damage) + " [Level " + str(element_level) + "]")
 	
 	return total_damage
 
 
 func can_cast(spell: SpellData) -> bool:
-	"""Validates if a spell can be cast (checks mana cost)."""
+	"""Validates if a spell can be cast (checks mana cost and unlock level)."""
 	if spell == null:
 		_log("🚫 can_cast() called with null spell")
+		return false
+	
+	# Check if spell is unlocked
+	if not is_spell_unlocked(spell):
+		_log("🚫 Cannot cast " + spell.display_name + ": spell not unlocked (requires level " + str(spell.unlock_level) + ", current: " + str(get_level(spell.element)) + ")")
 		return false
 	
 	# Check mana cost
@@ -175,8 +192,31 @@ func can_cast(spell: SpellData) -> bool:
 		_log_error("PlayerStats not available for can_cast() check")
 		return false
 	
-	# Future: Add cooldown checks, spell unlock checks, etc.
+	# Future: Add cooldown checks, etc.
 	return true
+
+
+func is_spell_unlocked(spell: SpellData) -> bool:
+	"""Checks if a spell is unlocked based on element level."""
+	if spell == null:
+		return false
+	
+	var current_level: int = get_level(spell.element)
+	return current_level >= spell.unlock_level
+
+
+func get_unlocked_spells(element: String) -> Array[SpellData]:
+	"""Returns array of all unlocked spells for the specified element."""
+	var unlocked: Array[SpellData] = []
+	var current_level: int = get_level(element)
+	
+	# Load all spells for this element and filter by unlock level
+	# Note: This assumes spells are loaded from resources/spells/ directory
+	# For now, this is a placeholder - actual implementation would scan spell resources
+	_log("get_unlocked_spells() called for " + element + " (level " + str(current_level) + ")")
+	_log("  ⚠ Full implementation requires scanning spell resources directory")
+	
+	return unlocked
 
 
 func _validate_system() -> void:

@@ -5,11 +5,11 @@ extends Node2D
 var pool_manager: ProjectilePool = null
 var is_active := false
 
-const LOG_PREFIX := "[Impact] "
+var _logger = GameLogger.create("[Impact] ")
 
 
 func _log(msg: String) -> void:
-	print(LOG_PREFIX + msg)
+	_logger.log(msg)
 
 
 func _ready() -> void:

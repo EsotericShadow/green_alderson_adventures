@@ -1,7 +1,7 @@
 class_name ItemData
 extends Resource
-## Placeholder stub class - inventory system not yet implemented
-## TODO: Implement when milestone 4 (Crafting & Chests) is reached
+## Base class for all items in the game.
+## Defines common properties like name, description, icon, and stacking behavior.
 
 @export var id: String = ""
 @export var display_name: String = ""
@@ -10,4 +10,5 @@ extends Resource
 @export var stackable: bool = true
 @export var max_stack: int = 99
 @export_enum("consumable", "equipment", "material", "key") var item_type: String = "material"
+@export var weight: float = 0.0  # Weight in kg for carry weight system
 

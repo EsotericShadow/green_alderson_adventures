@@ -1,5 +1,8 @@
 extends Area2D
 
+# Logging
+var _logger: GameLogger.GameLoggerInstance
+
 @export var speed: float = 500.0  # Faster, more responsive
 @export var lifetime: float = 1.5
 @export var damage: int = 25  # Damage dealt to enemies (fallback if no spell_data)
@@ -20,6 +23,7 @@ var is_active := false
 
 
 func _ready() -> void:
+	_logger = GameLogger.create("[SpellProjectile] ")
 	# Connect collision signals once (optimized - best practice)
 	if not signals_connected:
 		body_entered.connect(_on_body_entered)
@@ -64,12 +68,14 @@ func setup(dir_vec: Vector2, shooter: Node = null, z_index_override: int = -1, d
 		hue_shift = data.hue_shift
 		speed = data.projectile_speed
 		_apply_hue()
+		_logger.log("Projectile setup: " + data.display_name + " (" + data.element + ")")
 	else:
 		spell_data = null
 		hue_shift = 0.0
 		# Reset modulate if no spell data
 		if anim != null:
 			anim.modulate = Color.WHITE
+		_logger.log("Projectile setup: fallback (no spell data)")
 	
 	velocity = travel_dir * speed
 	owner_node = shooter
@@ -136,6 +142,8 @@ func _on_area_entered(area: Area2D) -> void:
 		if spell_data != null and SpellSystem != null:
 			final_damage = SpellSystem.get_spell_damage(spell_data)
 		
+		_logger.log("Hit enemy hurtbox! Damage: " + str(final_damage))
+		
 		# Hit enemy hurtbox
 		hurtbox.receive_hit(final_damage, travel_dir * 150.0, owner_node)
 		
@@ -144,6 +152,10 @@ func _on_area_entered(area: Area2D) -> void:
 			# Gain XP equal to damage dealt (scaled for balance)
 			var xp_gain: int = max(1, int(final_damage / 2.0))  # Half of damage dealt, minimum 1
 			SpellSystem.gain_xp(spell_data.element, xp_gain)
+		
+		# Gain Resilience XP for dealing damage
+		if PlayerStats != null and final_damage > 0:
+			PlayerStats.gain_resilience_xp_for_damage_dealt(final_damage)
 		
 		_spawn_impact()
 		_deactivate()
@@ -166,6 +178,8 @@ func _deactivate() -> void:
 		return
 	
 	is_active = false
+	var spell_name: String = spell_data.display_name if spell_data != null else "unknown"
+	_logger.log("Projectile deactivated: " + spell_name)
 	
 	# Only return to pool if this is a fireball from the pool
 	# Element-specific projectiles are instantiated directly and should be freed
@@ -178,9 +192,11 @@ func _deactivate() -> void:
 			should_return_to_pool = true
 	
 	if should_return_to_pool:
+		_logger.log("  Returning to pool")
 		pool_manager.return_fireball(self)
 	else:
 		# Element-specific projectiles or projectiles without pool - just free them
+		_logger.log("  Freeing projectile (not pooled)")
 		queue_free()
 
 
@@ -194,9 +210,11 @@ func _deal_damage_to(body: Node) -> void:
 	var damage_dealt: bool = false
 	if body.is_in_group("enemy"):
 		if body.has_method("take_damage"):
+			_logger.log("Dealing " + str(final_damage) + " damage to enemy: " + body.name)
 			body.take_damage(final_damage, owner_node)
 			damage_dealt = true
 	elif body.has_method("take_damage"):
+		_logger.log("Dealing " + str(final_damage) + " damage to: " + body.name)
 		body.take_damage(final_damage, owner_node)
 		damage_dealt = true
 	
