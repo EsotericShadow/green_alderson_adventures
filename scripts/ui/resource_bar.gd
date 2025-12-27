@@ -13,7 +13,7 @@ extends Control
 
 @onready var border_panel: Panel = $BorderPanel
 @onready var fill_container: Control = $FillContainer
-@onready var fill_background: Panel = $FillContainer/Background
+@onready var fill_background: Panel = get_node_or_null("FillContainer/Background")
 @onready var fill_light: Panel = $FillContainer/LightFill
 @onready var fill_dark: Panel = $FillContainer/DarkFill
 
