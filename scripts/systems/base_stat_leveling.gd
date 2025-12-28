@@ -26,8 +26,8 @@ var _last_player_position: Vector2 = Vector2.ZERO
 var _heavy_carry_distance_accumulator: float = 0.0
 
 # Constants
-const BASE_STAT_XP_PER_LEVEL: int = 100  # XP needed = level * 100 (same as element levels)
-const MAX_BASE_STAT_LEVEL: int = 64  # Maximum level for base stats
+# XP System: Using RuneScape-style exponential XP curve (see XPFormula)
+const MAX_BASE_STAT_LEVEL: int = 110  # Maximum level for base stats
 const VITALITY_XP_RATIO: int = 8  # 1 VIT XP per 8 XP in other stats (slower progression)
 const HEAVY_CARRY_THRESHOLD: float = 0.90  # 90% weight for XP gain
 const HEAVY_CARRY_XP_PER_METER: float = 0.1  # XP per meter moved (distance-based, lower than other methods)
@@ -37,7 +37,7 @@ func _ready() -> void:
 	_logger.log("BaseStatLeveling initialized")
 	_logger.log("  Base stat XP tracking: " + str(base_stat_xp.keys()))
 	_logger.log("  Max level: " + str(MAX_BASE_STAT_LEVEL))
-	_logger.log("  XP per level: " + str(BASE_STAT_XP_PER_LEVEL))
+	_logger.log("  XP System: RuneScape-style exponential curve")
 
 
 func _process(_delta: float) -> void:
@@ -138,20 +138,29 @@ func _check_base_stat_level_up(stat_name: String) -> void:
 		_logger.log(stat_name.capitalize() + " at max level (" + str(MAX_BASE_STAT_LEVEL) + "), cannot level up")
 		return  # Can't level up past max
 	
-	var xp_needed: int = current_level * BASE_STAT_XP_PER_LEVEL
 	var current_xp: int = base_stat_xp[stat_name]
 	
-	if current_xp >= xp_needed:
-		# Level up by incrementing stat in PlayerStats
-		_increment_base_stat(stat_name)
+	# Calculate what level this XP should correspond to (using RuneScape formula)
+	var calculated_level: int = XPFormula.get_level_from_xp(current_xp)
+	
+	# Cap calculated level to max
+	if calculated_level > MAX_BASE_STAT_LEVEL:
+		calculated_level = MAX_BASE_STAT_LEVEL
+	
+	# Check if we should level up
+	if calculated_level > current_level:
+		# Level up to the calculated level (could be multiple levels)
+		var old_level: int = current_level
+		
+		# Set stat to calculated level (handling multiple level-ups)
+		var level_diff: int = calculated_level - current_level
+		for i in range(level_diff):
+			_increment_base_stat(stat_name)
+		
 		var new_level: int = _get_base_stat_level(stat_name)
+		var xp_for_new_level: int = XPFormula.get_xp_for_level(new_level)
 		
-		# Cap at max level (shouldn't happen, but safety check)
-		if new_level > MAX_BASE_STAT_LEVEL:
-			_set_base_stat_to_max(stat_name)
-			new_level = MAX_BASE_STAT_LEVEL
-		
-		_logger.log("🎉 " + stat_name.capitalize() + " LEVELED UP! Level " + str(current_level) + " → " + str(new_level) + " (XP: " + str(current_xp) + "/" + str(xp_needed) + ")")
+		_logger.log("🎉 " + stat_name.capitalize() + " LEVELED UP! Level " + str(old_level) + " → " + str(new_level) + " (XP: " + str(current_xp) + ", needed: " + str(xp_for_new_level) + ")")
 		
 		# Emit signal for UI updates and game events
 		base_stat_leveled_up.emit(stat_name, new_level)
@@ -159,9 +168,6 @@ func _check_base_stat_level_up(stat_name: String) -> void:
 		
 		# Update health/mana/stamina if relevant stat leveled up
 		_update_resource_caps(stat_name)
-		
-		# Recursively check for multiple level-ups
-		_check_base_stat_level_up(stat_name)
 
 
 func _get_base_stat_level(stat_name: String) -> int:
@@ -241,7 +247,13 @@ func get_base_stat_xp(stat_name: String) -> int:
 	return base_stat_xp[stat_name]
 
 
-func get_base_stat_xp_for_next_level(stat_name: String) -> int:
-	"""Returns XP needed to reach next level for a base stat."""
+func get_base_stat_xp_for_current_level(stat_name: String) -> int:
+	"""Returns the minimum total XP needed for the current level (using RuneScape XP formula)."""
 	var current_level: int = _get_base_stat_level(stat_name)
-	return current_level * BASE_STAT_XP_PER_LEVEL
+	return XPFormula.get_xp_for_current_level(current_level)
+
+
+func get_base_stat_xp_for_next_level(stat_name: String) -> int:
+	"""Returns the total XP needed to reach the next level for a base stat (using RuneScape XP formula)."""
+	var current_level: int = _get_base_stat_level(stat_name)
+	return XPFormula.get_xp_for_next_level(current_level)

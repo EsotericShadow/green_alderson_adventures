@@ -252,12 +252,12 @@ func _test_base_stat_leveling() -> void:
 	
 	# Test max level constant
 	_total_tests += 1
-	if BaseStatLeveling.MAX_BASE_STAT_LEVEL == 64:
+	if BaseStatLeveling.MAX_BASE_STAT_LEVEL == 110:
 		_passed_tests += 1
 		_logger.log("  ✓ Max base stat level: " + str(BaseStatLeveling.MAX_BASE_STAT_LEVEL))
 	else:
 		_failed_tests += 1
-		_logger.log_error("  ✗ Max base stat level wrong! Expected: 64, Got: " + str(BaseStatLeveling.MAX_BASE_STAT_LEVEL))
+		_logger.log_error("  ✗ Max base stat level wrong! Expected: 110, Got: " + str(BaseStatLeveling.MAX_BASE_STAT_LEVEL))
 
 
 func _test_stat_formulas() -> void:

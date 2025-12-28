@@ -27,9 +27,10 @@ func _ready() -> void:
 	_find_pool()
 	
 	if fireball_scene == null:
-		_log("⚠️ No fireball_scene assigned - will need pool")
+		# _log("⚠️ No fireball_scene assigned - will need pool")  # Commented out: spell casting logging
+		pass
 	else:
-		_log("✓ Fireball scene ready")
+		pass  # _log("✓ Fireball scene ready")  # Commented out: spell casting logging
 
 
 func _find_pool() -> void:
@@ -40,18 +41,19 @@ func _find_pool() -> void:
 			pool = scene.find_child("ProjectilePool", true, false)
 	
 	if pool != null:
-		_log("✓ ProjectilePool found")
+		# _log("✓ ProjectilePool found")  # Commented out: spell casting logging
+		pass
 	else:
-		_log("⚠️ No ProjectilePool found - will instantiate directly")
+		pass  # _log("⚠️ No ProjectilePool found - will instantiate directly")  # Commented out: spell casting logging
 
 
 ## Spawn a fireball in the given direction
 ## Returns the spawned fireball node
 func spawn_fireball(direction: String, spawn_pos: Vector2, z_index_value: int, spell_data: SpellData = null) -> Node:
-	_log("🔥 Spawning projectile...")
-	_log("   Direction: " + direction)
-	_log("   Position: " + str(spawn_pos))
-	_log("   Z-index: " + str(z_index_value))
+	# _log("🔥 Spawning projectile...")  # Commented out: spell casting logging
+	# _log("   Direction: " + direction)  # Commented out: spell casting logging
+	# _log("   Position: " + str(spawn_pos))  # Commented out: spell casting logging
+	# _log("   Z-index: " + str(z_index_value))  # Commented out: spell casting logging
 	
 	# Determine which projectile scene to use based on element
 	var projectile_scene: PackedScene = null
@@ -67,9 +69,10 @@ func spawn_fireball(direction: String, spawn_pos: Vector2, z_index_value: int, s
 				projectile_scene = load("res://scenes/projectiles/airball.tscn") as PackedScene
 		
 		if projectile_scene != null:
-			_log("   Using element-specific projectile: " + spell_data.element)
+			# _log("   Using element-specific projectile: " + spell_data.element)  # Commented out: spell casting logging
+			pass
 		else:
-			_log("   ⚠️ Element-specific scene not found, using fallback")
+			pass  # _log("   ⚠️ Element-specific scene not found, using fallback")  # Commented out: spell casting logging
 	
 	# Fallback to fireball_scene if element-specific scene not found
 	if projectile_scene == null:
@@ -88,7 +91,7 @@ func spawn_fireball(direction: String, spawn_pos: Vector2, z_index_value: int, s
 	                      projectile_scene == fireball_scene)
 	
 	if use_pool:
-		_log("   Source: Pool (fireball)")
+		# _log("   Source: Pool (fireball)")  # Commented out: spell casting logging
 		fb = pool.get_fireball()
 		if fb == null:
 			_log_error("Pool.get_fireball() returned null!")
@@ -98,25 +101,25 @@ func spawn_fireball(direction: String, spawn_pos: Vector2, z_index_value: int, s
 			parent.remove_child(fb)
 		get_tree().current_scene.add_child(fb)
 	else:
-		_log("   Source: Instantiate (element-specific)")
+		# _log("   Source: Instantiate (element-specific)")  # Commented out: spell casting logging
 		fb = projectile_scene.instantiate()
 		get_tree().current_scene.add_child(fb)
 	
 	fb.global_position = spawn_pos
 	
 	var dir_vec := DirectionUtils.dir_to_vector(direction)
-	_log("   Direction vector: " + str(dir_vec))
+	# _log("   Direction vector: " + str(dir_vec))  # Commented out: spell casting logging
 	
 	if fb.has_method("setup"):
 		fb.call("setup", dir_vec, owner_node, z_index_value, spell_data)
-		_log("   ✓ Projectile setup() called")
-		if spell_data != null:
-			_log("   ✓ SpellData provided: " + spell_data.display_name + " (" + spell_data.element + ")")
+		# _log("   ✓ Projectile setup() called")  # Commented out: spell casting logging
+		# if spell_data != null:
+		# 	_log("   ✓ SpellData provided: " + spell_data.display_name + " (" + spell_data.element + ")")  # Commented out: spell casting logging
 	else:
 		fb.z_index = z_index_value
-		_log("   ⚠️ Projectile has no setup() method - set z_index directly")
+		# _log("   ⚠️ Projectile has no setup() method - set z_index directly")  # Commented out: spell casting logging
 	
-	_log("   ✓ Projectile spawned successfully!")
+	# _log("   ✓ Projectile spawned successfully!")  # Commented out: spell casting logging
 	return fb
 
 

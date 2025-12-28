@@ -7,7 +7,8 @@ var _logger = GameLogger.create("[SPELL_SYSTEM] ")
 
 # Constants (LOCKED per SPEC.md)
 const ELEMENTS: Array[String] = ["fire", "water", "earth", "air"]
-const XP_PER_LEVEL_MULTIPLIER: int = 100  # XP needed = level * 100
+const MAX_ELEMENT_LEVEL: int = 110  # Maximum level for spell elements
+# XP system: Using RuneScape-style exponential XP curve (see XPFormula)
 
 # Signals (LOCKED NAMES per SPEC.md)
 signal element_leveled_up(element: String, new_level: int)
@@ -42,7 +43,7 @@ func _ready() -> void:
 	# (Already initialized in variable declarations, but ensure consistency)
 	_log("SpellSystem initialized")
 	_log("  Elements: " + str(ELEMENTS))
-	_log("  XP per level multiplier: " + str(XP_PER_LEVEL_MULTIPLIER))
+	_log("  XP System: RuneScape-style exponential curve")
 	for element in ELEMENTS:
 		_log("  " + element.capitalize() + ": Level " + str(element_levels[element]) + ", XP: " + str(element_xp[element]))
 	
@@ -69,9 +70,9 @@ func get_xp(element: String) -> int:
 
 
 func get_xp_for_next_level(element: String) -> int:
-	"""Returns the total XP needed to reach the next level."""
+	"""Returns the total XP needed to reach the next level (using RuneScape XP formula)."""
 	var current_level: int = get_level(element)
-	return current_level * XP_PER_LEVEL_MULTIPLIER
+	return XPFormula.get_xp_for_next_level(current_level)
 
 
 func gain_xp(element: String, amount: int) -> void:
@@ -105,16 +106,24 @@ func _check_level_up(element: String) -> void:
 		return
 	
 	var current_level: int = element_levels[element]
-	var xp_needed: int = get_xp_for_next_level(element)
 	var current_xp: int = element_xp[element]
 	
-	# Check if we have enough XP to level up
-	if current_xp >= xp_needed:
-		# Level up
-		element_levels[element] += 1
+	# Calculate what level this XP should correspond to (using RuneScape formula)
+	var calculated_level: int = XPFormula.get_level_from_xp(current_xp)
+	
+	# Cap calculated level to max
+	if calculated_level > MAX_ELEMENT_LEVEL:
+		calculated_level = MAX_ELEMENT_LEVEL
+	
+	# Check if we should level up
+	if calculated_level > current_level:
+		# Level up to the calculated level (could be multiple levels)
+		var old_level: int = current_level
+		element_levels[element] = calculated_level
 		var new_level: int = element_levels[element]
 		
-		_log("🎉 " + element.capitalize() + " LEVELED UP! Level " + str(current_level) + " → " + str(new_level) + " (XP: " + str(current_xp) + "/" + str(xp_needed) + ")")
+		var xp_for_new_level: int = XPFormula.get_xp_for_level(new_level)
+		_log("🎉 " + element.capitalize() + " LEVELED UP! Level " + str(old_level) + " → " + str(new_level) + " (XP: " + str(current_xp) + ", needed: " + str(xp_for_new_level) + ")")
 		
 		# Emit signal for UI updates and game events
 		element_leveled_up.emit(element, new_level)
@@ -125,13 +134,11 @@ func _check_level_up(element: String) -> void:
 			_log("  ✓ Emitted EventBus.level_up signal")
 		else:
 			_log("  ⚠ EventBus not available")
-		
-		# Recursively check for multiple level-ups (if XP is high enough)
-		_check_level_up(element)
 	else:
 		# Log progress towards next level
-		var xp_remaining: int = xp_needed - current_xp
-		_log("  📊 Progress: " + str(current_xp) + "/" + str(xp_needed) + " XP (" + str(xp_remaining) + " remaining for level " + str(current_level + 1) + ")")
+		var xp_for_next: int = XPFormula.get_xp_for_next_level(current_level)
+		var xp_remaining: int = xp_for_next - current_xp
+		_log("  📊 Progress: " + str(current_xp) + "/" + str(xp_for_next) + " XP (" + str(xp_remaining) + " remaining for level " + str(current_level + 1) + ")")
 
 
 func get_spell_damage(spell: SpellData) -> int:
@@ -239,10 +246,10 @@ func _validate_system() -> void:
 			_log_error("Invalid XP for " + element + ": " + str(element_xp[element]))
 			all_valid = false
 	
-	# Check XP calculation
+	# Check XP calculation (using RuneScape formula)
 	for element in ELEMENTS:
 		var level: int = element_levels[element]
-		var expected_xp_needed: int = level * XP_PER_LEVEL_MULTIPLIER
+		var expected_xp_needed: int = XPFormula.get_xp_for_next_level(level)
 		var actual_xp_needed: int = get_xp_for_next_level(element)
 		if expected_xp_needed != actual_xp_needed:
 			_log_error("XP calculation mismatch for " + element + ": expected " + str(expected_xp_needed) + ", got " + str(actual_xp_needed))

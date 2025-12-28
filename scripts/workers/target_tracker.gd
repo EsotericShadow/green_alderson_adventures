@@ -24,7 +24,7 @@ func _ready() -> void:
 	if owner_node != null:
 		spawn_position = owner_node.global_position
 		_logger = GameLogger.create("[" + owner_node.name + "/TargetTracker] ")
-		_logger.log("TargetTracker initialized (detection: " + str(detection_range) + ", lose: " + str(lose_range) + ")")
+		# _logger.log("TargetTracker initialized (detection: " + str(detection_range) + ", lose: " + str(lose_range) + ")")  # Commented out: enemy AI logging
 
 
 ## Set the target to track
@@ -32,14 +32,14 @@ func set_target(new_target: Node2D) -> void:
 	if target != new_target:
 		target = new_target
 		if target != null:
-			_logger.log("Target acquired: " + target.name)
+			# _logger.log("Target acquired: " + target.name)  # Commented out: enemy AI logging
 			target_acquired.emit(target)
 
 
 ## Clear the current target
 func clear_target() -> void:
 	if target != null:
-		_logger.log("Target lost")
+		# _logger.log("Target lost")  # Commented out: enemy AI logging
 		target = null
 		target_lost.emit()
 

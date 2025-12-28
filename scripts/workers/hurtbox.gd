@@ -33,14 +33,12 @@ func _ready() -> void:
 
 ## Called by Hitbox when it hits us
 func receive_hit(damage: int, knockback: Vector2, attacker: Node) -> void:
-	var attacker_name: String = str(attacker.name) if attacker != null else "unknown"
-	
 	if is_invincible:
-		_log("🛡️ Hit received but INVINCIBLE - ignoring (from " + attacker_name + ")")
+		# _log("🛡️ Hit received but INVINCIBLE - ignoring (from " + (str(attacker.name) if attacker != null else "unknown") + ")")  # Commented out: enemy AI logging
 		return
 	
-	_log("💥 HIT RECEIVED! Damage: " + str(damage) + " from " + attacker_name)
-	_log("   Emitting 'hurt' signal...")
+	# _log("💥 HIT RECEIVED! Damage: " + str(damage) + " from " + (str(attacker.name) if attacker != null else "unknown"))  # Commented out: enemy AI logging (health changes logged in PlayerStats)
+	# _log("   Emitting 'hurt' signal...")  # Commented out: enemy AI logging
 	
 	hurt.emit(damage, knockback, attacker)
 	
@@ -49,14 +47,14 @@ func receive_hit(damage: int, knockback: Vector2, attacker: Node) -> void:
 
 
 func _start_invincibility() -> void:
-	_log("🛡️ Invincibility START (" + str(invincibility_time) + "s)")
+	# _log("🛡️ Invincibility START (" + str(invincibility_time) + "s)")  # Commented out: enemy AI logging
 	is_invincible = true
 	_start_blink()
 	get_tree().create_timer(invincibility_time).timeout.connect(_end_invincibility)
 
 
 func _end_invincibility() -> void:
-	_log("🛡️ Invincibility END")
+	# _log("🛡️ Invincibility END")  # Commented out: enemy AI logging
 	is_invincible = false
 	_stop_blink()
 

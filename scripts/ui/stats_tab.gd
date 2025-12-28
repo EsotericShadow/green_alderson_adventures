@@ -57,33 +57,45 @@ func _update_base_stats() -> void:
 	# Update base stat rows with XP information
 	if resilience_row.has_method("update_stat_with_xp"):
 		var level: int = PlayerStats.base_resilience
-		var current_xp: int = PlayerStats.get_base_stat_xp("resilience")
-		var xp_needed: int = PlayerStats.get_base_stat_xp_for_next_level("resilience")
-		resilience_row.update_stat_with_xp("Resilience", level, current_xp, xp_needed)
+		var total_xp: int = PlayerStats.get_base_stat_xp("resilience")
+		var xp_for_current: int = BaseStatLeveling.get_base_stat_xp_for_current_level("resilience") if BaseStatLeveling != null else 0
+		var xp_for_next: int = PlayerStats.get_base_stat_xp_for_next_level("resilience")
+		var xp_in_level: int = total_xp - xp_for_current
+		var xp_needed_in_level: int = xp_for_next - xp_for_current
+		resilience_row.update_stat_with_xp("Resilience", level, xp_in_level, xp_needed_in_level)
 	elif resilience_row.has_method("update_stat"):
 		resilience_row.update_stat("Resilience", PlayerStats.get_total_resilience())
 	
 	if agility_row.has_method("update_stat_with_xp"):
 		var level: int = PlayerStats.base_agility
-		var current_xp: int = PlayerStats.get_base_stat_xp("agility")
-		var xp_needed: int = PlayerStats.get_base_stat_xp_for_next_level("agility")
-		agility_row.update_stat_with_xp("Agility", level, current_xp, xp_needed)
+		var total_xp: int = PlayerStats.get_base_stat_xp("agility")
+		var xp_for_current: int = BaseStatLeveling.get_base_stat_xp_for_current_level("agility") if BaseStatLeveling != null else 0
+		var xp_for_next: int = PlayerStats.get_base_stat_xp_for_next_level("agility")
+		var xp_in_level: int = total_xp - xp_for_current
+		var xp_needed_in_level: int = xp_for_next - xp_for_current
+		agility_row.update_stat_with_xp("Agility", level, xp_in_level, xp_needed_in_level)
 	elif agility_row.has_method("update_stat"):
 		agility_row.update_stat("Agility", PlayerStats.get_total_agility())
 	
 	if int_row.has_method("update_stat_with_xp"):
 		var level: int = PlayerStats.base_int
-		var current_xp: int = PlayerStats.get_base_stat_xp("int")
-		var xp_needed: int = PlayerStats.get_base_stat_xp_for_next_level("int")
-		int_row.update_stat_with_xp("INT", level, current_xp, xp_needed)
+		var total_xp: int = PlayerStats.get_base_stat_xp("int")
+		var xp_for_current: int = BaseStatLeveling.get_base_stat_xp_for_current_level("int") if BaseStatLeveling != null else 0
+		var xp_for_next: int = PlayerStats.get_base_stat_xp_for_next_level("int")
+		var xp_in_level: int = total_xp - xp_for_current
+		var xp_needed_in_level: int = xp_for_next - xp_for_current
+		int_row.update_stat_with_xp("INT", level, xp_in_level, xp_needed_in_level)
 	elif int_row.has_method("update_stat"):
 		int_row.update_stat("INT", PlayerStats.get_total_int())
 	
 	if vit_row.has_method("update_stat_with_xp"):
 		var level: int = PlayerStats.base_vit
-		var current_xp: int = PlayerStats.get_base_stat_xp("vit")
-		var xp_needed: int = PlayerStats.get_base_stat_xp_for_next_level("vit")
-		vit_row.update_stat_with_xp("VIT", level, current_xp, xp_needed)
+		var total_xp: int = PlayerStats.get_base_stat_xp("vit")
+		var xp_for_current: int = BaseStatLeveling.get_base_stat_xp_for_current_level("vit") if BaseStatLeveling != null else 0
+		var xp_for_next: int = PlayerStats.get_base_stat_xp_for_next_level("vit")
+		var xp_in_level: int = total_xp - xp_for_current
+		var xp_needed_in_level: int = xp_for_next - xp_for_current
+		vit_row.update_stat_with_xp("VIT", level, xp_in_level, xp_needed_in_level)
 	elif vit_row.has_method("update_stat"):
 		vit_row.update_stat("VIT", PlayerStats.get_total_vit())
 

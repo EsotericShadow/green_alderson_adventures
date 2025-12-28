@@ -20,7 +20,7 @@ func _ready() -> void:
 		push_error("Mover: Parent must be CharacterBody2D")
 		return
 	_logger = GameLogger.create("[" + body.name + "/Mover] ")
-	_logger.log("Mover initialized")
+	# _logger.log("Mover initialized")  # Commented out: movement logging
 
 
 func _physics_process(delta: float) -> void:
@@ -54,7 +54,7 @@ func stop() -> void:
 ## Apply knockback force
 func apply_knockback(force: Vector2) -> void:
 	knockback_velocity = force
-	_logger.log("Knockback applied: " + str(force))
+	# _logger.log("Knockback applied: " + str(force))  # Commented out: movement logging
 
 
 ## Check if currently moving (voluntary movement, not knockback)

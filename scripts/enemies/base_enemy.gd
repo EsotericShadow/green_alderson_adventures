@@ -82,58 +82,59 @@ func _log_error(msg: String) -> void:
 func _ready() -> void:
 	_logger = GameLogger.create("[" + name + "] ")
 	add_to_group("enemy")
-	_log("Enemy spawned at " + str(global_position))
+	# _log("Enemy spawned at " + str(global_position))  # Commented out: enemy AI logging
 	_setup_workers()
 	_connect_signals()
 
 
 func _setup_workers() -> void:
-	_log("Checking workers...")
+	# _log("Checking workers...")  # Commented out: enemy AI logging
 	
 	if mover == null:
 		_log_error("Mover is MISSING! Movement will not work.")
-	else:
-		_log("  ✓ Mover ready")
+	# else:
+	# 	_log("  ✓ Mover ready")  # Commented out: enemy AI logging
 	
 	if animator == null:
 		_log_error("Animator is MISSING! Animations will not work.")
 	else:
 		animator.use_4_directions = true
-		_log("  ✓ Animator ready (4-directional)")
+		# _log("  ✓ Animator ready (4-directional)")  # Commented out: enemy AI logging
 	
 	if health_tracker == null:
 		_log_error("HealthTracker is MISSING!")
 	else:
 		health_tracker.set_max_health(max_health)
-		_log("  ✓ HealthTracker ready (HP: " + str(max_health) + ")")
+		# _log("  ✓ HealthTracker ready (HP: " + str(max_health) + ")")  # Commented out: enemy AI logging
 	
 	if hurtbox == null:
 		_log_error("Hurtbox is MISSING! Cannot take damage.")
 	else:
 		hurtbox.owner_node = self
-		_log("  ✓ Hurtbox ready")
+		# _log("  ✓ Hurtbox ready")  # Commented out: enemy AI logging
 	
 	if hitbox == null:
 		_log_error("Hitbox is MISSING! Cannot deal damage.")
 	else:
 		hitbox.owner_node = self
+		# Damage is set from attack_damage (may be randomized in subclass _ready())
 		hitbox.damage = attack_damage
 		hitbox.disable()
-		_log("  ✓ Hitbox ready (damage: " + str(attack_damage) + ")")
+		# _log("  ✓ Hitbox ready (damage: " + str(attack_damage) + ")")  # Commented out: enemy AI logging
 	
 	if target_tracker == null:
 		_log_error("TargetTracker is MISSING! Cannot track player.")
 	else:
 		target_tracker.detection_range = detection_range
 		target_tracker.lose_range = detection_range * 1.5
-		_log("  ✓ TargetTracker ready (range: " + str(detection_range) + ")")
+		# _log("  ✓ TargetTracker ready (range: " + str(detection_range) + ")")  # Commented out: enemy AI logging
 	
 	if detection_area == null:
 		_log_error("DetectionArea is MISSING! Cannot detect player.")
-	else:
-		_log("  ✓ DetectionArea ready")
+	# else:
+	# 	_log("  ✓ DetectionArea ready")  # Commented out: enemy AI logging
 	
-	_log("Setup complete!")
+	# _log("Setup complete!")  # Commented out: enemy AI logging
 
 
 func _connect_signals() -> void:
@@ -187,7 +188,7 @@ func _process_idle() -> void:
 	
 	# Check if target acquired (either from tracker or detection area)
 	if target_tracker != null and target_tracker.has_target():
-		_log("👁️ Target detected! Switching to CHASE")
+		# _log("👁️ Target detected! Switching to CHASE")  # Commented out: enemy AI logging
 		_change_state(State.CHASE)
 		return
 	
@@ -196,7 +197,7 @@ func _process_idle() -> void:
 		var bodies := detection_area.get_overlapping_bodies()
 		for body in bodies:
 			if body.is_in_group("player"):
-				_log("👁️ Player found in detection area - acquiring target")
+				# _log("👁️ Player found in detection area - acquiring target")  # Commented out: enemy AI logging
 				if target_tracker != null:
 					target_tracker.set_target(body)
 					_change_state(State.CHASE)
@@ -210,12 +211,12 @@ func _process_chase() -> void:
 	
 	# Lost target?
 	if not target_tracker.has_target():
-		_log("👁️ Lost target - returning to spawn")
+		# _log("👁️ Lost target - returning to spawn")  # Commented out: enemy AI logging
 		_change_state(State.RETURN)
 		return
 	
 	if target_tracker.is_target_too_far():
-		_log("👁️ Target too far (" + str(int(target_tracker.get_distance_to_target())) + " > " + str(int(target_tracker.lose_range)) + ") - giving up")
+		# _log("👁️ Target too far (" + str(int(target_tracker.get_distance_to_target())) + " > " + str(int(target_tracker.lose_range)) + ") - giving up")  # Commented out: enemy AI logging
 		target_tracker.clear_target()
 		_change_state(State.RETURN)
 		return
@@ -233,7 +234,7 @@ func _process_chase() -> void:
 	# PROVEN PATTERN: During backoff, enemy backs away to give player escape window
 	if post_attack_backoff_timer > 0.0:
 		# Still in backoff period - BACK AWAY from player (proven anti-lock-on pattern)
-		_log("⏳ Post-attack backoff active (" + str(post_attack_backoff_timer) + "s remaining) - backing away")
+		# _log("⏳ Post-attack backoff active (" + str(post_attack_backoff_timer) + "s remaining) - backing away")  # Commented out: enemy AI logging
 		var backoff_dir := target_tracker.get_direction_to_target()
 		if mover != null:
 			# Back away from player during recovery period
@@ -246,7 +247,7 @@ func _process_chase() -> void:
 	
 	# Only attack if: within range, cooldown ready, backoff done, AND not too close (separation distance)
 	if dist <= attack_range and dist >= separation_distance and attack_cooldown_timer <= 0.0:
-		_log("⚔️ In range (" + str(int(dist)) + " <= " + str(int(attack_range)) + ") - ATTACKING!")
+		# _log("⚔️ In range (" + str(int(dist)) + " <= " + str(int(attack_range)) + ") - ATTACKING!")  # Commented out: enemy AI logging
 		_change_state(State.ATTACK)
 		return
 	
@@ -258,7 +259,7 @@ func _process_chase() -> void:
 		if dist < separation_distance:
 			dir = -dir  # Reverse direction to back away
 			mover.move(dir, move_speed * 0.8)  # Back away slower
-			_log("📏 Too close (" + str(int(dist)) + " < " + str(int(separation_distance)) + ") - backing away")
+			# _log("📏 Too close (" + str(int(dist)) + " < " + str(int(separation_distance)) + ") - backing away")  # Commented out: enemy AI logging
 		else:
 			# Safe to approach or maintain position
 			mover.move(dir, move_speed)
@@ -282,7 +283,7 @@ func _process_hurt() -> void:
 	
 	# Wait for hurt duration
 	if hurt_timer <= 0.0:
-		_log("💢 Hurt recovery complete")
+		# _log("💢 Hurt recovery complete")  # Commented out: enemy AI logging
 		if target_tracker != null and target_tracker.has_target():
 			_change_state(State.CHASE)
 		else:
@@ -296,7 +297,7 @@ func _process_return() -> void:
 	
 	# Reached spawn?
 	if target_tracker.is_at_spawn():
-		_log("🏠 Reached spawn - going idle")
+		# _log("🏠 Reached spawn - going idle")  # Commented out: enemy AI logging
 		# Clear target when returning to spawn to reset aggression
 		if target_tracker != null:
 			target_tracker.clear_target()
@@ -320,7 +321,7 @@ func _change_state(new_state: State) -> void:
 	var old_state := current_state
 	current_state = new_state
 	
-	_log("📍 State: " + _state_name(old_state) + " → " + _state_name(new_state))
+	# _log("📍 State: " + _state_name(old_state) + " → " + _state_name(new_state))  # Commented out: enemy AI logging
 	
 	# Handle state entry
 	match new_state:
@@ -336,30 +337,30 @@ func _change_state(new_state: State) -> void:
 
 func _start_attack() -> void:
 	attack_cooldown_timer = attack_cooldown
-	_log("⚔️ Starting attack!")
-	_log("   Cooldown set to " + str(attack_cooldown) + "s")
+	# _log("⚔️ Starting attack!")  # Commented out: enemy AI logging
+	# _log("   Cooldown set to " + str(attack_cooldown) + "s")  # Commented out: enemy AI logging
 	
 	# Face target
 	if target_tracker != null and target_tracker.has_target():
 		var dir := target_tracker.get_direction_to_target()
 		last_direction = DirectionUtils.vector_to_dir4(dir, last_direction)
-		_log("   Facing: " + last_direction)
+		# _log("   Facing: " + last_direction)  # Commented out: enemy AI logging
 	
 	# Play attack animation
 	if animator != null:
-		_log("   Playing: attack_" + last_direction)
+		# _log("   Playing: attack_" + last_direction)  # Commented out: enemy AI logging
 		animator.play_one_shot("attack", last_direction)
 	else:
 		_log_error("Cannot play attack animation - Animator is null!")
 	
 	# Enable hitbox after delay
-	_log("   Hitbox activates in " + str(attack_hit_delay) + "s")
+	# _log("   Hitbox activates in " + str(attack_hit_delay) + "s")  # Commented out: enemy AI logging
 	get_tree().create_timer(attack_hit_delay).timeout.connect(_enable_hitbox)
 
 
 func _enable_hitbox() -> void:
 	if current_state != State.ATTACK:
-		_log("⚔️ Hitbox activation cancelled - no longer in ATTACK state")
+		# _log("⚔️ Hitbox activation cancelled - no longer in ATTACK state")  # Commented out: enemy AI logging
 		return
 	
 	if hitbox == null:
@@ -368,7 +369,7 @@ func _enable_hitbox() -> void:
 	
 	# Position hitbox based on facing direction
 	_position_hitbox()
-	_log("⚔️ HITBOX ACTIVE for " + str(attack_hit_duration) + "s (position: " + str(hitbox.position) + ")")
+	# _log("⚔️ HITBOX ACTIVE for " + str(attack_hit_duration) + "s (position: " + str(hitbox.position) + ")")  # Commented out: enemy AI logging
 	hitbox.enable_for(attack_hit_duration)
 
 
@@ -388,33 +389,33 @@ func _position_hitbox() -> void:
 
 func _start_hurt() -> void:
 	hurt_timer = hurt_duration
-	_log("💢 HURT! Recovery time: " + str(hurt_duration) + "s")
+	# _log("💢 HURT! Recovery time: " + str(hurt_duration) + "s")  # Commented out: enemy AI logging
 	
 	if animator != null:
 		animator.force_stop_one_shot()  # Interrupt any current animation
 		animator.play_one_shot("hurt", last_direction)
-		_log("   Playing: hurt_" + last_direction)
+		# _log("   Playing: hurt_" + last_direction)  # Commented out: enemy AI logging
 	else:
 		_log_error("Cannot play hurt animation - Animator is null!")
 
 
 func _start_death() -> void:
 	is_dead = true
-	_log("💀 DEATH!")
+	# _log("💀 DEATH!")  # Commented out: enemy AI logging
 	
 	if mover != null:
 		mover.stop()
 	
 	if hurtbox != null:
 		hurtbox.disable()
-		_log("   Hurtbox disabled")
+		# _log("   Hurtbox disabled")  # Commented out: enemy AI logging
 	if hitbox != null:
 		hitbox.disable()
-		_log("   Hitbox disabled")
+		# _log("   Hitbox disabled")  # Commented out: enemy AI logging
 	
 	if animator != null:
 		animator.play_one_shot("death", last_direction)
-		_log("   Playing: death_" + last_direction)
+		# _log("   Playing: death_" + last_direction)  # Commented out: enemy AI logging
 	else:
 		_log_error("Cannot play death animation - Animator is null!")
 
@@ -442,7 +443,7 @@ func _flash_red() -> void:
 	if _hit_flash_tween != null and _hit_flash_tween.is_valid():
 		_hit_flash_tween.kill()
 	
-	_log("💥 FLASH RED")
+	# _log("💥 FLASH RED")  # Commented out: enemy AI logging
 	sprite.modulate = Color(1.0, 0.3, 0.3, 1.0)  # Red tint
 	
 	_hit_flash_tween = create_tween()
@@ -453,7 +454,7 @@ func _flash_red() -> void:
 
 func _on_body_entered_detection(body: Node2D) -> void:
 	if body.is_in_group("player"):
-		_log("👁️ PLAYER DETECTED! (" + body.name + " entered detection area)")
+		# _log("👁️ PLAYER DETECTED! (" + body.name + " entered detection area)")  # Commented out: enemy AI logging
 		if target_tracker != null:
 			target_tracker.set_target(body)
 		else:
@@ -462,18 +463,18 @@ func _on_body_entered_detection(body: Node2D) -> void:
 
 func _on_body_exited_detection(body: Node2D) -> void:
 	if target_tracker != null and body == target_tracker.target:
-		_log("👁️ Player left detection area (but still tracking...)")
+		# _log("👁️ Player left detection area (but still tracking...)")  # Commented out: enemy AI logging
 		# Don't immediately lose target, let distance check handle it
+		pass
 
 
 func _on_hurt(damage: int, knockback: Vector2, attacker: Node) -> void:
 	if is_dead:
-		_log("💢 Hit received but already dead - ignoring")
+		# _log("💢 Hit received but already dead - ignoring")  # Commented out: enemy AI logging
 		return
 	
-	var attacker_name: String = str(attacker.name) if attacker != null else "unknown"
-	_log("💥 HIT! Damage: " + str(damage) + " from " + attacker_name)
-	_log("   Knockback: " + str(knockback))
+	# _log("💥 HIT! Damage: " + str(damage) + " from " + (str(attacker.name) if attacker != null else "unknown"))  # Commented out: enemy AI logging (health changes logged in HealthTracker)
+	# _log("   Knockback: " + str(knockback))  # Commented out: enemy AI logging
 	
 	# Visual feedback - flash red!
 	_flash_red()
@@ -481,13 +482,12 @@ func _on_hurt(damage: int, knockback: Vector2, attacker: Node) -> void:
 	# Apply knockback
 	if mover != null:
 		mover.apply_knockback(knockback)
-		_log("   Applied knockback")
+		# _log("   Applied knockback")  # Commented out: enemy AI logging
 	
 	# Apply damage
 	if health_tracker != null:
-		var hp_before := health_tracker.current_health
 		health_tracker.take_damage(damage, attacker)
-		_log("   Health: " + str(hp_before) + " → " + str(health_tracker.current_health))
+		# _log("   Health: " + str(health_tracker.current_health) + "/" + str(health_tracker.max_health))  # Commented out: enemy AI logging (health changes logged in HealthTracker)
 	
 	# Enter hurt state (unless dead)
 	if not is_dead:
@@ -495,33 +495,32 @@ func _on_hurt(damage: int, knockback: Vector2, attacker: Node) -> void:
 
 
 func _on_died(killer: Node) -> void:
-	var killer_name: String = str(killer.name) if killer != null else "unknown"
-	_log("💀 KILLED by " + killer_name + "!")
+	# _log("💀 KILLED by " + (str(killer.name) if killer != null else "unknown") + "!")  # Commented out: enemy AI logging
 	_change_state(State.DEATH)
 
 
 func _on_animation_finished(anim_name: String) -> void:
-	_log("🎬 Animation finished: " + anim_name)
+	# _log("🎬 Animation finished: " + anim_name)  # Commented out: enemy AI logging
 	
 	# ⚠️⚠️⚠️ LOCKED POST-ATTACK LOGIC - DO NOT MODIFY ⚠️⚠️⚠️
 	# This timer system prevents spam attacks by requiring a pause after each attack
 	# Removing or reducing this will cause lock-on spam attack behavior
 	# Attack finished
 	if anim_name.begins_with("attack"):
-		_log("   Attack complete - deciding next action...")
+		# _log("   Attack complete - deciding next action...")  # Commented out: enemy AI logging
 		# Start post-attack backoff timer (prevents immediate spam attacks)
 		post_attack_backoff_timer = post_attack_backoff_time
-		_log("   Post-attack backoff started (" + str(post_attack_backoff_time) + "s) - can't attack again until timer expires")
+		# _log("   Post-attack backoff started (" + str(post_attack_backoff_time) + "s) - can't attack again until timer expires")  # Commented out: enemy AI logging
 		if target_tracker != null and target_tracker.has_target():
-			_log("   Still have target - continuing chase")
+			# _log("   Still have target - continuing chase")  # Commented out: enemy AI logging
 			_change_state(State.CHASE)
 		else:
-			_log("   No target - going idle")
+			# _log("   No target - going idle")  # Commented out: enemy AI logging
 			_change_state(State.IDLE)
 	
 	# Death animation finished
 	elif anim_name.begins_with("death"):
-		_log("   Death animation complete - removing from scene")
+		# _log("   Death animation complete - removing from scene")  # Commented out: enemy AI logging
 		enemy_died.emit()
 		queue_free()
 

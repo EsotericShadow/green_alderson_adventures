@@ -52,7 +52,7 @@ func play(base_name: String, direction: String) -> void:
 	
 	if sprite.animation != anim_name:
 		if anim_name != _last_anim:
-			_log("▶️ " + anim_name)
+			# _log("▶️ " + anim_name)  # Commented out: animation logging
 			_last_anim = anim_name
 		sprite.play(anim_name)
 
@@ -68,15 +68,15 @@ func play_one_shot(base_name: String, direction: String) -> void:
 	_update_flip(direction)
 	
 	if sprite.sprite_frames.has_animation(anim_name):
-		_log("🎬 ONE-SHOT: " + anim_name)
+		# _log("🎬 ONE-SHOT: " + anim_name)  # Commented out: animation logging
 		is_one_shot_playing = true
 		current_one_shot = anim_name
 		_last_anim = anim_name
 		sprite.play(anim_name)
 	else:
 		_log_error("Animation '" + anim_name + "' NOT FOUND!")
-		_log("   Requested: " + base_name + " + " + direction)
-		_log("   Resolved to: " + anim_name)
+		_log_error("   Requested: " + base_name + " + " + direction)  # Keep errors
+		_log_error("   Resolved to: " + anim_name)  # Keep errors
 
 
 ## Check if a one-shot animation is currently playing
@@ -135,7 +135,7 @@ func _update_flip(direction: String) -> void:
 func _on_animation_finished() -> void:
 	if is_one_shot_playing:
 		var anim := current_one_shot
-		_log("🎬 One-shot finished: " + anim)
+		# _log("🎬 One-shot finished: " + anim)  # Commented out: animation logging
 		is_one_shot_playing = false
 		current_one_shot = ""
 		finished.emit(anim)

@@ -235,7 +235,7 @@ theme_override_constants/separation = 2
 
 [node name="StrRow" type="Control" parent="Control/PanelContainer/MarginContainer/VBoxContainer/TabContent/StatsPanel/VBoxContainer/BaseStatsSection/VBoxContainer"]
 layout_mode = 2
-custom_minimum_size = Vector2(0, 30)
+custom_minimum_size = Vector2(0, 50)
 script = ExtResource("5_base_stat_row")
 
 [node name="HBoxContainer" type="HBoxContainer" parent="Control/PanelContainer/MarginContainer/VBoxContainer/TabContent/StatsPanel/VBoxContainer/BaseStatsSection/VBoxContainer/StrRow"]
@@ -267,9 +267,35 @@ theme_override_font_sizes/font_size = 11
 text = "5"
 horizontal_alignment = 2
 
+[node name="VBoxContainer" type="VBoxContainer" parent="Control/PanelContainer/MarginContainer/VBoxContainer/TabContent/StatsPanel/VBoxContainer/BaseStatsSection/VBoxContainer/StrRow/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 2
+
+[node name="LevelLabel" type="Label" parent="Control/PanelContainer/MarginContainer/VBoxContainer/TabContent/StatsPanel/VBoxContainer/BaseStatsSection/VBoxContainer/StrRow/HBoxContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 0
+custom_minimum_size = Vector2(0, 12)
+theme_override_font_sizes/font_size = 10
+text = "Lv. 5"
+
+[node name="XPBar" type="ProgressBar" parent="Control/PanelContainer/MarginContainer/VBoxContainer/TabContent/StatsPanel/VBoxContainer/BaseStatsSection/VBoxContainer/StrRow/HBoxContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 0
+custom_minimum_size = Vector2(0, 8)
+max_value = 100.0
+show_percentage = false
+
+[node name="XPLabel" type="Label" parent="Control/PanelContainer/MarginContainer/VBoxContainer/TabContent/StatsPanel/VBoxContainer/BaseStatsSection/VBoxContainer/StrRow/HBoxContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 0
+custom_minimum_size = Vector2(0, 10)
+text = "0 / 100"
+theme_override_font_sizes/font_size = 9
+
 [node name="DexRow" type="Control" parent="Control/PanelContainer/MarginContainer/VBoxContainer/TabContent/StatsPanel/VBoxContainer/BaseStatsSection/VBoxContainer"]
 layout_mode = 2
-custom_minimum_size = Vector2(0, 28)
+custom_minimum_size = Vector2(0, 50)
 script = ExtResource("5_base_stat_row")
 
 [node name="HBoxContainer" type="HBoxContainer" parent="Control/PanelContainer/MarginContainer/VBoxContainer/TabContent/StatsPanel/VBoxContainer/BaseStatsSection/VBoxContainer/DexRow"]
@@ -301,9 +327,35 @@ theme_override_font_sizes/font_size = 11
 text = "5"
 horizontal_alignment = 2
 
+[node name="VBoxContainer" type="VBoxContainer" parent="Control/PanelContainer/MarginContainer/VBoxContainer/TabContent/StatsPanel/VBoxContainer/BaseStatsSection/VBoxContainer/DexRow/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 2
+
+[node name="LevelLabel" type="Label" parent="Control/PanelContainer/MarginContainer/VBoxContainer/TabContent/StatsPanel/VBoxContainer/BaseStatsSection/VBoxContainer/DexRow/HBoxContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 0
+custom_minimum_size = Vector2(0, 12)
+theme_override_font_sizes/font_size = 10
+text = "Lv. 5"
+
+[node name="XPBar" type="ProgressBar" parent="Control/PanelContainer/MarginContainer/VBoxContainer/TabContent/StatsPanel/VBoxContainer/BaseStatsSection/VBoxContainer/DexRow/HBoxContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 0
+custom_minimum_size = Vector2(0, 8)
+max_value = 100.0
+show_percentage = false
+
+[node name="XPLabel" type="Label" parent="Control/PanelContainer/MarginContainer/VBoxContainer/TabContent/StatsPanel/VBoxContainer/BaseStatsSection/VBoxContainer/DexRow/HBoxContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 0
+custom_minimum_size = Vector2(0, 10)
+text = "0 / 100"
+theme_override_font_sizes/font_size = 9
+
 [node name="IntRow" type="Control" parent="Control/PanelContainer/MarginContainer/VBoxContainer/TabContent/StatsPanel/VBoxContainer/BaseStatsSection/VBoxContainer"]
 layout_mode = 2
-custom_minimum_size = Vector2(0, 28)
+custom_minimum_size = Vector2(0, 50)
 script = ExtResource("5_base_stat_row")
 
 [node name="HBoxContainer" type="HBoxContainer" parent="Control/PanelContainer/MarginContainer/VBoxContainer/TabContent/StatsPanel/VBoxContainer/BaseStatsSection/VBoxContainer/IntRow"]
@@ -335,9 +387,35 @@ theme_override_font_sizes/font_size = 11
 text = "5"
 horizontal_alignment = 2
 
+[node name="VBoxContainer" type="VBoxContainer" parent="Control/PanelContainer/MarginContainer/VBoxContainer/TabContent/StatsPanel/VBoxContainer/BaseStatsSection/VBoxContainer/IntRow/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 2
+
+[node name="LevelLabel" type="Label" parent="Control/PanelContainer/MarginContainer/VBoxContainer/TabContent/StatsPanel/VBoxContainer/BaseStatsSection/VBoxContainer/IntRow/HBoxContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 0
+custom_minimum_size = Vector2(0, 12)
+theme_override_font_sizes/font_size = 10
+text = "Lv. 5"
+
+[node name="XPBar" type="ProgressBar" parent="Control/PanelContainer/MarginContainer/VBoxContainer/TabContent/StatsPanel/VBoxContainer/BaseStatsSection/VBoxContainer/IntRow/HBoxContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 0
+custom_minimum_size = Vector2(0, 8)
+max_value = 100.0
+show_percentage = false
+
+[node name="XPLabel" type="Label" parent="Control/PanelContainer/MarginContainer/VBoxContainer/TabContent/StatsPanel/VBoxContainer/BaseStatsSection/VBoxContainer/IntRow/HBoxContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 0
+custom_minimum_size = Vector2(0, 10)
+text = "0 / 100"
+theme_override_font_sizes/font_size = 9
+
 [node name="VitRow" type="Control" parent="Control/PanelContainer/MarginContainer/VBoxContainer/TabContent/StatsPanel/VBoxContainer/BaseStatsSection/VBoxContainer"]
 layout_mode = 2
-custom_minimum_size = Vector2(0, 28)
+custom_minimum_size = Vector2(0, 50)
 script = ExtResource("5_base_stat_row")
 
 [node name="HBoxContainer" type="HBoxContainer" parent="Control/PanelContainer/MarginContainer/VBoxContainer/TabContent/StatsPanel/VBoxContainer/BaseStatsSection/VBoxContainer/VitRow"]
@@ -368,6 +446,32 @@ layout_mode = 2
 theme_override_font_sizes/font_size = 11
 text = "5"
 horizontal_alignment = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Control/PanelContainer/MarginContainer/VBoxContainer/TabContent/StatsPanel/VBoxContainer/BaseStatsSection/VBoxContainer/VitRow/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 2
+
+[node name="LevelLabel" type="Label" parent="Control/PanelContainer/MarginContainer/VBoxContainer/TabContent/StatsPanel/VBoxContainer/BaseStatsSection/VBoxContainer/VitRow/HBoxContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 0
+custom_minimum_size = Vector2(0, 12)
+theme_override_font_sizes/font_size = 10
+text = "Lv. 5"
+
+[node name="XPBar" type="ProgressBar" parent="Control/PanelContainer/MarginContainer/VBoxContainer/TabContent/StatsPanel/VBoxContainer/BaseStatsSection/VBoxContainer/VitRow/HBoxContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 0
+custom_minimum_size = Vector2(0, 8)
+max_value = 100.0
+show_percentage = false
+
+[node name="XPLabel" type="Label" parent="Control/PanelContainer/MarginContainer/VBoxContainer/TabContent/StatsPanel/VBoxContainer/BaseStatsSection/VBoxContainer/VitRow/HBoxContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 0
+custom_minimum_size = Vector2(0, 10)
+text = "0 / 100"
+theme_override_font_sizes/font_size = 9
 
 [node name="MagicSkillsSection" type="VBoxContainer" parent="Control/PanelContainer/MarginContainer/VBoxContainer/TabContent/StatsPanel/VBoxContainer"]
 layout_mode = 2

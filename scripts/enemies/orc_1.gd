@@ -28,7 +28,11 @@ func _ready() -> void:
 	# ⚠️ LOCKED: Orc-specific stats - TUNED FOR BALANCED COMBAT (prevents spam, allows engagement)
 	max_health = 80
 	move_speed = 70.0          # Slightly faster chase
-	attack_damage = 15
+	# Damage: Random between 1/5th (20) and 1/3rd (33) of default player max HP (100)
+	var default_player_max_hp: int = 100
+	var min_damage: int = int(default_player_max_hp / 5.0)  # 20
+	var max_damage: int = int(default_player_max_hp / 3.0)  # 33
+	attack_damage = randi_range(min_damage, max_damage)
 	attack_range = 45.0        # Slightly longer reach
 	detection_range = 200.0    # Notices player sooner
 	attack_cooldown = 1.1      # ⚠️ LOCKED: Reasonable cooldown to prevent spam (was 0.9) - DO NOT REDUCE BELOW 1.0

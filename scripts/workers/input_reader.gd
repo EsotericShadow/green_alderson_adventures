@@ -16,7 +16,7 @@ var _previous_run_modifier_pressed: bool = false
 
 func _ready() -> void:
 	_logger = GameLogger.create("[" + get_parent().name + "/InputReader] ")
-	_logger.log("InputReader initialized")
+	# _logger.log("InputReader initialized")  # Commented out: movement logging
 	_previous_run_modifier_pressed = is_run_modifier_pressed()
 
 
@@ -140,11 +140,11 @@ func is_action_pressed(action: String) -> bool:
 ## Disable input reading
 func disable() -> void:
 	enabled = false
-	_logger.log("Input disabled")
+	# _logger.log("Input disabled")  # Commented out: movement logging
 
 
 ## Enable input reading
 func enable() -> void:
 	enabled = true
-	_logger.log("Input enabled")
+	# _logger.log("Input enabled")  # Commented out: movement logging
 

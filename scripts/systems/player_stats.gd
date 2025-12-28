@@ -11,6 +11,7 @@ signal mana_changed(current: int, maximum: int)
 signal stamina_changed(current: int, maximum: int)
 signal gold_changed(amount: int)
 signal stat_changed(stat_name: String, new_value: int)
+signal character_level_changed(new_level: int)
 signal player_died
 
 # Base Stats (RENAMED: STR→Resilience, DEX→Agility)
@@ -49,6 +50,18 @@ func _ready() -> void:
 	mana = get_max_mana()
 	stamina = get_max_stamina()
 	_logger.log("Initialized: Health=" + str(health) + ", Mana=" + str(mana) + ", Stamina=" + str(stamina))
+	
+	# Connect to SpellSystem element level changes to update character level
+	if SpellSystem != null:
+		SpellSystem.element_leveled_up.connect(_on_element_leveled_up)
+	
+	# Initialize character level
+	_update_character_level()
+
+
+func _on_element_leveled_up(_element: String, _new_level: int) -> void:
+	"""Called when an element levels up to recalculate character level."""
+	_update_character_level()
 
 
 # Fractional accumulation for smooth regeneration
@@ -196,7 +209,7 @@ func set_health(value: int) -> void:
 		_logger.log("Health changed: " + str(old_health) + " → " + str(health) + "/" + str(get_max_health()))
 		health_changed.emit(health, get_max_health())
 		if health <= 0:
-			_logger.log_error("Player died!")
+			_logger.log("Player died!")
 			player_died.emit()
 
 
@@ -316,8 +329,15 @@ func get_base_stat_xp(stat_name: String) -> int:
 	return 0
 
 
+func get_base_stat_xp_for_current_level(stat_name: String) -> int:
+	"""Returns the minimum total XP needed for the current level (delegated to BaseStatLeveling)."""
+	if BaseStatLeveling != null:
+		return BaseStatLeveling.get_base_stat_xp_for_current_level(stat_name)
+	return 0
+
+
 func get_base_stat_xp_for_next_level(stat_name: String) -> int:
-	"""Returns XP needed to reach next level for a base stat (delegated to BaseStatLeveling)."""
+	"""Returns the total XP needed to reach next level for a base stat (delegated to BaseStatLeveling)."""
 	if BaseStatLeveling != null:
 		return BaseStatLeveling.get_base_stat_xp_for_next_level(stat_name)
 	return 100
@@ -328,6 +348,57 @@ func get_carry_weight_slow_multiplier() -> float:
 	var current_weight: float = get_current_carry_weight()
 	var max_weight: float = get_max_carry_weight()
 	return StatFormulas.calculate_carry_weight_slow_multiplier(current_weight, max_weight)
+
+
+# Character Level Methods (combines all base stats + magic elements)
+func get_character_level() -> int:
+	"""Returns the player's character level based on all stats (base stats + magic elements)."""
+	if SpellSystem == null:
+		return 1  # Default if SpellSystem not available
+	
+	var fire_level: int = SpellSystem.get_level("fire")
+	var water_level: int = SpellSystem.get_level("water")
+	var earth_level: int = SpellSystem.get_level("earth")
+	var air_level: int = SpellSystem.get_level("air")
+	
+	return CharacterLevel.get_character_level(
+		get_total_resilience(),
+		get_total_agility(),
+		get_total_int(),
+		get_total_vit(),
+		fire_level,
+		water_level,
+		earth_level,
+		air_level
+	)
+
+
+func get_character_level_info() -> Dictionary:
+	"""Returns full character level information including total skill levels."""
+	if SpellSystem == null:
+		return {"character_level": 1, "total_skill_levels": 0, "levels_needed_for_next": 8}
+	
+	var fire_level: int = SpellSystem.get_level("fire")
+	var water_level: int = SpellSystem.get_level("water")
+	var earth_level: int = SpellSystem.get_level("earth")
+	var air_level: int = SpellSystem.get_level("air")
+	
+	return CharacterLevel.calculate_character_level(
+		get_total_resilience(),
+		get_total_agility(),
+		get_total_int(),
+		get_total_vit(),
+		fire_level,
+		water_level,
+		earth_level,
+		air_level
+	)
+
+
+func _update_character_level() -> void:
+	"""Recalculates and emits character level changed signal."""
+	var new_level: int = get_character_level()
+	character_level_changed.emit(new_level)
 
 
 # Method to gain Resilience XP when dealing damage (called from combat system)
@@ -346,16 +417,19 @@ func set_base_stat(stat_name: String, value: int) -> void:
 			base_resilience = value
 			_logger.log("Resilience changed: " + str(old_value) + " → " + str(value))
 			stat_changed.emit("resilience", value)
+			_update_character_level()
 		"agility", "dex":  # Support both for backwards compatibility
 			old_value = base_agility
 			base_agility = value
 			_logger.log("Agility changed: " + str(old_value) + " → " + str(value))
 			stat_changed.emit("agility", value)
+			_update_character_level()
 		"int":
 			old_value = base_int
 			base_int = value
 			_logger.log("Intelligence changed: " + str(old_value) + " → " + str(value))
 			stat_changed.emit("int", value)
+			_update_character_level()
 		"vit":
 			old_value = base_vit
 			base_vit = value
@@ -365,3 +439,4 @@ func set_base_stat(stat_name: String, value: int) -> void:
 			var new_max: int = get_max_health()
 			if health > new_max:
 				set_health(new_max)
+			_update_character_level()

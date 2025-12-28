@@ -39,11 +39,10 @@ func _on_area_entered(area: Area2D) -> void:
 		
 		# Don't hit ourselves
 		if hurtbox.owner_node == owner_node:
-			_log("Hit own hurtbox - ignoring")
+			# _log("Hit own hurtbox - ignoring")  # Commented out: enemy AI logging
 			return
 		
-		var target_name: String = str(hurtbox.owner_node.name) if hurtbox.owner_node != null else "unknown"
-		_log("💥 HIT! Target: " + target_name + ", Damage: " + str(damage))
+		# _log("💥 HIT! Target: " + (str(hurtbox.owner_node.name) if hurtbox.owner_node != null else "unknown") + ", Damage: " + str(damage))  # Commented out: enemy AI logging (health changes logged in PlayerStats)
 		
 		# Calculate knockback direction
 		var knockback_dir := Vector2.ZERO
@@ -51,7 +50,7 @@ func _on_area_entered(area: Area2D) -> void:
 			knockback_dir = (hurtbox.owner_node.global_position - owner_node.global_position).normalized()
 		
 		var knockback := knockback_dir * knockback_force
-		_log("   Knockback: " + str(knockback))
+		# _log("   Knockback: " + str(knockback))  # Commented out: enemy AI logging
 		
 		hurtbox.receive_hit(damage, knockback, owner_node)
 		hit_landed.emit(hurtbox.owner_node, damage)
@@ -59,20 +58,20 @@ func _on_area_entered(area: Area2D) -> void:
 
 ## Enable the hitbox (call when attack animation hits)
 func enable() -> void:
-	_log("⚔️ ENABLED")
+	# _log("⚔️ ENABLED")  # Commented out: enemy AI logging
 	set_deferred("monitoring", true)
 	set_deferred("monitorable", true)
 
 
 ## Disable the hitbox
 func disable() -> void:
-	_log("⚔️ disabled")
+	# _log("⚔️ disabled")  # Commented out: enemy AI logging
 	set_deferred("monitoring", false)
 	set_deferred("monitorable", false)
 
 
 ## Enable for a short duration then auto-disable
 func enable_for(duration: float) -> void:
-	_log("⚔️ ENABLED for " + str(duration) + "s")
+	# _log("⚔️ ENABLED for " + str(duration) + "s")  # Commented out: enemy AI logging
 	enable()
 	get_tree().create_timer(duration).timeout.connect(disable)
