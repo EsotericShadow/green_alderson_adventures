@@ -55,48 +55,52 @@ func _update_base_stats() -> void:
 		vit_row.setup("VIT", "res://assets/ui/icons/skills/stat_vit.png")
 	
 	# Update base stat rows with XP information
-	if resilience_row.has_method("update_stat_with_xp"):
-		var level: int = PlayerStats.base_resilience
+	if resilience_row != null and resilience_row.has_method("update_stat_with_xp"):
 		var total_xp: int = PlayerStats.get_base_stat_xp("resilience")
-		var xp_for_current: int = BaseStatLeveling.get_base_stat_xp_for_current_level("resilience") if BaseStatLeveling != null else 0
-		var xp_for_next: int = PlayerStats.get_base_stat_xp_for_next_level("resilience")
-		var xp_in_level: int = total_xp - xp_for_current
-		var xp_needed_in_level: int = xp_for_next - xp_for_current
+		# Calculate level based on XP (this should match the stored level after level-ups)
+		var level: int = XPFormula.get_level_from_xp(total_xp) if XPFormula != null else PlayerStats.base_resilience
+		var xp_for_current: int = XPFormula.get_xp_for_level(level) if XPFormula != null else 0
+		var xp_for_next: int = XPFormula.get_xp_for_level(level + 1) if XPFormula != null else 100
+		var xp_in_level: int = max(0, total_xp - xp_for_current)  # Clamp to 0 to prevent negatives
+		var xp_needed_in_level: int = max(1, xp_for_next - xp_for_current)  # Ensure at least 1 to prevent division by zero
 		resilience_row.update_stat_with_xp("Resilience", level, xp_in_level, xp_needed_in_level)
-	elif resilience_row.has_method("update_stat"):
+	elif resilience_row != null and resilience_row.has_method("update_stat"):
 		resilience_row.update_stat("Resilience", PlayerStats.get_total_resilience())
 	
-	if agility_row.has_method("update_stat_with_xp"):
-		var level: int = PlayerStats.base_agility
+	if agility_row != null and agility_row.has_method("update_stat_with_xp"):
 		var total_xp: int = PlayerStats.get_base_stat_xp("agility")
-		var xp_for_current: int = BaseStatLeveling.get_base_stat_xp_for_current_level("agility") if BaseStatLeveling != null else 0
-		var xp_for_next: int = PlayerStats.get_base_stat_xp_for_next_level("agility")
-		var xp_in_level: int = total_xp - xp_for_current
-		var xp_needed_in_level: int = xp_for_next - xp_for_current
+		# Calculate level based on XP (this should match the stored level after level-ups)
+		var level: int = XPFormula.get_level_from_xp(total_xp) if XPFormula != null else PlayerStats.base_agility
+		var xp_for_current: int = XPFormula.get_xp_for_level(level) if XPFormula != null else 0
+		var xp_for_next: int = XPFormula.get_xp_for_level(level + 1) if XPFormula != null else 100
+		var xp_in_level: int = max(0, total_xp - xp_for_current)  # Clamp to 0 to prevent negatives
+		var xp_needed_in_level: int = max(1, xp_for_next - xp_for_current)  # Ensure at least 1 to prevent division by zero
 		agility_row.update_stat_with_xp("Agility", level, xp_in_level, xp_needed_in_level)
-	elif agility_row.has_method("update_stat"):
+	elif agility_row != null and agility_row.has_method("update_stat"):
 		agility_row.update_stat("Agility", PlayerStats.get_total_agility())
 	
-	if int_row.has_method("update_stat_with_xp"):
-		var level: int = PlayerStats.base_int
+	if int_row != null and int_row.has_method("update_stat_with_xp"):
 		var total_xp: int = PlayerStats.get_base_stat_xp("int")
-		var xp_for_current: int = BaseStatLeveling.get_base_stat_xp_for_current_level("int") if BaseStatLeveling != null else 0
-		var xp_for_next: int = PlayerStats.get_base_stat_xp_for_next_level("int")
-		var xp_in_level: int = total_xp - xp_for_current
-		var xp_needed_in_level: int = xp_for_next - xp_for_current
+		# Calculate level based on XP (this should match the stored level after level-ups)
+		var level: int = XPFormula.get_level_from_xp(total_xp) if XPFormula != null else PlayerStats.base_int
+		var xp_for_current: int = XPFormula.get_xp_for_level(level) if XPFormula != null else 0
+		var xp_for_next: int = XPFormula.get_xp_for_level(level + 1) if XPFormula != null else 100
+		var xp_in_level: int = max(0, total_xp - xp_for_current)  # Clamp to 0 to prevent negatives
+		var xp_needed_in_level: int = max(1, xp_for_next - xp_for_current)  # Ensure at least 1 to prevent division by zero
 		int_row.update_stat_with_xp("INT", level, xp_in_level, xp_needed_in_level)
-	elif int_row.has_method("update_stat"):
+	elif int_row != null and int_row.has_method("update_stat"):
 		int_row.update_stat("INT", PlayerStats.get_total_int())
 	
-	if vit_row.has_method("update_stat_with_xp"):
-		var level: int = PlayerStats.base_vit
+	if vit_row != null and vit_row.has_method("update_stat_with_xp"):
 		var total_xp: int = PlayerStats.get_base_stat_xp("vit")
-		var xp_for_current: int = BaseStatLeveling.get_base_stat_xp_for_current_level("vit") if BaseStatLeveling != null else 0
-		var xp_for_next: int = PlayerStats.get_base_stat_xp_for_next_level("vit")
-		var xp_in_level: int = total_xp - xp_for_current
-		var xp_needed_in_level: int = xp_for_next - xp_for_current
+		# Calculate level based on XP (this should match the stored level after level-ups)
+		var level: int = XPFormula.get_level_from_xp(total_xp) if XPFormula != null else PlayerStats.base_vit
+		var xp_for_current: int = XPFormula.get_xp_for_level(level) if XPFormula != null else 0
+		var xp_for_next: int = XPFormula.get_xp_for_level(level + 1) if XPFormula != null else 100
+		var xp_in_level: int = max(0, total_xp - xp_for_current)  # Clamp to 0 to prevent negatives
+		var xp_needed_in_level: int = max(1, xp_for_next - xp_for_current)  # Ensure at least 1 to prevent division by zero
 		vit_row.update_stat_with_xp("VIT", level, xp_in_level, xp_needed_in_level)
-	elif vit_row.has_method("update_stat"):
+	elif vit_row != null and vit_row.has_method("update_stat"):
 		vit_row.update_stat("VIT", PlayerStats.get_total_vit())
 
 
@@ -119,9 +123,12 @@ func _update_element_stats() -> void:
 		# Update element stats
 		if row.has_method("update_element"):
 			var level: int = SpellSystem.get_level(element)
-			var current_xp: int = SpellSystem.get_xp(element)
-			var xp_needed: int = SpellSystem.get_xp_for_next_level(element)
-			row.update_element(element, level, current_xp, xp_needed)
+			var total_xp: int = SpellSystem.get_xp(element)
+			var xp_for_current: int = SpellSystem.get_xp_for_current_level(element)
+			var xp_for_next: int = SpellSystem.get_xp_for_next_level(element)
+			var xp_in_level: int = max(0, total_xp - xp_for_current)  # Clamp to 0 to prevent negatives
+			var xp_needed_in_level: int = max(1, xp_for_next - xp_for_current)  # Ensure at least 1 to prevent division by zero
+			row.update_element(element, level, xp_in_level, xp_needed_in_level)
 
 
 func _on_stat_changed(_stat_name: String, _new_value: int) -> void:

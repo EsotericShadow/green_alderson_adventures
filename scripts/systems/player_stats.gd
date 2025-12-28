@@ -16,10 +16,10 @@ signal player_died
 
 # Base Stats (RENAMED: STR→Resilience, DEX→Agility)
 # These values represent both the stat value AND the level
-var base_resilience: int = 5  # Formerly base_str
-var base_agility: int = 5  # Formerly base_dex
-var base_int: int = 5
-var base_vit: int = 5
+var base_resilience: int = 1  # Formerly base_str
+var base_agility: int = 1  # Formerly base_dex
+var base_int: int = 1
+var base_vit: int = 1
 
 
 

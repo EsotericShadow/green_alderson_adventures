@@ -73,8 +73,20 @@ func update_stat(stat: String, value: int) -> void:
 
 func update_stat_with_xp(stat: String, level: int, current_xp: int, xp_needed: int) -> void:
 	"""Updates stat display with level and XP information."""
+	# If stat_name is not set yet, set it (handles case where setup() wasn't called yet)
+	if stat_name == "":
+		stat_name = stat
+	
 	if stat != stat_name:
 		return
+	
+	# Ensure XP elements are found (fallback if _ready() didn't find them)
+	if vbox_container == null:
+		vbox_container = get_node_or_null("HBoxContainer/VBoxContainer")
+		if vbox_container != null:
+			level_label = vbox_container.get_node_or_null("LevelLabel")
+			xp_bar = vbox_container.get_node_or_null("XPBar")
+			xp_label = vbox_container.get_node_or_null("XPLabel")
 	
 	if level_label != null:
 		level_label.text = "Lv. " + str(level)

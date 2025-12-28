@@ -69,6 +69,12 @@ func get_xp(element: String) -> int:
 	return element_xp[element]
 
 
+func get_xp_for_current_level(element: String) -> int:
+	"""Returns the total XP needed for the current level (using RuneScape XP formula)."""
+	var current_level: int = get_level(element)
+	return XPFormula.get_xp_for_current_level(current_level)
+
+
 func get_xp_for_next_level(element: String) -> int:
 	"""Returns the total XP needed to reach the next level (using RuneScape XP formula)."""
 	var current_level: int = get_level(element)

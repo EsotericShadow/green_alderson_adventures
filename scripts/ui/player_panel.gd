@@ -62,6 +62,9 @@ func switch_tab(tab: Tab) -> void:
 			spells_panel.visible = true
 		Tab.STATS:
 			stats_panel.visible = true
+			# Update stats when switching to Stats tab
+			if stats_panel.has_method("_update_all_stats"):
+				stats_panel._update_all_stats()
 		Tab.SETTINGS:
 			settings_panel.visible = true
 	
