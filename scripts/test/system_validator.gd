@@ -239,7 +239,7 @@ func _test_base_stat_leveling() -> void:
 		return
 	
 	# Test XP tracking
-	var stats: Array[String] = ["resilience", "agility", "int", "vit"]
+	var stats: Array[String] = StatConstants.BASE_STATS
 	for stat in stats:
 		_total_tests += 1
 		var xp: int = BaseStatLeveling.get_base_stat_xp(stat)

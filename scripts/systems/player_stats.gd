@@ -1,6 +1,15 @@
 extends Node
 ## Global player stats system (autoload singleton).
 ## Manages base stats (Resilience/Agility/INT/VIT), derived values (health/mana/stamina), and gold.
+##
+## System Ownership and Data Flow:
+## - PlayerStats stores the actual stat levels (base_resilience, base_agility, base_int, base_vit)
+## - PlayerStats stored levels are the single source of truth for display
+## - BaseStatLeveling owns XP storage and level calculation logic
+## - BaseStatLeveling directly modifies PlayerStats levels on level-up (clear ownership)
+## - UI layer retrieves data via delegation methods (get_base_stat_xp, get_stat_display_data, etc.)
+##
+## Data Flow: BaseStatLeveling (XP) → Level Calculation → PlayerStats (stored) → UI (display)
 
 # Logging
 var _logger = GameLogger.create("[PlayerStats] ")
@@ -106,7 +115,7 @@ func get_total_resilience() -> int:
 	# Formerly get_total_str()
 	var bonus: int = 0
 	if InventorySystem != null:
-		bonus = InventorySystem.get_total_stat_bonus("resilience")
+		bonus = InventorySystem.get_total_stat_bonus(StatConstants.STAT_RESILIENCE)
 	return base_resilience + bonus
 
 
@@ -114,21 +123,21 @@ func get_total_agility() -> int:
 	# Formerly get_total_dex()
 	var bonus: int = 0
 	if InventorySystem != null:
-		bonus = InventorySystem.get_total_stat_bonus("agility")
+		bonus = InventorySystem.get_total_stat_bonus(StatConstants.STAT_AGILITY)
 	return base_agility + bonus
 
 
 func get_total_int() -> int:
 	var bonus: int = 0
 	if InventorySystem != null:
-		bonus = InventorySystem.get_total_stat_bonus("int")
+		bonus = InventorySystem.get_total_stat_bonus(StatConstants.STAT_INT)
 	return base_int + bonus
 
 
 func get_total_vit() -> int:
 	var bonus: int = 0
 	if InventorySystem != null:
-		bonus = InventorySystem.get_total_stat_bonus("vit")
+		bonus = InventorySystem.get_total_stat_bonus(StatConstants.STAT_VIT)
 	return base_vit + bonus
 
 
@@ -224,7 +233,7 @@ func take_damage(amount: int) -> void:
 	set_health(health - reduced_damage)
 	# Gain Resilience XP for taking damage
 	if reduced_damage > 0 and BaseStatLeveling != null:
-		BaseStatLeveling.gain_base_stat_xp("resilience", max(1, int(reduced_damage / 2.0)), "resilience")
+		BaseStatLeveling.gain_base_stat_xp(StatConstants.STAT_RESILIENCE, max(1, int(reduced_damage / 2.0)), StatConstants.STAT_RESILIENCE)
 
 
 # Mana Methods (LOCKED SIGNATURES per SPEC.md)
@@ -244,7 +253,7 @@ func consume_mana(amount: int) -> bool:
 	set_mana(mana - amount)
 	# Gain Intelligence XP for casting spells (whether they hit or not)
 	if amount > 0 and BaseStatLeveling != null:
-		BaseStatLeveling.gain_base_stat_xp("int", max(1, int(amount / 2.5)), "int")
+		BaseStatLeveling.gain_base_stat_xp(StatConstants.STAT_INT, max(1, int(amount / 2.5)), StatConstants.STAT_INT)
 	return true
 
 
@@ -282,7 +291,7 @@ func consume_stamina(amount: int) -> bool:
 	set_stamina(stamina - final_amount)
 	# Gain Agility XP for using stamina
 	if final_amount > 0 and BaseStatLeveling != null:
-		BaseStatLeveling.gain_base_stat_xp("agility", max(1, int(final_amount / 3.5)), "agility")
+		BaseStatLeveling.gain_base_stat_xp(StatConstants.STAT_AGILITY, max(1, int(final_amount / 3.5)), StatConstants.STAT_AGILITY)
 	return true
 
 
@@ -341,6 +350,20 @@ func get_base_stat_xp_for_next_level(stat_name: String) -> int:
 	if BaseStatLeveling != null:
 		return BaseStatLeveling.get_base_stat_xp_for_next_level(stat_name)
 	return 100
+
+
+func get_base_stat_level(stat_name: String) -> int:
+	"""Returns the stored level for a base stat (simple getter, source of truth for display)."""
+	match stat_name:
+		StatConstants.STAT_RESILIENCE, "str":  # Backward compatibility
+			return base_resilience
+		StatConstants.STAT_AGILITY, "dex":  # Backward compatibility
+			return base_agility
+		StatConstants.STAT_INT:
+			return base_int
+		StatConstants.STAT_VIT:
+			return base_vit
+	return 1
 
 
 func get_carry_weight_slow_multiplier() -> float:
@@ -405,36 +428,36 @@ func _update_character_level() -> void:
 func gain_resilience_xp_for_damage_dealt(damage: int) -> void:
 	"""Called when player deals damage to gain Resilience XP."""
 	if damage > 0 and BaseStatLeveling != null:
-		BaseStatLeveling.gain_base_stat_xp("resilience", max(1, int(damage / 2.0)), "resilience")
+		BaseStatLeveling.gain_base_stat_xp(StatConstants.STAT_RESILIENCE, max(1, int(damage / 2.0)), StatConstants.STAT_RESILIENCE)
 
 
 # Stat Modification Methods (UPDATED: Resilience/Agility)
 func set_base_stat(stat_name: String, value: int) -> void:
 	var old_value: int = 0
 	match stat_name:
-		"resilience", "str":  # Support both for backwards compatibility
+		StatConstants.STAT_RESILIENCE, "str":  # Support both for backwards compatibility
 			old_value = base_resilience
 			base_resilience = value
 			_logger.log("Resilience changed: " + str(old_value) + " → " + str(value))
-			stat_changed.emit("resilience", value)
+			stat_changed.emit(StatConstants.STAT_RESILIENCE, value)
 			_update_character_level()
-		"agility", "dex":  # Support both for backwards compatibility
+		StatConstants.STAT_AGILITY, "dex":  # Support both for backwards compatibility
 			old_value = base_agility
 			base_agility = value
 			_logger.log("Agility changed: " + str(old_value) + " → " + str(value))
-			stat_changed.emit("agility", value)
+			stat_changed.emit(StatConstants.STAT_AGILITY, value)
 			_update_character_level()
-		"int":
+		StatConstants.STAT_INT:
 			old_value = base_int
 			base_int = value
 			_logger.log("Intelligence changed: " + str(old_value) + " → " + str(value))
-			stat_changed.emit("int", value)
+			stat_changed.emit(StatConstants.STAT_INT, value)
 			_update_character_level()
-		"vit":
+		StatConstants.STAT_VIT:
 			old_value = base_vit
 			base_vit = value
 			_logger.log("Vitality changed: " + str(old_value) + " → " + str(value))
-			stat_changed.emit("vit", value)
+			stat_changed.emit(StatConstants.STAT_VIT, value)
 			# Update health if VIT changed
 			var new_max: int = get_max_health()
 			if health > new_max:

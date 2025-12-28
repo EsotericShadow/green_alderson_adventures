@@ -17,10 +17,10 @@ class_name PlayerState
 
 # Base stat XP
 @export var base_stat_xp: Dictionary = {
-	"resilience": 0,
-	"agility": 0,
-	"int": 0,
-	"vit": 0
+	StatConstants.STAT_RESILIENCE: 0,
+	StatConstants.STAT_AGILITY: 0,
+	StatConstants.STAT_INT: 0,
+	StatConstants.STAT_VIT: 0
 }
 
 # Element levels and XP

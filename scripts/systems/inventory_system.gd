@@ -327,20 +327,20 @@ func get_equipped(slot_name: String) -> EquipmentData:
 
 func get_total_stat_bonus(stat_name: String) -> int:
 	# Returns sum of stat bonuses from all equipped items
-	# stat_name: "resilience", "agility", "int", or "vit" (also supports "str"/"dex" for backwards compat)
+	# stat_name: StatConstants.STAT_RESILIENCE, STAT_AGILITY, STAT_INT, or STAT_VIT (also supports "str"/"dex" for backwards compat)
 	var total: int = 0
 	
 	for slot_name in equipment:
 		var item: EquipmentData = equipment[slot_name]
 		if item != null:
 			match stat_name:
-				"resilience", "str":  # Support both for backwards compatibility
+				StatConstants.STAT_RESILIENCE, "str":  # Support both for backwards compatibility
 					total += item.resilience_bonus
-				"agility", "dex":  # Support both for backwards compatibility
+				StatConstants.STAT_AGILITY, "dex":  # Support both for backwards compatibility
 					total += item.agility_bonus
-				"int":
+				StatConstants.STAT_INT:
 					total += item.int_bonus
-				"vit":
+				StatConstants.STAT_VIT:
 					total += item.vit_bonus
 	
 	return total

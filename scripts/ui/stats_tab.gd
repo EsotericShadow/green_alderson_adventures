@@ -41,67 +41,49 @@ func _update_all_stats() -> void:
 
 
 func _update_base_stats() -> void:
-	if PlayerStats == null:
+	if PlayerStats == null or BaseStatLeveling == null:
 		return
 	
-	# Initialize stat rows with icons on first update
-	if resilience_row.has_method("setup") and not resilience_row.get("_initialized"):
-		resilience_row.setup("Resilience", "res://assets/ui/icons/skills/stat_str.png")  # Using same icon for now
-	if agility_row.has_method("setup") and not agility_row.get("_initialized"):
-		agility_row.setup("Agility", "res://assets/ui/icons/skills/stat_dex.png")  # Using same icon for now
-	if int_row.has_method("setup") and not int_row.get("_initialized"):
-		int_row.setup("INT", "res://assets/ui/icons/skills/stat_int.png")
-	if vit_row.has_method("setup") and not vit_row.get("_initialized"):
-		vit_row.setup("VIT", "res://assets/ui/icons/skills/stat_vit.png")
+	# Stat configuration array (DRY principle - iterate instead of repeating)
+	var stat_configs: Array[Dictionary] = [
+		{"name": StatConstants.STAT_RESILIENCE, "row": resilience_row, "icon": "res://assets/ui/icons/skills/stat_str.png"},
+		{"name": StatConstants.STAT_AGILITY, "row": agility_row, "icon": "res://assets/ui/icons/skills/stat_dex.png"},
+		{"name": StatConstants.STAT_INT, "row": int_row, "icon": "res://assets/ui/icons/skills/stat_int.png"},
+		{"name": StatConstants.STAT_VIT, "row": vit_row, "icon": "res://assets/ui/icons/skills/stat_vit.png"}
+	]
 	
-	# Update base stat rows with XP information
-	if resilience_row != null and resilience_row.has_method("update_stat_with_xp"):
-		var total_xp: int = PlayerStats.get_base_stat_xp("resilience")
-		# Calculate level based on XP (this should match the stored level after level-ups)
-		var level: int = XPFormula.get_level_from_xp(total_xp) if XPFormula != null else PlayerStats.base_resilience
-		var xp_for_current: int = XPFormula.get_xp_for_level(level) if XPFormula != null else 0
-		var xp_for_next: int = XPFormula.get_xp_for_level(level + 1) if XPFormula != null else 100
-		var xp_in_level: int = max(0, total_xp - xp_for_current)  # Clamp to 0 to prevent negatives
-		var xp_needed_in_level: int = max(1, xp_for_next - xp_for_current)  # Ensure at least 1 to prevent division by zero
-		resilience_row.update_stat_with_xp("Resilience", level, xp_in_level, xp_needed_in_level)
-	elif resilience_row != null and resilience_row.has_method("update_stat"):
-		resilience_row.update_stat("Resilience", PlayerStats.get_total_resilience())
-	
-	if agility_row != null and agility_row.has_method("update_stat_with_xp"):
-		var total_xp: int = PlayerStats.get_base_stat_xp("agility")
-		# Calculate level based on XP (this should match the stored level after level-ups)
-		var level: int = XPFormula.get_level_from_xp(total_xp) if XPFormula != null else PlayerStats.base_agility
-		var xp_for_current: int = XPFormula.get_xp_for_level(level) if XPFormula != null else 0
-		var xp_for_next: int = XPFormula.get_xp_for_level(level + 1) if XPFormula != null else 100
-		var xp_in_level: int = max(0, total_xp - xp_for_current)  # Clamp to 0 to prevent negatives
-		var xp_needed_in_level: int = max(1, xp_for_next - xp_for_current)  # Ensure at least 1 to prevent division by zero
-		agility_row.update_stat_with_xp("Agility", level, xp_in_level, xp_needed_in_level)
-	elif agility_row != null and agility_row.has_method("update_stat"):
-		agility_row.update_stat("Agility", PlayerStats.get_total_agility())
-	
-	if int_row != null and int_row.has_method("update_stat_with_xp"):
-		var total_xp: int = PlayerStats.get_base_stat_xp("int")
-		# Calculate level based on XP (this should match the stored level after level-ups)
-		var level: int = XPFormula.get_level_from_xp(total_xp) if XPFormula != null else PlayerStats.base_int
-		var xp_for_current: int = XPFormula.get_xp_for_level(level) if XPFormula != null else 0
-		var xp_for_next: int = XPFormula.get_xp_for_level(level + 1) if XPFormula != null else 100
-		var xp_in_level: int = max(0, total_xp - xp_for_current)  # Clamp to 0 to prevent negatives
-		var xp_needed_in_level: int = max(1, xp_for_next - xp_for_current)  # Ensure at least 1 to prevent division by zero
-		int_row.update_stat_with_xp("INT", level, xp_in_level, xp_needed_in_level)
-	elif int_row != null and int_row.has_method("update_stat"):
-		int_row.update_stat("INT", PlayerStats.get_total_int())
-	
-	if vit_row != null and vit_row.has_method("update_stat_with_xp"):
-		var total_xp: int = PlayerStats.get_base_stat_xp("vit")
-		# Calculate level based on XP (this should match the stored level after level-ups)
-		var level: int = XPFormula.get_level_from_xp(total_xp) if XPFormula != null else PlayerStats.base_vit
-		var xp_for_current: int = XPFormula.get_xp_for_level(level) if XPFormula != null else 0
-		var xp_for_next: int = XPFormula.get_xp_for_level(level + 1) if XPFormula != null else 100
-		var xp_in_level: int = max(0, total_xp - xp_for_current)  # Clamp to 0 to prevent negatives
-		var xp_needed_in_level: int = max(1, xp_for_next - xp_for_current)  # Ensure at least 1 to prevent division by zero
-		vit_row.update_stat_with_xp("VIT", level, xp_in_level, xp_needed_in_level)
-	elif vit_row != null and vit_row.has_method("update_stat"):
-		vit_row.update_stat("VIT", PlayerStats.get_total_vit())
+	# Update each stat row using display data from model layer (separation of concerns)
+	for config in stat_configs:
+		var row: Control = config.row
+		var stat_name: String = config.name
+		var display_name: String = StatConstants.BASE_STAT_DISPLAY_NAMES[stat_name]
+		
+		if row == null:
+			continue
+		
+		# Initialize stat row with icon on first update
+		if row.has_method("setup") and not row.get("_initialized"):
+			row.setup(display_name, config.icon)
+		
+		# Get display data from model layer (no calculations in UI)
+		var display_data: Dictionary = BaseStatLeveling.get_stat_display_data(stat_name)
+		
+		# Update row with display data
+		if row.has_method("update_stat_with_xp"):
+			row.update_stat_with_xp(display_name, display_data.level, display_data.xp_in_level, display_data.xp_needed)
+		elif row.has_method("update_stat"):
+			# Fallback for rows without XP display
+			var total_stat: int = 0
+			match stat_name:
+				StatConstants.STAT_RESILIENCE:
+					total_stat = PlayerStats.get_total_resilience()
+				StatConstants.STAT_AGILITY:
+					total_stat = PlayerStats.get_total_agility()
+				StatConstants.STAT_INT:
+					total_stat = PlayerStats.get_total_int()
+				StatConstants.STAT_VIT:
+					total_stat = PlayerStats.get_total_vit()
+			row.update_stat(display_name, total_stat)
 
 
 func _update_element_stats() -> void:
