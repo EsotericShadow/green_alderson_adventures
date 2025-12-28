@@ -463,7 +463,7 @@ func _on_died() -> void:
 	player_died.emit()
 
 
-func _on_hurt(damage: int, knockback: Vector2, attacker: Node) -> void:
+func _on_hurt(damage: int, knockback: Vector2, _attacker: Node) -> void:
 	# _log("💥 PLAYER HIT! Damage: " + str(damage) + " from " + (str(attacker.name) if attacker != null else "unknown"))  # Commented out: enemy AI logging (health changes logged in PlayerStats)
 	# _log("   Knockback: " + str(knockback))  # Commented out: enemy AI logging
 	

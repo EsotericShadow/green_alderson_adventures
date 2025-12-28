@@ -494,7 +494,7 @@ func _on_hurt(damage: int, knockback: Vector2, attacker: Node) -> void:
 		_change_state(State.HURT)
 
 
-func _on_died(killer: Node) -> void:
+func _on_died(_killer: Node) -> void:
 	# _log("💀 KILLED by " + (str(killer.name) if killer != null else "unknown") + "!")  # Commented out: enemy AI logging
 	_change_state(State.DEATH)
 
