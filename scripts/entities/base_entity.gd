@@ -3,7 +3,11 @@ class_name BaseEntity
 ## Base class for all entities (player, enemy, NPC).
 ## Provides common functionality and prepares for network synchronization.
 
+## Emitted when this entity dies. Subclasses (player.gd, base_enemy.gd) emit this signal.
+@warning_ignore("unused_signal")
 signal entity_died(entity: BaseEntity)
+## Emitted when this entity's state changes. Subclasses emit this signal.
+@warning_ignore("unused_signal")
 signal entity_state_changed(entity: BaseEntity)
 
 # Entity data (serializable state)
@@ -27,7 +31,9 @@ var _logger: GameLogger.GameLoggerInstance
 
 
 func _ready() -> void:
-	_logger = GameLogger.create("[" + name + "/Entity] ")
+	# Create logger (can be overridden in subclasses if different prefix needed)
+	if _logger == null:
+		_logger = GameLogger.create("[" + name + "/Entity] ")
 	entity_data.entity_id = _generate_entity_id()
 	entity_data.entity_type = _get_entity_type()
 	_setup_workers()
@@ -45,8 +51,15 @@ func _get_entity_type() -> String:
 
 
 func _setup_workers() -> void:
-	# Override in subclasses to set up worker references
-	pass
+	# Set up common worker references (can be overridden in subclasses)
+	mover = get_node_or_null("Mover") as Mover
+	animator = get_node_or_null("Animator") as Animator
+	health_tracker = get_node_or_null("HealthTracker") as HealthTracker
+	hurtbox = get_node_or_null("Hurtbox") as Hurtbox
+	
+	# Set owner_node for hurtbox if it exists
+	if hurtbox != null:
+		hurtbox.owner_node = self
 
 
 ## Gets serializable entity data.
@@ -89,4 +102,3 @@ func _log(msg: String) -> void:
 
 func _log_error(msg: String) -> void:
 	_logger.log_error(msg)
-

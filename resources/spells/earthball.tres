@@ -13,4 +13,5 @@ mana_cost = 15
 cooldown = 0.9
 hue_shift = 0.3
 projectile_speed = 500.0
+projectile_scene_path = "res://scenes/projectiles/earthball.tscn"
 

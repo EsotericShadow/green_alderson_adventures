@@ -1,4 +1,4 @@
-extends Area2D
+extends BaseAreaWorker
 class_name Hurtbox
 
 ## WORKER: Receives hits from hitboxes
@@ -9,20 +9,12 @@ signal hurt(damage: int, knockback: Vector2, attacker: Node)
 
 @export var invincibility_time: float = 0.5
 
-var owner_node: Node = null
 var is_invincible: bool = false
 var _blink_tween: Tween = null  # Track our own tween
-var _logger: GameLogger.GameLoggerInstance
 
 
-func _log(msg: String) -> void:
-	_logger.log(msg)
-
-
-func _ready() -> void:
-	owner_node = get_parent()
-	_logger = GameLogger.create("[" + owner_node.name + "/Hurtbox] ")
-	
+func _on_initialize() -> void:
+	"""Initialize hurtbox - set collision layers."""
 	# Hurtbox layer = 8, doesn't detect anything (gets detected by hitboxes)
 	collision_layer = 8
 	collision_mask = 0

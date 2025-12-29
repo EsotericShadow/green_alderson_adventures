@@ -1,4 +1,4 @@
-extends CharacterBody2D
+extends BaseEntity
 
 ## COORDINATOR: Player controller
 ## Makes ALL decisions about player behavior
@@ -7,30 +7,23 @@ extends CharacterBody2D
 signal player_died
 signal health_changed(current: int, max_health: int)
 
-@export var walk_speed: float = 120.0
-@export var run_speed: float = 220.0
+# Movement speeds (loaded from GameBalance config)
+# These are kept as fallback defaults but should use GameBalance getters
+var walk_speed: float = 120.0  # Use GameBalance.get_walk_speed() instead
+var run_speed: float = 220.0  # Use GameBalance.get_run_speed() instead
 # max_health now comes from PlayerStats.get_max_health()
-@export var fireball_cooldown: float = 0.6   # Snappier spellcasting
-@export var fireball_cast_delay: float = 0.35  # Faster cast wind-up
-@export var fireball_mana_cost: int = 15  # Mana consumed per fireball cast (increased)
-@export var stamina_drain_rate: float = 20.0  # Stamina per second while running (increased)
-@export var min_stamina_to_run: int = 5  # Minimum stamina required to run
+var stamina_drain_rate: float = 20.0  # Use GameBalance.get_stamina_drain_rate() instead
+var min_stamina_to_run: int = 5  # Use GameBalance.get_min_stamina_to_run() instead
 
-# Worker references
-@onready var mover: Mover = $Mover
-@onready var animator: Animator = $Animator
+# Worker references (mover, animator, health_tracker, hurtbox inherited from BaseEntity)
 @onready var input_reader: InputReader = $InputReader
-@onready var health_tracker: HealthTracker = $HealthTracker
-@onready var hurtbox: Hurtbox = $Hurtbox
 @onready var spell_spawner: SpellSpawner = $SpellSpawner
+@onready var running_state_manager: RunningStateManager = $RunningStateManager
+@onready var spell_caster: SpellCaster = $SpellCaster
 
 # State
 var last_direction: String = "down"
 var is_dead: bool = false
-var cooldown_timer: float = 0.0
-var is_casting: bool = false
-var _stamina_drain_accumulator: float = 0.0  # Fractional accumulator for smooth stamina drain
-var _running_enabled: bool = false  # Whether running is currently enabled (separate from run key state)
 var spawn_position: Vector2 = Vector2(0, -2)  # Default spawn position (will be set from scene)
 
 # Spell system (Commit 3C: 10 spell slots)
@@ -42,44 +35,34 @@ var spell_bar: Node = null  # Reference to spell bar UI (CanvasLayer)
 var _camera: Camera2D = null
 var _shake_tween: Tween = null
 
-# Logging
+# Logging (logger inherited from BaseEntity)
 var _last_logged_state := ""
-var _logger = GameLogger.create("[PLAYER] ")
-
-
-func _log(msg: String) -> void:
-	_logger.log(msg)
-
-
-func _log_error(msg: String) -> void:
-	_logger.log_error(msg)
 
 
 func _ready() -> void:
+	# Initialize logger before calling super (BaseEntity checks if null)
+	_logger = GameLogger.create("[PLAYER] ")
+	# Call parent _ready() to initialize BaseEntity (calls _setup_workers())
+	super._ready()
+	
 	add_to_group("player")
 	spawn_position = global_position  # Store initial spawn position
-	# _log("Player spawned at " + str(global_position))  # Commented out: initialization logging
-	# _log("Checking workers...")  # Commented out: initialization logging
+	_logger.log_debug("Player spawned at " + str(global_position))
+	_logger.log_debug("Checking workers...")
 	
-	if mover == null:
-		_log_error("Mover worker is MISSING! Movement will not work.")
-	# else:
-		# _log("  ✓ Mover ready")  # Commented out: initialization logging (keep errors)
-	
-	if animator == null:
-		_log_error("Animator worker is MISSING! Animations will not work.")
-	else:
+	# Connect animator finished signal
+	if animator != null:
 		animator.finished.connect(_on_animation_finished)
-		# _log("  ✓ Animator ready")  # Commented out: initialization logging (keep errors)
+		_logger.log_debug("  ✓ Animator ready")
 	
+	# Set up player-specific workers
 	if input_reader == null:
 		_log_error("InputReader worker is MISSING! Controls will not work.")
-	# else:
-		# _log("  ✓ InputReader ready")  # Commented out: initialization logging (keep errors)
-	
-	if health_tracker == null:
-		_log_error("HealthTracker worker is MISSING! Health system disabled.")
 	else:
+		_logger.log_debug("  ✓ InputReader ready")
+	
+	# Configure health_tracker (player-specific: sync with PlayerStats)
+	if health_tracker != null:
 		var max_hp: int = PlayerStats.get_max_health()
 		health_tracker.set_max_health(max_hp)
 		# Connect HealthTracker died signal (for death handling via PlayerStats)
@@ -91,98 +74,92 @@ func _ready() -> void:
 		PlayerStats.health_changed.connect(_sync_health_tracker_from_stats)
 		# Initial sync
 		_sync_health_tracker_from_stats(PlayerStats.health, PlayerStats.get_max_health())
-		_log("  ✓ HealthTracker ready (HP: " + str(max_hp) + " from PlayerStats)")
+		_logger.log_info("  ✓ HealthTracker ready (HP: " + str(max_hp) + " from PlayerStats)")
 	
-	if hurtbox == null:
-		_log_error("Hurtbox worker is MISSING! Player cannot take damage.")
-	else:
-		hurtbox.owner_node = self
+	# Connect hurtbox signal
+	if hurtbox != null:
 		hurtbox.hurt.connect(_on_hurt)
-		# _log("  ✓ Hurtbox ready")  # Commented out: initialization logging (keep errors)
+		_logger.log_debug("  ✓ Hurtbox ready")
 	
 	if spell_spawner == null:
 		_log_error("SpellSpawner worker is MISSING! Spells will not work.")
-	# else:
-		# _log("  ✓ SpellSpawner ready")  # Commented out: initialization logging (keep errors)
+	else:
+		_logger.log_debug("  ✓ SpellSpawner ready")
+	
+	if spell_caster == null:
+		_log_error("SpellCaster worker is MISSING! Spell casting will not work.")
+	else:
+		spell_caster.spell_spawner = spell_spawner
+		_logger.log_debug("  ✓ SpellCaster ready")
+	
+	if running_state_manager == null:
+		_log_error("RunningStateManager worker is MISSING! Running will not work.")
+	else:
+		running_state_manager.input_reader = input_reader
+		# Load config from GameBalance
+		if GameBalance != null:
+			running_state_manager.stamina_drain_rate = GameBalance.get_stamina_drain_rate()
+			running_state_manager.min_stamina_to_run = GameBalance.get_min_stamina_to_run()
+			walk_speed = GameBalance.get_walk_speed()
+			run_speed = GameBalance.get_run_speed()
+		else:
+			# Fallback to defaults
+			running_state_manager.stamina_drain_rate = stamina_drain_rate
+			running_state_manager.min_stamina_to_run = min_stamina_to_run
+		_logger.log_debug("  ✓ RunningStateManager ready")
 	
 	# Find camera for screen shake
 	_camera = get_node_or_null("Camera2D")
 	if _camera != null:
-		# _log("  ✓ Camera2D found (screen shake enabled)")  # Commented out: initialization logging
-		pass
+		_logger.log_debug("  ✓ Camera2D found (screen shake enabled)")
 	else:
-		pass  # _log("  ⚠ No Camera2D found (screen shake disabled)")  # Commented out: initialization logging
+		_logger.log_debug("  ⚠ No Camera2D found (screen shake disabled)")
 	
 	# Load default spells (Commit 3C: 10 spell slots)
 	equipped_spells.resize(10)
-	equipped_spells[0] = load("res://resources/spells/fireball.tres") as SpellData
-	equipped_spells[1] = load("res://resources/spells/waterball.tres") as SpellData
-	equipped_spells[2] = load("res://resources/spells/earthball.tres") as SpellData
-	equipped_spells[3] = load("res://resources/spells/airball.tres") as SpellData
+	equipped_spells[0] = ResourceManager.load_spell("fireball")
+	equipped_spells[1] = ResourceManager.load_spell("waterball")
+	equipped_spells[2] = ResourceManager.load_spell("earthball")
+	equipped_spells[3] = ResourceManager.load_spell("airball")
 	# Slots 4-9 remain null for now
 	
 	# Find and connect to spell bar UI
 	_find_spell_bar()
 	
-	# _log("  ✓ Loaded " + str(_count_equipped_spells()) + " spells")  # Commented out: initialization logging
-	# _log("Player ready! All systems: " + ("GO" if _all_workers_ready() else "SOME MISSING"))  # Commented out: initialization logging
+	_logger.log_info("  ✓ Loaded " + str(_count_equipped_spells()) + " spells")
+	_logger.log_info("Player ready! All systems: " + ("GO" if _all_workers_ready() else "SOME MISSING"))
+
+
+func _get_entity_type() -> String:
+	return "player"
 
 
 func _all_workers_ready() -> bool:
-	return mover != null and animator != null and input_reader != null and health_tracker != null and spell_spawner != null
+	return mover != null and animator != null and input_reader != null and health_tracker != null and hurtbox != null and spell_spawner != null and running_state_manager != null and spell_caster != null
 
 
 func _physics_process(delta: float) -> void:
 	if is_dead:
 		return
 	
-	# Update cooldown
-	if cooldown_timer > 0.0:
-		cooldown_timer -= delta
+	# Update spell caster cooldown
+	if spell_caster != null:
+		spell_caster.update(delta)
 	
 	# --- READ INPUT ---
 	if input_reader == null:
 		return
 	
 	var input_vec := input_reader.get_movement()
-	var run_key_just_pressed := input_reader.is_run_just_pressed()
-	var run_key_just_released := input_reader.is_run_just_released()
 	
-	# Handle running state transitions
-	# Enable running when run key is pressed (can happen while already moving)
-	if run_key_just_pressed:
-		if PlayerStats.has_stamina(min_stamina_to_run):
-			_running_enabled = true
-			# _log("🏃 Running enabled (run key pressed)")  # Commented out: movement logging
-		else:
-			# _log("🏃 Run key pressed but insufficient stamina (" + str(PlayerStats.stamina) + "/" + str(min_stamina_to_run) + ")")  # Commented out: movement logging
-			pass
-	
-	# Disable running when run key is released
-	if run_key_just_released:
-		_running_enabled = false
-		# _log("🚶 Running disabled (run key released)")  # Commented out: movement logging
-	
-	# Auto-disable running when stamina depletes (even if run key is still held)
-	var has_enough_stamina: bool = PlayerStats.has_stamina(min_stamina_to_run)
-	if _running_enabled and not has_enough_stamina:
-		_running_enabled = false
-		# _log("🚶 Running auto-disabled (stamina depleted, run key still held)")  # Commented out: movement logging
+	# Update running state manager
+	if running_state_manager != null:
+		running_state_manager.update_running_state(delta, input_vec)
 	
 	# Determine if player should actually run
-	var wants_run: bool = _running_enabled and has_enough_stamina
-	
-	# Consume stamina while running (fractional accumulation for smooth drain)
-	# Stamina consumption is already reduced by agility in PlayerStats.consume_stamina()
-	if wants_run and input_vec.length() > 0.0:
-		_stamina_drain_accumulator += stamina_drain_rate * delta
-		if _stamina_drain_accumulator >= 1.0:
-			var stamina_cost: int = int(_stamina_drain_accumulator)
-			_stamina_drain_accumulator -= float(stamina_cost)
-			PlayerStats.consume_stamina(stamina_cost)
-	else:
-		# Reset accumulator when not running
-		_stamina_drain_accumulator = 0.0
+	var wants_run: bool = false
+	if running_state_manager != null:
+		wants_run = running_state_manager.can_run()
 	
 	# --- HANDLE SPELL SELECTION AND CASTING (1-9, 0) ---
 	for i in range(10):
@@ -191,26 +168,15 @@ func _physics_process(delta: float) -> void:
 			# If already selected, cast it; otherwise just select
 			if selected_spell_index == i:
 				# Cast the spell
-				if _can_cast():
-					var spell := get_selected_spell()
-					if spell != null:
-						# _log("🔥 Spell key pressed - CASTING " + spell.display_name + "!")  # Commented out: spell casting logging
-						_start_fireball_cast(input_vec)
-					else:
-						# _log("🔥 Spell key pressed but no spell in slot " + str(i + 1))  # Commented out: spell casting logging
-						pass
-				else:
-					if is_casting:
-						# _log("🔥 Spell key pressed but already casting...")  # Commented out: spell casting logging
-						pass
-					elif cooldown_timer > 0.0:
-						# _log("🔥 Spell key pressed but on cooldown (" + str(snappedf(cooldown_timer, 0.1)) + "s left)")  # Commented out: spell casting logging
-						pass
-					else:
-						var spell := get_selected_spell()
-						if spell != null and not PlayerStats.has_mana(spell.mana_cost):
-							# _log("🔥 Spell key pressed but not enough mana!")  # Commented out: spell casting logging (mana logged in PlayerStats)
-							pass
+				var spell := get_selected_spell()
+				if spell != null and spell_caster != null:
+					var cast_dir := last_direction
+					if input_vec.length() > 0.0:
+						cast_dir = DirectionUtils.vector_to_dir8(input_vec, last_direction)
+					
+					_start_spell_cast(spell, cast_dir)
+				# else:
+				# 	_logger.log_debug("🔥 Spell key pressed but no spell in slot " + str(i + 1))
 			else:
 				# Select the spell
 				_select_spell(i)
@@ -220,7 +186,7 @@ func _physics_process(delta: float) -> void:
 	if input_reader.is_action_just_pressed("jump") and wants_run and input_vec.length() > 0.0:
 		if animator != null and not animator.is_locked():
 			last_direction = DirectionUtils.vector_to_dir8(input_vec, last_direction)
-			# _log("🦘 Run jump! Direction: " + last_direction)  # Commented out: movement logging
+			_logger.log_debug("🦘 Run jump! Direction: " + last_direction)
 			animator.play_one_shot("run_jump", last_direction)
 			return
 	
@@ -248,7 +214,7 @@ func _physics_process(delta: float) -> void:
 		current_state = "idle " + last_direction
 	
 	if current_state != _last_logged_state:
-		# _log("State: " + current_state)  # Commented out: movement logging
+		_logger.log_debug("State: " + current_state)
 		_last_logged_state = current_state
 	
 	# Don't change animation if one-shot is playing (but movement still works)
@@ -261,84 +227,50 @@ func _physics_process(delta: float) -> void:
 			animator.play("idle", last_direction)
 
 
-func _can_cast() -> bool:
-	var spell := get_selected_spell()
-	if spell == null:
-		# Fallback to hardcoded mana cost if no spell
-		return cooldown_timer <= 0.0 and not is_casting and PlayerStats.has_mana(fireball_mana_cost)
+func _start_spell_cast(spell: SpellData, direction: String) -> void:
+	"""Starts casting a spell.
 	
-	# Use spell's mana cost and validate with SpellSystem
-	if SpellSystem != null and not SpellSystem.can_cast(spell):
-		return false
-	
-	return cooldown_timer <= 0.0 and not is_casting
-
-
-func _start_fireball_cast(input_vec: Vector2) -> void:
-	# Consume mana for casting (use spell's mana cost if available)
-	var spell := get_selected_spell()
-	var mana_to_consume: int = fireball_mana_cost
-	if spell != null:
-		mana_to_consume = spell.mana_cost
-	
-	if not PlayerStats.consume_mana(mana_to_consume):
-		_log_error("Failed to consume mana for fireball cast!")
-		return
-	
-	is_casting = true
-	# Use spell's cooldown if available, otherwise use default
-	if spell != null:
-		cooldown_timer = spell.cooldown
-	else:
-		cooldown_timer = fireball_cooldown
-	
-	# Use movement direction if moving, else use last direction
-	var cast_dir := last_direction
-	if input_vec.length() > 0.0:
-		cast_dir = DirectionUtils.vector_to_dir8(input_vec, last_direction)
-	
-	# _log("🔥 Starting fireball cast facing " + cast_dir)  # Commented out: spell casting logging
-	# _log("   Animation: fireball_" + cast_dir)  # Commented out: spell casting logging
-	# _log("   Fireball will spawn in " + str(fireball_cast_delay) + "s")  # Commented out: spell casting logging
-	
-	# Play cast animation (one-shot, but doesn't lock movement)
-	if animator != null:
-		animator.play_one_shot("fireball", cast_dir)
-	else:
-		_log_error("Cannot play cast animation - Animator is null!")
-	
-	# Spawn fireball after delay
-	get_tree().create_timer(fireball_cast_delay).timeout.connect(
-		_spawn_fireball.bind(cast_dir)
-	)
-
-
-func _spawn_fireball(direction: String) -> void:
-	is_casting = false
-	# _log("🔥 Cast delay complete - spawning fireball!")  # Commented out: spell casting logging
-	
-	if spell_spawner == null:
-		_log_error("Cannot spawn fireball - SpellSpawner is null!")
+	Args:
+		spell: The spell to cast
+		direction: Direction to cast (8-direction string)
+	"""
+	if spell_caster == null:
+		_log_error("Cannot cast spell - SpellCaster is null!")
 		return
 	
 	# Z-index: below player when facing north, above when facing south/sides
 	var z_index_value := 2
 	if DirectionUtils.is_facing_north(direction):
 		z_index_value = 1
-		# _log("   Facing north - fireball spawns BELOW player (z=" + str(z_index_value) + ")")  # Commented out: spell casting logging
-	else:
-		pass  # _log("   Facing south/side - fireball spawns ABOVE player (z=" + str(z_index_value) + ")")  # Commented out: spell casting logging
 	
-	# Pass selected spell data to spawner
-	var spell := get_selected_spell()
-	var fireball := spell_spawner.spawn_fireball(direction, global_position, z_index_value, spell)
-	if fireball != null:
-		# _log("   ✓ Fireball spawned at " + str(global_position))  # Commented out: spell casting logging
-		# if spell != null:
-		# 	_log("   ✓ Using spell: " + spell.display_name + " (" + spell.element + ")")  # Commented out: spell casting logging
-		pass
-	else:
-		_log_error("SpellSpawner.spawn_fireball returned null!")
+	# Try to cast (checks cooldown, mana, etc.)
+	if not spell_caster.try_cast(spell, direction, global_position, z_index_value):
+		return  # Cannot cast (cooldown, no mana, etc.)
+	
+	# Play cast animation
+	spell_caster.start_cast_animation(spell, direction, animator)
+	
+	# Spawn spell after delay
+	var cast_delay := spell.cooldown * 0.583  # fireball_cast_delay ratio (0.35 / 0.6)
+	get_tree().create_timer(cast_delay).timeout.connect(
+		_spawn_spell.bind(spell, direction, z_index_value)
+	)
+
+
+func _spawn_spell(spell: SpellData, direction: String, z_index_value: int) -> void:
+	"""Spawns the spell projectile after cast delay.
+	
+	Args:
+		spell: The spell to spawn
+		direction: Direction to cast
+		z_index_value: Z-index for projectile
+	"""
+	if spell_caster == null:
+		return
+	
+	var projectile := spell_caster.spawn_spell(spell, direction, global_position, z_index_value)
+	if projectile == null:
+		_log_error("Failed to spawn spell projectile!")
 
 
 
@@ -358,11 +290,11 @@ func _select_spell(index: int) -> void:
 		return
 	
 	if equipped_spells[index] == null:
-		# _log("⚠️ Spell slot " + str(index + 1) + " is empty")  # Commented out: spell casting logging
+		_logger.log_debug("⚠️ Spell slot " + str(index + 1) + " is empty")
 		return
 	
 	selected_spell_index = index
-	# _log("📖 Selected spell slot " + str(index + 1) + ": " + equipped_spells[index].display_name)  # Commented out: spell casting logging
+	_logger.log_debug("📖 Selected spell slot " + str(index + 1) + ": " + equipped_spells[index].display_name)
 	
 	# Update spell bar UI
 	if spell_bar != null and spell_bar.has_method("select_slot"):
@@ -381,22 +313,21 @@ func _find_spell_bar() -> void:
 	
 	if spell_bar == null:
 		_log_error("⚠️ SpellBar not found - spell bar UI unavailable")
-		# _log("   Searching for SpellBar in scene tree...")  # Commented out: initialization logging (keep errors)
+		_logger.log_debug("   Searching for SpellBar in scene tree...")
 		var scene := get_tree().current_scene
 		if scene != null:
-			# _log("   Current scene: " + scene.name)  # Commented out: initialization logging
+			_logger.log_debug("   Current scene: " + scene.name)
 			# for child in scene.get_children():
-			# 	_log("   - Child: " + child.name + " (type: " + child.get_class() + ")")  # Commented out: initialization logging
-			pass
+			# 	_logger.log_debug("   - Child: " + child.name + " (type: " + child.get_class() + ")")
 		return
 	
-	# _log("  ✓ SpellBar found: " + str(spell_bar.name) + " (type: " + spell_bar.get_class() + ")")  # Commented out: initialization logging
+	_logger.log_debug("  ✓ SpellBar found: " + str(spell_bar.name) + " (type: " + spell_bar.get_class() + ")")
 	
 	# Setup spell bar with equipped spells
 	if spell_bar.has_method("setup_spells"):
 		spell_bar.setup_spells(equipped_spells)
 		spell_bar.select_slot(selected_spell_index)
-		# _log("  ✓ Spell bar connected and spells set up")  # Commented out: initialization logging
+		_logger.log_debug("  ✓ Spell bar connected and spells set up")
 	else:
 		_log_error("SpellBar missing setup_spells() method!")
 
@@ -432,40 +363,41 @@ func _on_health_changed(current: int, maximum: int) -> void:
 
 func _on_died() -> void:
 	# PlayerStats.player_died signal doesn't pass killer, but we can log it
-	_log("💀 PLAYER DIED!")
+	_logger.log_info("💀 PLAYER DIED!")
 	is_dead = true
 	
 	# Disable input
 	if input_reader != null:
 		input_reader.disable()
-		# _log("   Input disabled")  # Commented out: movement logging
+		_logger.log_debug("   Input disabled")
 	
 	# Stop movement
 	if mover != null:
 		mover.stop()
-		# _log("   Movement stopped")  # Commented out: movement logging
+		_logger.log_debug("   Movement stopped")
 	
 	# Disable hurtbox (can't take more damage)
 	if hurtbox != null:
 		hurtbox.disable()
-		# _log("   Hurtbox disabled")  # Commented out: enemy AI logging
+		_logger.log_debug("   Hurtbox disabled")
 	
 	# Play death animation
 	if animator != null:
 		animator.force_stop_one_shot()  # Stop any current one-shot animation
 		animator.play_one_shot("death", "down")  # Death animation is non-directional
-		# _log("   Playing death animation: death")  # Commented out: animation logging
+		_logger.log_debug("   Playing death animation: death")
 	else:
 		_log_error("Cannot play death animation - Animator is null!")
 		# If no animator, respawn immediately
 		call_deferred("_respawn")
 	
 	player_died.emit()
+	entity_died.emit(self)  # Also emit BaseEntity signal
 
 
-func _on_hurt(damage: int, knockback: Vector2, _attacker: Node) -> void:
-	# _log("💥 PLAYER HIT! Damage: " + str(damage) + " from " + (str(attacker.name) if attacker != null else "unknown"))  # Commented out: enemy AI logging (health changes logged in PlayerStats)
-	# _log("   Knockback: " + str(knockback))  # Commented out: enemy AI logging
+func _on_hurt(damage: int, knockback: Vector2, attacker: Node) -> void:
+	_logger.log_debug("💥 PLAYER HIT! Damage: " + str(damage) + " from " + (str(attacker.name) if attacker != null else "unknown"))
+	_logger.log_debug("   Knockback: " + str(knockback))
 	
 	# SCREEN SHAKE!
 	_screen_shake(8.0, 0.2)
@@ -473,7 +405,7 @@ func _on_hurt(damage: int, knockback: Vector2, _attacker: Node) -> void:
 	# Apply knockback
 	if mover != null:
 		mover.apply_knockback(knockback * 0.5)
-		# _log("   Applied knockback")  # Commented out: movement logging
+		_logger.log_debug("   Applied knockback")
 	
 	# Apply damage to PlayerStats (global system) - this will emit health_changed signal
 	# HealthTracker will be synced automatically via _sync_health_tracker_from_stats()
@@ -481,27 +413,26 @@ func _on_hurt(damage: int, knockback: Vector2, _attacker: Node) -> void:
 
 
 func _on_animation_finished(anim_name: String) -> void:
-	# _log("🎬 Animation finished: " + anim_name)  # Commented out: animation logging
+	# _log("🎬 Animation finished: " + anim_name)  # Will use DEBUG level in Phase 4
 	
 	# Death animation finished - respawn
 	if anim_name.begins_with("death"):
-		# _log("   Death animation complete - respawning...")  # Commented out: animation logging (respawn logs kept)
+		# _log("   Death animation complete - respawning...")  # Will use DEBUG level in Phase 4
 		call_deferred("_respawn")
 		return
 	
-	# One-shot animation finished, casting is done
-	if is_casting:
-		is_casting = false
-		# _log("   Cast animation complete, is_casting = false")  # Commented out: animation logging
+	# Cast animation finished - notify spell caster
+	if spell_caster != null and anim_name.begins_with("fireball"):
+		spell_caster.on_animation_finished(anim_name)
 
 
 ## Respawn the player after death
 func _respawn() -> void:
-	_log("🔄 RESPAWNING PLAYER...")
+	_logger.log_info("🔄 RESPAWNING PLAYER...")
 	
 	# Reset position to spawn point
 	global_position = spawn_position
-	# _log("   Position reset to " + str(spawn_position))  # Commented out: movement logging
+	_logger.log_debug("   Position reset to " + str(spawn_position))
 	
 	# Reset death state
 	is_dead = false
@@ -510,7 +441,7 @@ func _respawn() -> void:
 	PlayerStats.set_health(PlayerStats.get_max_health())
 	PlayerStats.set_mana(PlayerStats.get_max_mana())
 	PlayerStats.set_stamina(PlayerStats.get_max_stamina())
-	_log("   Health/Mana/Stamina reset to full")
+	_logger.log_info("   Health/Mana/Stamina reset to full")
 	
 	# HealthTracker will be synced automatically via _sync_health_tracker_from_stats() signal
 	# Just ensure it's marked as not dead
@@ -518,25 +449,25 @@ func _respawn() -> void:
 		health_tracker.max_health = PlayerStats.get_max_health()
 		health_tracker.current_health = PlayerStats.health
 		health_tracker.is_dead = false
-		# _log("   HealthTracker reset")  # Commented out: initialization logging
+		_logger.log_debug("   HealthTracker reset")
 	
 	# Re-enable input
 	if input_reader != null:
 		input_reader.enable()
-		# _log("   Input re-enabled")  # Commented out: movement logging
+		_logger.log_debug("   Input re-enabled")
 	
 	# Re-enable hurtbox
 	if hurtbox != null:
 		hurtbox.enable()
-		# _log("   Hurtbox re-enabled")  # Commented out: enemy AI logging
+		_logger.log_debug("   Hurtbox re-enabled")
 	
-	# Reset casting state
-	is_casting = false
-	cooldown_timer = 0.0
-	_running_enabled = false
-	_stamina_drain_accumulator = 0.0
+	# Reset casting and running state
+	if spell_caster != null:
+		spell_caster.reset()
+	if running_state_manager != null:
+		running_state_manager.reset()
 	
-	_log("✅ Player respawned successfully!")
+	_logger.log_info("✅ Player respawned successfully!")
 
 
 ## Shake the camera for impact feel
@@ -544,7 +475,7 @@ func _screen_shake(intensity: float, duration: float) -> void:
 	if _camera == null:
 		return
 	
-	# _log("📳 SCREEN SHAKE! Intensity: " + str(intensity))  # Commented out: visual effect logging
+	_logger.log_debug("📳 SCREEN SHAKE! Intensity: " + str(intensity))
 	
 	# Kill any existing shake
 	if _shake_tween != null and _shake_tween.is_valid():

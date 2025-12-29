@@ -80,7 +80,7 @@ func _update_slots() -> void:
 	
 	for slot_name in slots:
 		var slot: Control = slots[slot_name]
-		var equipment: EquipmentData = InventorySystem.equipment.get(slot_name)
+		var equipment: EquipmentData = InventorySystem.get_equipped(slot_name)
 		
 		if slot.has_method("setup"):
 			slot.setup(slot_name, equipment)

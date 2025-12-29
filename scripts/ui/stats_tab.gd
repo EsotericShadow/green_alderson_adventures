@@ -23,10 +23,10 @@ func _ready() -> void:
 	if PlayerStats != null:
 		PlayerStats.stat_changed.connect(_on_stat_changed)
 	
-	# Connect to XP/leveling signals from BaseStatLeveling
-	if BaseStatLeveling != null:
-		BaseStatLeveling.base_stat_xp_gained.connect(_on_base_stat_xp_gained)
-		BaseStatLeveling.base_stat_leveled_up.connect(_on_base_stat_leveled_up)
+	# Connect to XP/leveling signals from PlayerStats
+	if PlayerStats != null:
+		PlayerStats.base_stat_xp_gained.connect(_on_base_stat_xp_gained)
+		PlayerStats.base_stat_leveled_up.connect(_on_base_stat_leveled_up)
 	
 	if SpellSystem != null:
 		SpellSystem.xp_gained.connect(_on_xp_gained)
@@ -41,7 +41,7 @@ func _update_all_stats() -> void:
 
 
 func _update_base_stats() -> void:
-	if PlayerStats == null or BaseStatLeveling == null:
+	if PlayerStats == null:
 		return
 	
 	# Stat configuration array (DRY principle - iterate instead of repeating)
@@ -66,7 +66,7 @@ func _update_base_stats() -> void:
 			row.setup(display_name, config.icon)
 		
 		# Get display data from model layer (no calculations in UI)
-		var display_data: Dictionary = BaseStatLeveling.get_stat_display_data(stat_name)
+		var display_data: Dictionary = PlayerStats.get_stat_display_data(stat_name)
 		
 		# Update row with display data
 		if row.has_method("update_stat_with_xp"):

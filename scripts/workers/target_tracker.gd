@@ -1,12 +1,9 @@
-extends Node
+extends BaseWorker
 class_name TargetTracker
 
 ## WORKER: Tracks a target node
 ## Does ONE thing: provides info about target position/distance
 ## Does NOT: decide to chase, trigger attacks, manage AI state
-
-# Logging
-var _logger: GameLogger.GameLoggerInstance
 
 signal target_acquired(target: Node2D)
 signal target_lost
@@ -15,16 +12,13 @@ signal target_lost
 @export var lose_range: float = 250.0  # Lose target if they go beyond this
 
 var target: Node2D = null
-var owner_node: Node2D = null
 var spawn_position: Vector2 = Vector2.ZERO
 
 
-func _ready() -> void:
-	owner_node = get_parent() as Node2D
+func _on_initialize() -> void:
+	"""Initialize target tracker - set spawn position."""
 	if owner_node != null:
 		spawn_position = owner_node.global_position
-		_logger = GameLogger.create("[" + owner_node.name + "/TargetTracker] ")
-		# _logger.log("TargetTracker initialized (detection: " + str(detection_range) + ", lose: " + str(lose_range) + ")")  # Commented out: enemy AI logging
 
 
 ## Set the target to track

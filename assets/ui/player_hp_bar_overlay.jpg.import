@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bmn5nejnqi1px"
-path="res://.godot/imported/unnamed-4.jpg-52f3a171b852b233234ef614f84f6e0c.ctex"
+path="res://.godot/imported/player_hp_bar_overlay.jpg-90f163980175fab3755c3e07ce87d6a6.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://scenes/enemies/unnamed-4.jpg"
-dest_files=["res://.godot/imported/unnamed-4.jpg-52f3a171b852b233234ef614f84f6e0c.ctex"]
+source_file="res://assets/ui/player_hp_bar_overlay.jpg"
+dest_files=["res://.godot/imported/player_hp_bar_overlay.jpg-90f163980175fab3755c3e07ce87d6a6.ctex"]
 
 [params]
 

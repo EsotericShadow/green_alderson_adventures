@@ -1,6 +1,9 @@
 extends CanvasLayer
 ## Tool Belt UI - 5 quick item slots (F1-F5) displayed below spell hotbar
 
+# Logging
+var _logger = GameLogger.create("[ToolBelt] ")
+
 const LOG_PREFIX := "[TOOL_BELT] "
 const NUM_SLOTS: int = 5
 
@@ -13,7 +16,7 @@ const QUICK_BELT_SLOT_SCENE: PackedScene = preload("res://scenes/ui/quick_belt_s
 
 func _ready() -> void:
 	layer = 19  # Same layer as spell hotbar
-	print(LOG_PREFIX + "Tool belt ready")
+	_logger.log("Tool belt ready")
 	_create_slots()
 	_update_slots()
 	
@@ -58,14 +61,14 @@ func use_slot(index: int) -> bool:
 	var item: ItemData = inventory_slot.get("item")
 	
 	if item == null:
-		print(LOG_PREFIX + "Slot ", index, " is empty")
+		_logger.log_debug("Slot " + str(index) + " is empty")
 		return false
 	
 	# TODO: Implement item usage logic (consumables, potions, etc.)
 	# For now, just remove one item
 	if item.item_type == "consumable":
 		InventorySystem.remove_item(item, 1)
-		print(LOG_PREFIX + "Used item: ", item.display_name)
+		_logger.log("Used item: " + item.display_name)
 		return true
 	
 	return false

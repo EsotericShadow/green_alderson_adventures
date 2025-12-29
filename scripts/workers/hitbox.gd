@@ -1,4 +1,4 @@
-extends Area2D
+extends BaseAreaWorker
 class_name Hitbox
 
 ## WORKER: Detects when this hitbox hits a hurtbox
@@ -10,18 +10,9 @@ signal hit_landed(target: Node, damage: int)
 @export var damage: int = 10
 @export var knockback_force: float = 200.0  # More impact!
 
-var owner_node: Node = null
-var _logger: GameLogger.GameLoggerInstance
 
-
-func _log(msg: String) -> void:
-	_logger.log(msg)
-
-
-func _ready() -> void:
-	owner_node = get_parent()
-	_logger = GameLogger.create("[" + owner_node.name + "/Hitbox] ")
-	
+func _on_initialize() -> void:
+	"""Initialize hitbox - set collision layers and connect signals."""
 	# Hitbox layer = 4, detects Hurtbox layer = 8
 	collision_layer = 4
 	collision_mask = 8

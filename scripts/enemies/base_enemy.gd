@@ -1,4 +1,4 @@
-extends CharacterBody2D
+extends BaseEntity
 class_name BaseEnemy
 
 ## ⚠️⚠️⚠️ LOCKED COMBAT LOGIC - DO NOT ALTER ⚠️⚠️⚠️
@@ -46,11 +46,7 @@ signal state_changed(old_state: String, new_state: String)
 @export var separation_distance: float = 25.0  # ⚠️ LOCKED: Minimum distance to maintain (prevents spam attacks) - DO NOT SET BELOW 25
 @export var post_attack_backoff_time: float = 1.0  # ⚠️ LOCKED: Time to wait after attack before attacking again (prevents spam) - DO NOT SET BELOW 1.0
 
-# Worker references
-@onready var mover: Mover = $Mover
-@onready var animator: Animator = $Animator
-@onready var health_tracker: HealthTracker = $HealthTracker
-@onready var hurtbox: Hurtbox = $Hurtbox
+# Worker references (mover, animator, health_tracker, hurtbox inherited from BaseEntity)
 @onready var hitbox: Hitbox = $Hitbox
 @onready var target_tracker: TargetTracker = $TargetTracker
 @onready var detection_area: Area2D = $DetectionArea
@@ -64,23 +60,20 @@ var hurt_timer: float = 0.0
 var post_attack_backoff_timer: float = 0.0
 var is_dead: bool = false
 
-# Logging
-var _logger: GameLogger.GameLoggerInstance
-
 # Effects
 var _hit_flash_tween: Tween = null
 
 
-func _log(msg: String) -> void:
-	_logger.log(msg)
-
-
-func _log_error(msg: String) -> void:
-	_logger.log_error(msg)
+func _get_entity_type() -> String:
+	return "enemy"
 
 
 func _ready() -> void:
+	# Initialize logger before calling super (BaseEntity checks if null)
 	_logger = GameLogger.create("[" + name + "] ")
+	# Call parent _ready() to initialize BaseEntity (sets up mover, animator, health_tracker, hurtbox)
+	super._ready()
+	
 	add_to_group("enemy")
 	# _log("Enemy spawned at " + str(global_position))  # Commented out: enemy AI logging
 	_setup_workers()
@@ -88,30 +81,20 @@ func _ready() -> void:
 
 
 func _setup_workers() -> void:
+	# Call parent to set up common workers (mover, animator, health_tracker, hurtbox)
+	super._setup_workers()
+	
 	# _log("Checking workers...")  # Commented out: enemy AI logging
 	
-	if mover == null:
-		_log_error("Mover is MISSING! Movement will not work.")
-	# else:
-	# 	_log("  ✓ Mover ready")  # Commented out: enemy AI logging
-	
-	if animator == null:
-		_log_error("Animator is MISSING! Animations will not work.")
-	else:
+	# Configure animator (enemy-specific: use 4 directions)
+	if animator != null:
 		animator.use_4_directions = true
 		# _log("  ✓ Animator ready (4-directional)")  # Commented out: enemy AI logging
 	
-	if health_tracker == null:
-		_log_error("HealthTracker is MISSING!")
-	else:
+	# Configure health_tracker (enemy-specific: set max health)
+	if health_tracker != null:
 		health_tracker.set_max_health(max_health)
 		# _log("  ✓ HealthTracker ready (HP: " + str(max_health) + ")")  # Commented out: enemy AI logging
-	
-	if hurtbox == null:
-		_log_error("Hurtbox is MISSING! Cannot take damage.")
-	else:
-		hurtbox.owner_node = self
-		# _log("  ✓ Hurtbox ready")  # Commented out: enemy AI logging
 	
 	if hitbox == null:
 		_log_error("Hitbox is MISSING! Cannot deal damage.")
@@ -522,6 +505,7 @@ func _on_animation_finished(anim_name: String) -> void:
 	elif anim_name.begins_with("death"):
 		# _log("   Death animation complete - removing from scene")  # Commented out: enemy AI logging
 		enemy_died.emit()
+		entity_died.emit(self)  # Also emit BaseEntity signal
 		queue_free()
 
 

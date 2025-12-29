@@ -20,7 +20,7 @@ func _ready() -> void:
 		push_error("Mover: Parent must be CharacterBody2D")
 		return
 	_logger = GameLogger.create("[" + body.name + "/Mover] ")
-	# _logger.log("Mover initialized")  # Commented out: movement logging
+	_logger.log_debug("Mover initialized")
 
 
 func _physics_process(delta: float) -> void:

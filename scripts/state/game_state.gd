@@ -11,7 +11,6 @@ var player_state: PlayerState = PlayerState.new()
 var player_stats: Node = null
 var inventory_system: Node = null
 var spell_system: Node = null
-var base_stat_leveling: Node = null
 
 
 func _ready() -> void:
@@ -19,7 +18,6 @@ func _ready() -> void:
 	player_stats = get_node_or_null("/root/PlayerStats")
 	inventory_system = get_node_or_null("/root/InventorySystem")
 	spell_system = get_node_or_null("/root/SpellSystem")
-	base_stat_leveling = get_node_or_null("/root/BaseStatLeveling")
 	
 	# Sync initial state from existing systems
 	sync_from_systems()
@@ -43,9 +41,9 @@ func sync_from_systems() -> void:
 	player_state.stamina = player_stats.stamina
 	player_state.gold = player_stats.gold
 	
-	# Sync base stat XP
-	if base_stat_leveling != null:
-		player_state.base_stat_xp = base_stat_leveling.base_stat_xp.duplicate()
+	# Sync base stat XP (now stored in PlayerStats)
+	if player_stats != null:
+		player_state.base_stat_xp = player_stats.base_stat_xp.duplicate()
 	
 	# Sync element levels and XP
 	if spell_system != null:
@@ -53,8 +51,11 @@ func sync_from_systems() -> void:
 		player_state.element_xp = spell_system.element_xp.duplicate()
 	
 	# Sync inventory (if needed)
+	# TODO: Implement inventory sync:
+	#   - Sync inventory_slots array from InventorySystem.get_all_slots()
+	#   - Sync equipment dictionary from InventorySystem.equipment
+	#   - Ensure item resources are properly loaded via ResourceManager
 	if inventory_system != null:
-		# TODO: Sync inventory slots and equipment
 		pass
 
 
@@ -64,21 +65,17 @@ func sync_to_systems() -> void:
 	if player_stats == null:
 		return
 	
-	# Sync base stats
-	player_stats.base_resilience = player_state.base_resilience
-	player_stats.base_agility = player_state.base_agility
-	player_stats.base_int = player_state.base_int
-	player_stats.base_vit = player_state.base_vit
+	# Sync base stat XP first (now stored in PlayerStats)
+	player_stats.base_stat_xp = player_state.base_stat_xp.duplicate()
 	
-	# Sync current values
+	# Recalculate stat levels from XP (this sets base_resilience, base_agility, base_int, base_vit correctly)
+	player_stats.recalculate_stat_levels_from_xp()
+	
+	# Sync current values (after levels are set so max values are correct)
 	player_stats.set_health(player_state.health)
 	player_stats.set_mana(player_state.mana)
 	player_stats.set_stamina(player_state.stamina)
 	player_stats.gold = player_state.gold
-	
-	# Sync base stat XP
-	if base_stat_leveling != null:
-		base_stat_leveling.base_stat_xp = player_state.base_stat_xp.duplicate()
 	
 	# Sync element levels and XP
 	if spell_system != null:

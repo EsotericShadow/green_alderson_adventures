@@ -29,7 +29,7 @@ func _run_all_tests() -> void:
 	_test_player_stats_formulas()
 	_test_inventory_system()
 	_test_spell_system()
-	_test_base_stat_leveling()
+	_test_player_stats_xp_leveling()
 	_test_stat_formulas()
 	_test_damage_calculator()
 	_test_cooldown_systems()
@@ -42,7 +42,6 @@ func _test_autoloads_exist() -> void:
 		"PlayerStats",
 		"InventorySystem",
 		"SpellSystem",
-		"BaseStatLeveling",
 		"EventBus"
 	]
 	
@@ -231,18 +230,18 @@ func _test_spell_system() -> void:
 		_logger.log("  ✓ " + element.capitalize() + " unlock pattern configured: " + str(expected_spells) + " spells")
 
 
-func _test_base_stat_leveling() -> void:
-	_logger.log("\n--- Testing BaseStatLeveling ---")
+func _test_player_stats_xp_leveling() -> void:
+	_logger.log("\n--- Testing PlayerStats XP and Leveling ---")
 	
-	if BaseStatLeveling == null:
-		_logger.log_error("BaseStatLeveling is null!")
+	if PlayerStats == null:
+		_logger.log_error("PlayerStats is null!")
 		return
 	
 	# Test XP tracking
 	var stats: Array[String] = StatConstants.BASE_STATS
 	for stat in stats:
 		_total_tests += 1
-		var xp: int = BaseStatLeveling.get_base_stat_xp(stat)
+		var xp: int = PlayerStats.get_base_stat_xp(stat)
 		if xp >= 0:
 			_passed_tests += 1
 			_logger.log("  ✓ " + stat.capitalize() + " XP tracking: " + str(xp))
@@ -250,14 +249,15 @@ func _test_base_stat_leveling() -> void:
 			_failed_tests += 1
 			_logger.log_error("  ✗ " + stat.capitalize() + " XP invalid: " + str(xp))
 	
-	# Test max level constant
+	# Test max level (now in GameBalance)
 	_total_tests += 1
-	if BaseStatLeveling.MAX_BASE_STAT_LEVEL == 110:
+	var max_level: int = GameBalance.get_max_base_stat_level() if GameBalance != null else 110
+	if max_level == 110:
 		_passed_tests += 1
-		_logger.log("  ✓ Max base stat level: " + str(BaseStatLeveling.MAX_BASE_STAT_LEVEL))
+		_logger.log("  ✓ Max base stat level: " + str(max_level))
 	else:
 		_failed_tests += 1
-		_logger.log_error("  ✗ Max base stat level wrong! Expected: 110, Got: " + str(BaseStatLeveling.MAX_BASE_STAT_LEVEL))
+		_logger.log_error("  ✗ Max base stat level wrong! Expected: 110, Got: " + str(max_level))
 
 
 func _test_stat_formulas() -> void:

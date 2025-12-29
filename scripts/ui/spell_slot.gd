@@ -1,6 +1,9 @@
 extends PanelContainer
 class_name SpellSlot
 ## Spell slot UI component.
+
+# Logging
+var _logger = GameLogger.create("[SpellSlot] ")
 ## Displays spell icon with hue shift, handles selection highlighting.
 
 signal slot_clicked(slot_index: int)
@@ -18,7 +21,7 @@ func setup(index: int, spell: SpellData) -> void:
 	spell_data = spell
 	
 	if icon == null or key_label == null:
-		print("[SpellSlot] ⚠️ Slot ", index, ": icon or key_label is null!")
+		_logger.log_warning("Slot " + str(index) + ": icon or key_label is null!")
 		return  # Nodes not ready yet
 	
 	# Ensure icon is visible
@@ -32,14 +35,14 @@ func setup(index: int, spell: SpellData) -> void:
 	
 	if spell == null:
 		# Empty slot
-		print("[SpellSlot] Slot ", index, ": empty (no spell)")
+		_logger.log_debug("Slot " + str(index) + ": empty (no spell)")
 		icon.texture = null
 		icon.modulate = Color.WHITE
 		key_label.text = ""
 		icon.visible = false
 	else:
 		# Load spell icon and apply hue shift
-		print("[SpellSlot] Slot ", index, ": setting spell ", spell.display_name)
+		_logger.log_debug("Slot " + str(index) + ": setting spell " + spell.display_name)
 		_load_spell_icon(spell)
 		key_label.visible = true
 		icon.visible = true
@@ -71,7 +74,7 @@ func _load_spell_icon(spell: SpellData) -> void:
 	
 	# Fallback to blue icon if element-specific icon doesn't exist
 	if base_icon == null:
-		print("[SpellSlot] ⚠️ Element-specific icon not found (", icon_filename, "), using blue icon")
+		_logger.log_warning("Element-specific icon not found (" + icon_filename + "), using blue icon")
 		icon_path = "res://assets/animations/UI/spell_hotbar_icons/spell_ball_blast/spell_icon_lvl_1(blue).png"
 		base_icon = load(icon_path) as Texture2D
 		
@@ -95,18 +98,18 @@ func _load_spell_icon(spell: SpellData) -> void:
 			_:
 				modulate_color = Color.WHITE
 		icon.modulate = modulate_color
-		print("[SpellSlot]   Using fallback modulation: ", modulate_color)
+		_logger.log_debug("Using fallback modulation: " + str(modulate_color))
 	else:
 		# Element-specific icon found - use white modulate (icon should already be colored)
 		icon.modulate = Color.WHITE
-		print("[SpellSlot] ✓ Element-specific icon loaded: ", icon_filename)
+		_logger.log_debug("Element-specific icon loaded: " + icon_filename)
 	
-	print("[SpellSlot] ✓ Icon loaded for ", spell.display_name, " (", spell.element, ")")
+	_logger.log_debug("Icon loaded for " + spell.display_name + " (" + spell.element + ")")
 	icon.texture = base_icon
 	
 	# Ensure icon is visible after setting texture
 	icon.visible = true
-	print("[SpellSlot]   Icon visible: ", icon.visible, ", texture: ", icon.texture != null)
+	_logger.log_debug("Icon visible: " + str(icon.visible) + ", texture: " + str(icon.texture != null))
 
 
 func set_selected(is_selected: bool) -> void:

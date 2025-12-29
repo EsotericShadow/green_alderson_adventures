@@ -364,3 +364,42 @@ func get_total_damage_percentage() -> float:
 		if item != null:
 			total += item.damage_percentage_bonus
 	return total
+
+
+func get_current_carry_weight() -> float:
+	"""Calculates current total weight of all items in inventory and equipment."""
+	var total_weight: float = 0.0
+	
+	# Count inventory items
+	for i in range(capacity):
+		var slot: Dictionary = get_slot(i)
+		var item: ItemData = slot.get("item")
+		var count: int = slot.get("count", 0)
+		if item != null and count > 0:
+			total_weight += item.weight * count
+	
+	# Also count equipped items
+	for slot_name in equipment:
+		var item: EquipmentData = equipment[slot_name]
+		if item != null:
+			total_weight += item.weight
+	
+	return total_weight
+
+
+func can_carry_item(item: ItemData, count: int = 1) -> bool:
+	"""Checks if player can carry additional items."""
+	if item == null:
+		return false
+	
+	var current_weight: float = get_current_carry_weight()
+	var additional_weight: float = item.weight * count
+	
+	# Get max weight from MovementSystem
+	if MovementSystem != null:
+		var max_weight: float = MovementSystem.get_max_carry_weight()
+		return (current_weight + additional_weight) <= max_weight
+	
+	# Fallback if MovementSystem not available
+	_logger.log_warning("MovementSystem not available for can_carry_item check")
+	return true

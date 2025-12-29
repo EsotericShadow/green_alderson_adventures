@@ -1,4 +1,4 @@
-extends Node
+extends BaseWorker
 class_name Animator
 
 ## WORKER: Plays animations on an AnimatedSprite2D
@@ -12,24 +12,14 @@ var is_one_shot_playing: bool = false
 var current_one_shot: String = ""
 var use_4_directions: bool = false  # false = 8 directions, true = 4 directions
 
-var _logger: GameLogger.GameLoggerInstance
 var _last_anim := ""
 
 
-func _log(msg: String) -> void:
-	_logger.log(msg)
-
-
-func _log_error(msg: String) -> void:
-	_logger.log_error(msg)
-
-
-func _ready() -> void:
-	_logger = GameLogger.create("[" + get_parent().name + "/Animator] ")
-	
-	sprite = get_parent().get_node_or_null("AnimatedSprite2D")
+func _on_initialize() -> void:
+	"""Initialize animator - find sprite and connect signals."""
+	sprite = owner_node.get_node_or_null("AnimatedSprite2D")
 	if sprite == null:
-		_log_error("No AnimatedSprite2D found as sibling! Animations will NOT work.")
+		_logger.log_error("No AnimatedSprite2D found as sibling! Animations will NOT work.")
 		return
 	
 	if not sprite.animation_finished.is_connected(_on_animation_finished):
@@ -40,7 +30,7 @@ func _ready() -> void:
 ## Will not interrupt a one-shot animation
 func play(base_name: String, direction: String) -> void:
 	if sprite == null:
-		_log_error("Cannot play '" + base_name + "' - sprite is null!")
+		_logger.log_error("Cannot play '" + base_name + "' - sprite is null!")
 		return
 	
 	# Don't interrupt one-shot animations
@@ -61,7 +51,7 @@ func play(base_name: String, direction: String) -> void:
 ## Returns immediately, emits 'finished' signal when done
 func play_one_shot(base_name: String, direction: String) -> void:
 	if sprite == null:
-		_log_error("Cannot play one-shot '" + base_name + "' - sprite is null!")
+		_logger.log_error("Cannot play one-shot '" + base_name + "' - sprite is null!")
 		return
 	
 	var anim_name := _resolve_anim_name(base_name, direction)
@@ -74,9 +64,9 @@ func play_one_shot(base_name: String, direction: String) -> void:
 		_last_anim = anim_name
 		sprite.play(anim_name)
 	else:
-		_log_error("Animation '" + anim_name + "' NOT FOUND!")
-		_log_error("   Requested: " + base_name + " + " + direction)  # Keep errors
-		_log_error("   Resolved to: " + anim_name)  # Keep errors
+		_logger.log_error("Animation '" + anim_name + "' NOT FOUND!")
+		_logger.log_error("   Requested: " + base_name + " + " + direction)  # Keep errors
+		_logger.log_error("   Resolved to: " + anim_name)  # Keep errors
 
 
 ## Check if a one-shot animation is currently playing

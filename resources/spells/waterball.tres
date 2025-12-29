@@ -13,4 +13,5 @@ mana_cost = 12
 cooldown = 0.7
 hue_shift = 0.5
 projectile_speed = 500.0
+projectile_scene_path = "res://scenes/projectiles/waterball.tscn"
 

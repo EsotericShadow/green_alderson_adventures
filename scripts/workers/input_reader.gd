@@ -1,12 +1,9 @@
-extends Node
+extends BaseWorker
 class_name InputReader
 
 ## WORKER: Reads player input
 ## Does ONE thing: reports what buttons are pressed
 ## Does NOT: trigger actions, make decisions, emit signals
-
-# Logging
-var _logger: GameLogger.GameLoggerInstance
 
 var enabled: bool = true
 
@@ -14,9 +11,8 @@ var enabled: bool = true
 var _previous_run_modifier_pressed: bool = false
 
 
-func _ready() -> void:
-	_logger = GameLogger.create("[" + get_parent().name + "/InputReader] ")
-	# _logger.log("InputReader initialized")  # Commented out: movement logging
+func _on_initialize() -> void:
+	"""Initialize input reader - set up run modifier tracking."""
 	_previous_run_modifier_pressed = is_run_modifier_pressed()
 
 

@@ -1,4 +1,4 @@
-extends Node
+extends BaseWorker
 class_name SpellSpawner
 
 ## WORKER: Spawns projectiles
@@ -7,30 +7,12 @@ class_name SpellSpawner
 
 @export var fireball_scene: PackedScene
 
-var owner_node: Node2D = null
 var pool: Node = null  # ProjectilePool reference
 
-var _logger: GameLogger.GameLoggerInstance
 
-
-func _log(msg: String) -> void:
-	_logger.log(msg)
-
-
-func _log_error(msg: String) -> void:
-	_logger.log_error(msg)
-
-
-func _ready() -> void:
-	_logger = GameLogger.create("[" + get_parent().name + "/SpellSpawner] ")
-	owner_node = get_parent() as Node2D
+func _on_initialize() -> void:
+	"""Initialize spell spawner - find projectile pool."""
 	_find_pool()
-	
-	if fireball_scene == null:
-		# _log("⚠️ No fireball_scene assigned - will need pool")  # Commented out: spell casting logging
-		pass
-	else:
-		pass  # _log("✓ Fireball scene ready")  # Commented out: spell casting logging
 
 
 func _find_pool() -> void:
@@ -55,31 +37,17 @@ func spawn_fireball(direction: String, spawn_pos: Vector2, z_index_value: int, s
 	# _log("   Position: " + str(spawn_pos))  # Commented out: spell casting logging
 	# _log("   Z-index: " + str(z_index_value))  # Commented out: spell casting logging
 	
-	# Determine which projectile scene to use based on element
+	# Load projectile scene from SpellData (data-driven approach)
 	var projectile_scene: PackedScene = null
-	if spell_data != null:
-		match spell_data.element:
-			"fire":
-				projectile_scene = load("res://scenes/projectiles/fireball.tscn") as PackedScene
-			"water":
-				projectile_scene = load("res://scenes/projectiles/waterball.tscn") as PackedScene
-			"earth":
-				projectile_scene = load("res://scenes/projectiles/earthball.tscn") as PackedScene
-			"air":
-				projectile_scene = load("res://scenes/projectiles/airball.tscn") as PackedScene
-		
-		if projectile_scene != null:
-			# _log("   Using element-specific projectile: " + spell_data.element)  # Commented out: spell casting logging
-			pass
-		else:
-			pass  # _log("   ⚠️ Element-specific scene not found, using fallback")  # Commented out: spell casting logging
+	if spell_data != null and not spell_data.projectile_scene_path.is_empty():
+		projectile_scene = ResourceManager.load_scene(spell_data.projectile_scene_path)
 	
-	# Fallback to fireball_scene if element-specific scene not found
+	# Fallback to fireball_scene if path is empty or load fails
 	if projectile_scene == null:
 		projectile_scene = fireball_scene
 	
 	if projectile_scene == null:
-		_log_error("No projectile scene available! Cannot spawn.")
+		_logger.log_error("No projectile scene available! Cannot spawn.")
 		return null
 	
 	var fb: Node = null
@@ -94,7 +62,7 @@ func spawn_fireball(direction: String, spawn_pos: Vector2, z_index_value: int, s
 		# _log("   Source: Pool (fireball)")  # Commented out: spell casting logging
 		fb = pool.get_fireball()
 		if fb == null:
-			_log_error("Pool.get_fireball() returned null!")
+			_logger.log_error("Pool.get_fireball() returned null!")
 			return null
 		var parent := fb.get_parent()
 		if parent != null:

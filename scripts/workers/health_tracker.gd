@@ -1,12 +1,9 @@
-extends Node
+extends BaseWorker
 class_name HealthTracker
 
 ## WORKER: Tracks health points
 ## Does ONE thing: manages HP value and reports changes
 ## Does NOT: apply knockback, trigger animations, make decisions
-
-# Logging
-var _logger: GameLogger.GameLoggerInstance
 
 signal changed(current: int, maximum: int)
 signal died(killer: Node)
@@ -18,10 +15,10 @@ var current_health: int = 100
 var is_dead: bool = false
 
 
-func _ready() -> void:
-	_logger = GameLogger.create("[" + get_parent().name + "/HealthTracker] ")
+func _on_initialize() -> void:
+	"""Initialize health tracker - set initial health."""
 	current_health = max_health
-	_logger.log("HealthTracker initialized: " + str(current_health) + "/" + str(max_health) + " HP")
+	_logger.log_info("HealthTracker initialized: " + str(current_health) + "/" + str(max_health) + " HP")
 
 
 ## Take damage from a source

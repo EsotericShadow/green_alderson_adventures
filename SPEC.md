@@ -18,6 +18,7 @@
 8. [Milestone 3: Elemental Spells](#milestone-3-elemental-spells)
 9. [Milestone 4: Crafting & Chests](#milestone-4-crafting--chests)
 10. [Milestone 5: Currency & Merchant](#milestone-5-currency--merchant)
+11. [Architecture Patterns](#architecture-patterns)
 
 ---
 
@@ -293,6 +294,89 @@ extends Resource
 - `prices`: Parallel array of buy prices (sell price = 50% of buy price)
 
 **Constraint**: `stock.size()` must equal `prices.size()`
+
+---
+
+## Architecture Patterns
+
+This section documents the architectural patterns and principles used in the codebase. See `ARCHITECTURE_GUIDELINES.md` for detailed guidelines.
+
+### Data Flow Patterns
+
+**State Changes:**
+- Always use setters + signals for state changes
+- Never directly mutate properties across system boundaries
+- Example: `PlayerStats.set_base_stat_level()` instead of `PlayerStats.base_resilience = 5`
+
+**Queries:**
+- Use method calls for read-only operations
+- Direct property access is acceptable for simple queries within the same system
+
+**Cross-System Notifications:**
+- Use EventBus signals for decoupled cross-system notifications
+- Direct signals are acceptable for closely related systems
+
+See `ARCHITECTURE_GUIDELINES.md` for complete data flow documentation.
+
+### Worker Pattern
+
+Workers are single-purpose components that execute specific tasks. Coordinators make decisions and delegate to workers.
+
+**Worker Responsibilities:**
+- Execute a single, well-defined task
+- Expose simple interface to coordinator
+- Do NOT make high-level decisions
+
+**Coordinator Responsibilities:**
+- Make decisions about what to do
+- Orchestrate worker interactions
+- Do NOT implement low-level details
+
+**BaseWorker Class:**
+- All workers can extend `BaseWorker` for consistent interface
+- Provides initialization, update, and cleanup lifecycle
+- Optional: existing workers continue to work without BaseWorker
+
+### Error Handling
+
+See `ERROR_HANDLING_GUIDELINES.md` for complete error handling patterns.
+
+**Key Principles:**
+- Never silently fail - always log errors
+- Return safe defaults when possible
+- Use appropriate return types (nullable resources, bool success/failure)
+- Emit signals for cross-system error notifications
+
+### Resource Loading
+
+All resource loading should go through `ResourceManager` singleton.
+
+**Pattern:**
+```gdscript
+var spell = ResourceManager.load_spell("fireball")
+var item = ResourceManager.load_item("health_potion")
+```
+
+**Benefits:**
+- Centralized resource paths
+- Automatic caching
+- Consistent error handling
+- Easy to change resource locations
+
+### Configuration Management
+
+All game balance values should be defined in `GameBalanceConfig` resource and accessed via `GameBalance` autoload.
+
+**Pattern:**
+```gdscript
+var walk_speed = GameBalance.get_walk_speed()
+var max_level = GameBalance.get_max_base_stat_level()
+```
+
+**Benefits:**
+- Data-driven design
+- Easy balancing without code changes
+- Centralized configuration
 
 ---
 

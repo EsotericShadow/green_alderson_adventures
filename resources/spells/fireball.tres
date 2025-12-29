@@ -13,4 +13,5 @@ mana_cost = 10
 cooldown = 0.6
 hue_shift = 0.0
 projectile_speed = 500.0
+projectile_scene_path = "res://scenes/projectiles/fireball.tscn"
 

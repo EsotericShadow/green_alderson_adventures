@@ -43,10 +43,10 @@ func _ready() -> void:
 	if close_button != null:
 		close_button.pressed.connect(close)
 	
-	# Initial refresh (don't await in _ready, slots will be created immediately)
+	# Initial refresh (call directly, await is safe in _ready for first frame)
 	_logger.log("Refreshing slots...")
-	_refresh_slots_immediate()
-	_refresh_equipment_slots_immediate()
+	_refresh_slots()
+	_refresh_equipment_slots()
 	
 	# Start hidden (this is the full-screen modal inventory, sidebar inventory is separate)
 	if control != null:
@@ -101,10 +101,6 @@ func close() -> void:
 
 
 func _refresh_slots() -> void:
-	_refresh_slots_async()
-
-
-func _refresh_slots_async() -> void:
 	_logger.log("_refresh_slots() called")
 	
 	if slot_grid == null:
@@ -124,44 +120,6 @@ func _refresh_slots_async() -> void:
 	
 	# Wait one frame to ensure nodes are fully removed
 	await get_tree().process_frame
-	
-	_logger.log("Creating slots for capacity: " + str(InventorySystem.capacity))
-	# Create slots for current capacity
-	for i in range(InventorySystem.capacity):
-		var slot: PanelContainer = SLOT_SCENE.instantiate()
-		if slot == null:
-			_logger.log_error("Failed to instantiate slot at index " + str(i))
-			continue
-		
-		# Add to scene tree first so @onready vars can be initialized
-		slot_grid.add_child(slot)
-		slot.slot_clicked.connect(_on_slot_clicked)
-		
-		# Setup after adding to tree (nodes will be ready)
-		var slot_data: Dictionary = InventorySystem.get_slot(i)
-		slot.setup(i, slot_data["item"], slot_data["count"])
-	
-	_logger.log("Created " + str(slot_grid.get_child_count()) + " slots")
-
-
-func _refresh_slots_immediate() -> void:
-	# Non-async version for _ready() - doesn't await
-	_logger.log("_refresh_slots_immediate() called")
-	
-	if slot_grid == null:
-		_logger.log_error("slot_grid is null in _refresh_slots!")
-		return
-	
-	if InventorySystem == null:
-		_logger.log_error("InventorySystem is null in _refresh_slots!")
-		return
-	
-	var existing_count: int = slot_grid.get_child_count()
-	_logger.log("Clearing existing slots (count: " + str(existing_count) + ")")
-	# Clear existing slots immediately
-	for child in slot_grid.get_children():
-		slot_grid.remove_child(child)
-		child.queue_free()
 	
 	_logger.log("Creating slots for capacity: " + str(InventorySystem.capacity))
 	# Create slots for current capacity
@@ -213,46 +171,6 @@ func _refresh_equipment_slots_async() -> void:
 			child.queue_free()
 	
 	await get_tree().process_frame
-	
-	# Get row containers
-	var row1: HBoxContainer = equip_container.get_child(0) as HBoxContainer  # head
-	var row2: HBoxContainer = equip_container.get_child(1) as HBoxContainer  # book, body, weapon
-	var row3: HBoxContainer = equip_container.get_child(2) as HBoxContainer  # ring, legs, gloves
-	var row4: HBoxContainer = equip_container.get_child(3) as HBoxContainer  # amulet, boots
-	
-	# Row 1: head (centered single column)
-	_create_equip_slot("head", row1)
-	
-	# Row 2: book, body, weapon (3 columns)
-	_create_equip_slot("book", row2)
-	_create_equip_slot("body", row2)
-	_create_equip_slot("weapon", row2)
-	
-	# Row 3: ring, legs, gloves (3 columns)
-	_create_equip_slot("ring1", row3)  # Using ring1 for "ring"
-	_create_equip_slot("legs", row3)
-	_create_equip_slot("gloves", row3)
-	
-	# Row 4: amulet, boots (2 columns)
-	_create_equip_slot("amulet", row4)
-	_create_equip_slot("boots", row4)
-
-
-func _refresh_equipment_slots_immediate() -> void:
-	# Non-async version for _ready()
-	if equip_container == null:
-		_logger.log_error("equip_container is null in _refresh_equipment_slots_immediate!")
-		return
-	
-	if InventorySystem == null:
-		_logger.log_error("InventorySystem is null in _refresh_equipment_slots_immediate!")
-		return
-	
-	# Clear existing equipment slots from all rows
-	for row in equip_container.get_children():
-		for child in row.get_children():
-			row.remove_child(child)
-			child.queue_free()
 	
 	# Get row containers
 	var row1: HBoxContainer = equip_container.get_child(0) as HBoxContainer  # head

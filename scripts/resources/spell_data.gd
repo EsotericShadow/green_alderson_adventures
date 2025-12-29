@@ -13,4 +13,5 @@ extends Resource
 @export var hue_shift: float = 0.0
 @export var projectile_speed: float = 300.0
 @export var unlock_level: int = 1  # Element level required to unlock this spell
+@export var projectile_scene_path: String = ""  # Path to the projectile scene (.tscn file)
 

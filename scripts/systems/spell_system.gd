@@ -7,7 +7,8 @@ var _logger = GameLogger.create("[SPELL_SYSTEM] ")
 
 # Constants (LOCKED per SPEC.md)
 const ELEMENTS: Array[String] = ["fire", "water", "earth", "air"]
-const MAX_ELEMENT_LEVEL: int = 110  # Maximum level for spell elements
+# Max level is now loaded from GameBalance config (fallback default)
+const MAX_ELEMENT_LEVEL: int = 110  # Use GameBalance.get_max_element_level() instead
 # XP system: Using RuneScape-style exponential XP curve (see XPFormula)
 
 # Signals (LOCKED NAMES per SPEC.md)
@@ -117,9 +118,12 @@ func _check_level_up(element: String) -> void:
 	# Calculate what level this XP should correspond to (using RuneScape formula)
 	var calculated_level: int = XPFormula.get_level_from_xp(current_xp)
 	
+	# Get max level from GameBalance config
+	var max_level: int = GameBalance.get_max_element_level()
+	
 	# Cap calculated level to max
-	if calculated_level > MAX_ELEMENT_LEVEL:
-		calculated_level = MAX_ELEMENT_LEVEL
+	if calculated_level > max_level:
+		calculated_level = max_level
 	
 	# Check if we should level up
 	if calculated_level > current_level:
@@ -278,4 +282,3 @@ func _validate_system() -> void:
 		_log("  ✓ System validation passed")
 	else:
 		_log_error("System validation FAILED - check errors above")
-
