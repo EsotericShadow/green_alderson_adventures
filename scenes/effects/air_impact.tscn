@@ -1,7 +1,7 @@
 [gd_scene load_steps=7 format=3 uid="uid://bsrvqn3k2iguo"]
 
 [ext_resource type="Script" uid="uid://b3l277omajc0e" path="res://scripts/projectiles/impact.gd" id="1_jsh65"]
-[ext_resource type="Texture2D" uid="uid://d1wutvvmk367h" path="res://assets/animations/spells/airball.png" id="2_jsh65"]
+[ext_resource type="Texture2D" uid="uid://d1wutvvmk367h" path="res://resources/assets/animations/spells/airball.png" id="2_jsh65"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_hih1b"]
 atlas = ExtResource("2_jsh65")

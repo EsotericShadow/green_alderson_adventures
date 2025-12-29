@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" uid="uid://c7ygdfpblxyut" path="res://scripts/projectiles/spell_projectile.gd" id="1_q6okr"]
 [ext_resource type="PackedScene" uid="uid://dhmibipwwcn53" path="res://scenes/effects/water_impact.tscn" id="2_td2k8"]
-[ext_resource type="Texture2D" uid="uid://6wtl6ltnliwp" path="res://assets/animations/spells/waterball.png" id="3_q6okr"]
+[ext_resource type="Texture2D" uid="uid://6wtl6ltnliwp" path="res://resources/assets/animations/spells/waterball.png" id="3_q6okr"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_smijy"]
 radius = 25.0

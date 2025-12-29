@@ -46,10 +46,10 @@ func _update_base_stats() -> void:
 	
 	# Stat configuration array (DRY principle - iterate instead of repeating)
 	var stat_configs: Array[Dictionary] = [
-		{"name": StatConstants.STAT_RESILIENCE, "row": resilience_row, "icon": "res://assets/ui/icons/skills/stat_str.png"},
-		{"name": StatConstants.STAT_AGILITY, "row": agility_row, "icon": "res://assets/ui/icons/skills/stat_dex.png"},
-		{"name": StatConstants.STAT_INT, "row": int_row, "icon": "res://assets/ui/icons/skills/stat_int.png"},
-		{"name": StatConstants.STAT_VIT, "row": vit_row, "icon": "res://assets/ui/icons/skills/stat_vit.png"}
+		{"name": StatConstants.STAT_RESILIENCE, "row": resilience_row, "icon": "res://resources/assets/skill_icons/stat_str.png"},
+		{"name": StatConstants.STAT_AGILITY, "row": agility_row, "icon": "res://resources/assets/skill_icons/stat_dex.png"},
+		{"name": StatConstants.STAT_INT, "row": int_row, "icon": "res://resources/assets/skill_icons/stat_int.png"},
+		{"name": StatConstants.STAT_VIT, "row": vit_row, "icon": "res://resources/assets/skill_icons/stat_vit.png"}
 	]
 	
 	# Update each stat row using display data from model layer (separation of concerns)

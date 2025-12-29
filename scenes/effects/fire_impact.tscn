@@ -1,7 +1,7 @@
 [gd_scene load_steps=7 format=3 uid="uid://c6501algqvf0d"]
 
 [ext_resource type="Script" uid="uid://b3l277omajc0e" path="res://scripts/projectiles/impact.gd" id="1_caylm"]
-[ext_resource type="Texture2D" uid="uid://7v1q2egwb54w" path="res://assets/animations/spells/fireball_V_1_1/firebal_v1.1-0.png" id="2_6l1y3"]
+[ext_resource type="Texture2D" uid="uid://7v1q2egwb54w" path="res://resources/assets/animations/spells/fireball_V_1_1/firebal_v1.1-0.png" id="2_6l1y3"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_0e48y"]
 atlas = ExtResource("2_6l1y3")

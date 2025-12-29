@@ -39,7 +39,7 @@ func setup(element_name: String) -> void:
 		"air":
 			icon_filename = "spell_icon_lvl_1(air).png"
 	
-	var icon_path: String = "res://assets/animations/UI/spell_hotbar_icons/spell_ball_blast/" + icon_filename
+	var icon_path: String = "res://resources/assets/animations/UI/spell_hotbar_icons/spell_ball_blast/" + icon_filename
 	var texture: Texture2D = load(icon_path) as Texture2D
 	if texture != null:
 		if icon != null:

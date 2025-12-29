@@ -6,8 +6,8 @@
 [ext_resource type="Script" path="res://scripts/ui/tabs/stats_tab.gd" id="4_stats_tab"]
 [ext_resource type="Script" path="res://scripts/ui/rows/base_stat_row.gd" id="5_base_stat_row"]
 [ext_resource type="Script" path="res://scripts/ui/rows/element_stat_row.gd" id="6_element_stat_row"]
-[ext_resource type="Texture2D" path="res://assets/ui/icons/skills/Hats_Wizard_Mage_Magician_Sorcerer.png" id="7_wizard_hat"]
-[ext_resource type="Texture2D" path="res://skill_icons/skills.png" id="8_skills_icon"]
+[ext_resource type="Texture2D" path="res://resources/assets/ui/icons/skills/Hats_Wizard_Mage_Magician_Sorcerer.png" id="7_wizard_hat"]
+[ext_resource type="Texture2D" path="res://resources/assets/skill_icons/skills.png" id="8_skills_icon"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_panel_bg"]
 bg_color = Color(0.15, 0.15, 0.15, 0.95)

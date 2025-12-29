@@ -83,7 +83,7 @@ func _load_slot_icon(equip_slot_name: String) -> void:
 			icon.texture = null
 			return
 	
-	var icon_path: String = "res://uiicons/" + icon_filename
+	var icon_path: String = "res://resources/assets/uiicons/" + icon_filename
 	var texture: Texture2D = load(icon_path) as Texture2D
 	if texture != null:
 		icon.texture = texture

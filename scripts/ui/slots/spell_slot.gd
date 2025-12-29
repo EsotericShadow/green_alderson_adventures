@@ -69,13 +69,13 @@ func _load_spell_icon(spell: SpellData) -> void:
 		_:
 			icon_filename = "spell_icon_lvl_1(blue).png"
 	
-	var icon_path := "res://assets/animations/UI/spell_hotbar_icons/spell_ball_blast/" + icon_filename
+	var icon_path := "res://resources/assets/animations/UI/spell_hotbar_icons/spell_ball_blast/" + icon_filename
 	var base_icon := load(icon_path) as Texture2D
 	
 	# Fallback to blue icon if element-specific icon doesn't exist
 	if base_icon == null:
 		_logger.log_warning("Element-specific icon not found (" + icon_filename + "), using blue icon")
-		icon_path = "res://assets/animations/UI/spell_hotbar_icons/spell_ball_blast/spell_icon_lvl_1(blue).png"
+		icon_path = "res://resources/assets/animations/UI/spell_hotbar_icons/spell_ball_blast/spell_icon_lvl_1(blue).png"
 		base_icon = load(icon_path) as Texture2D
 		
 		if base_icon == null:
