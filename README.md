@@ -63,39 +63,103 @@ A Godot 4.5 top-down action RPG with multi-element spell system, elemental level
 ```
 ├── scripts/
 │   ├── player.gd              # Player coordinator (movement, spells, combat)
-│   ├── constants.gd           # Game constants
-│   ├── enemies/
-│   │   ├── base_enemy.gd      # Base enemy AI with state machine
-│   │   └── orc_1.gd           # Orc enemy stats
-│   ├── projectiles/
-│   │   ├── spell_projectile.gd  # Generic projectile script (element-agnostic)
-│   │   └── impact.gd          # Impact effect on collision
-│   ├── resources/             # Resource class definitions
-│   │   ├── spell_data.gd      # SpellData resource class
-│   │   ├── item_data.gd       # ItemData stub (for inventory system)
-│   │   ├── equipment_data.gd  # EquipmentData stub
-│   │   └── merchant_data.gd   # MerchantData stub
-│   ├── systems/               # Autoload singletons
-│   │   ├── player_stats.gd    # Player attributes, health, mana, stamina, stats
-│   │   ├── event_bus.gd       # Central signal hub
-│   │   ├── inventory_system.gd # Inventory & equipment management
-│   │   ├── spell_system.gd    # Element leveling and spell progression
-│   │   └── projectile_pool.gd # Object pooling for performance
-│   ├── ui/                    # UI component scripts
-│   │   ├── health_bar.gd      # Health bar component
-│   │   ├── resource_bar.gd    # Generic resource bar (mana/stamina)
-│   │   ├── spell_bar.gd       # Spell hotbar controller
-│   │   ├── spell_slot.gd      # Individual spell slot
-│   │   └── enemy_health_bar.gd # Enemy health bar
-│   └── workers/               # Reusable single-purpose components
-│       ├── animator.gd        # Animation playback
-│       ├── health_tracker.gd  # Health management
-│       ├── hitbox.gd          # Deals damage
-│       ├── hurtbox.gd         # Receives damage
-│       ├── input_reader.gd    # Player input handling
-│       ├── mover.gd           # Movement & knockback
-│       ├── spell_spawner.gd   # Spell instantiation
-│       └── target_tracker.gd  # Enemy target tracking
+│   ├── constants/             # Game constants
+│   │   └── game_constants.gd
+│   ├── data/                  # Resource class definitions
+│   │   ├── item_data.gd
+│   │   ├── equipment_data.gd
+│   │   ├── potion_data.gd
+│   │   └── recipe_data.gd
+│   ├── entities/              # Entity base classes
+│   │   ├── base_entity.gd
+│   │   └── entity_data.gd
+│   ├── resources/             # Resource data classes
+│   │   ├── spell_data.gd
+│   │   ├── merchant_data.gd
+│   │   └── game_balance_config.gd
+│   ├── systems/               # Autoload singletons (organized by domain)
+│   │   ├── player/            # Player-related systems
+│   │   │   └── player_stats.gd  # Facade - delegates to focused systems
+│   │   ├── combat/             # Combat systems
+│   │   │   ├── combat_system.gd
+│   │   │   └── enemy_respawn_manager.gd
+│   │   ├── movement/           # Movement systems
+│   │   │   ├── movement_system.gd
+│   │   │   └── movement_tracker.gd
+│   │   ├── inventory/          # Inventory systems
+│   │   │   └── inventory_system.gd
+│   │   ├── spells/             # Spell systems
+│   │   │   ├── spell_system.gd
+│   │   │   └── projectile_pool.gd
+│   │   ├── resources/          # Resource management
+│   │   │   ├── resource_regen_system.gd
+│   │   │   ├── currency_system.gd
+│   │   │   ├── resource_manager.gd
+│   │   │   └── game_balance.gd
+│   │   ├── events/             # Event systems
+│   │   │   ├── event_bus.gd
+│   │   │   ├── ui_event_bus.gd
+│   │   │   ├── gameplay_event_bus.gd
+│   │   │   └── combat_event_bus.gd
+│   │   └── player/             # Player systems
+│   │       └── xp_leveling_system.gd
+│   ├── utils/                  # Utility classes (organized by domain)
+│   │   ├── direction/          # Direction utilities
+│   │   │   └── direction_utils.gd
+│   │   ├── stats/              # Stat calculation utilities
+│   │   │   ├── stat_formulas.gd
+│   │   │   └── damage_calculator.gd
+│   │   ├── logging/            # Logging utilities
+│   │   │   └── logger.gd (GameLogger)
+│   │   ├── cooldowns/          # Cooldown utilities
+│   │   │   ├── cooldown_manager.gd
+│   │   │   └── xp_cooldown.gd
+│   │   └── signals/            # Signal utilities
+│   │       └── signal_utils.gd
+│   ├── ui/                     # UI component scripts (organized by type)
+│   │   ├── bars/               # Resource bars
+│   │   │   ├── resource_bar.gd
+│   │   │   ├── spell_bar.gd
+│   │   │   └── enemy_health_bar.gd
+│   │   ├── slots/               # Slot components
+│   │   │   ├── spell_slot.gd
+│   │   │   └── inventory_slot.gd
+│   │   ├── rows/                # Row components
+│   │   │   └── base_stat_row.gd
+│   │   ├── tabs/                # Tab components
+│   │   │   ├── stats_tab.gd
+│   │   │   └── inventory_tab.gd
+│   │   ├── panels/              # Panel components
+│   │   │   └── player_panel.gd
+│   │   └── inventory/           # Inventory UI
+│   │       └── inventory_ui.gd
+│   ├── enemies/                # Enemy scripts
+│   │   ├── base_enemy.gd
+│   │   └── orc_1.gd
+│   ├── projectiles/            # Projectile scripts
+│   │   ├── spell_projectile.gd
+│   │   └── impact.gd
+│   └── workers/                 # Worker pattern components (organized by domain)
+│       ├── base/                # Base worker classes
+│       │   ├── base_worker.gd
+│       │   └── base_area_worker.gd
+│       ├── input/               # Input workers
+│       │   └── input_reader.gd
+│       ├── movement/            # Movement workers
+│       │   ├── mover.gd
+│       │   └── running_state_manager.gd
+│       ├── animation/            # Animation workers
+│       │   └── animator.gd
+│       ├── combat/               # Combat workers
+│       │   ├── health_tracker.gd
+│       │   ├── hurtbox.gd
+│       │   ├── hitbox.gd
+│       │   └── target_tracker.gd
+│       ├── spells/               # Spell workers
+│       │   ├── spell_spawner.gd
+│       │   └── spell_caster.gd
+│       └── effects/              # Effect workers
+│           └── camera_effects_worker.gd
 
 ├── scenes/
 │   ├── main.tscn              # Main game scene (entry point)
@@ -220,8 +284,8 @@ Where:
 | Run Speed | 220 |
 | Base Health | 100 (VIT * 20) |
 | Base Mana | 75 (INT * 15) |
-| Base Stamina | 50 (DEX * 10) |
-| Base Stats | STR: 5, DEX: 5, INT: 5, VIT: 5 |
+| Base Stamina | 50 (Agility * 10) |
+| Base Stats | Resilience: 1, Agility: 1, INT: 1, VIT: 1 |
 
 ### Orc Enemy
 | Stat | Value |

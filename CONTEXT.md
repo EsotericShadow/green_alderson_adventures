@@ -519,10 +519,16 @@ scripts/
 │   │   ├── resource_manager.gd
 │   │   └── game_balance.gd
 │   ├── events/              # Event systems
-│   │   └── event_bus.gd
-│   ├── xp_leveling_system.gd
-│   ├── projectile_pool.gd
-│   └── enemy_respawn_manager.gd
+│   │   ├── event_bus.gd
+│   │   ├── ui_event_bus.gd
+│   │   ├── gameplay_event_bus.gd
+│   │   └── combat_event_bus.gd
+│   ├── player/              # Player systems
+│   │   └── xp_leveling_system.gd
+│   ├── spells/              # Spell systems
+│   │   └── projectile_pool.gd
+│   └── combat/              # Combat systems
+│       └── enemy_respawn_manager.gd
 ├── utils/                   # Utility classes (organized by domain)
 │   ├── direction/            # Direction utilities
 │   │   └── direction_utils.gd
@@ -534,8 +540,8 @@ scripts/
 │   ├── cooldowns/           # Cooldown utilities
 │   │   ├── cooldown_manager.gd
 │   │   └── xp_cooldown.gd
-│   ├── leveling/             # Leveling utilities
 │   └── signals/             # Signal utilities
+│       └── signal_utils.gd
 ├── ui/                      # UI component scripts (organized by type)
 │   ├── bars/                # Resource bars
 │   │   └── resource_bar.gd

@@ -6,15 +6,20 @@
 
 ## Base Stats (4) - From PlayerStats System
 
-1. **STR (Strength)**
-   - Full name: Strength
-   - Affects: Physical damage, melee combat
-   - Location: `PlayerStats.base_str`, `PlayerStats.get_total_str()`
+1. **Resilience** (formerly STR/Strength)
+   - Full name: Resilience
+   - Affects: Carry weight, defense, damage reduction
+   - Location: `PlayerStats.base_resilience`, `PlayerStats.get_total_resilience()`
+   - Formula: `max_carry_weight = 45.0 + (resilience * 2.0) kg`
+   - Damage reduction: `damage_reduction = resilience * 0.15` (15% per point)
 
-2. **DEX (Dexterity)**
-   - Full name: Dexterity
-   - Affects: Stamina max (DEX × 10), movement speed, agility
-   - Location: `PlayerStats.base_dex`, `PlayerStats.get_total_dex()`
+2. **Agility** (formerly DEX/Dexterity)
+   - Full name: Agility
+   - Affects: Max stamina (Agility × 10), stamina consumption multiplier, movement speed
+   - Location: `PlayerStats.base_agility`, `PlayerStats.get_total_agility()`
+   - Formula: `max_stamina = agility * 10`
+   - Stamina consumption: `multiplier = 1.0 - (agility * 0.02)` (2% reduction per point)
+   - Movement speed: `multiplier = 1.0 + (agility * 0.03)` (3% increase per point)
 
 3. **INT (Intelligence)**
    - Full name: Intelligence
@@ -57,8 +62,8 @@
 **Recommended Size**: 32x32px or 40x40px (to match item icons)
 
 **File Naming Convention** (suggestion):
-- `stat_str.png` / `stat_strength.png`
-- `stat_dex.png` / `stat_dexterity.png`
+- `stat_resilience.png` / `stat_resilience.png` (formerly stat_str.png)
+- `stat_agility.png` / `stat_agility.png` (formerly stat_dex.png)
 - `stat_int.png` / `stat_intelligence.png`
 - `stat_vit.png` / `stat_vitality.png`
 - `stat_fire.png` / `element_fire.png`
@@ -76,7 +81,7 @@
 ## Tab Structure (Updated)
 
 1. **Tab 1: Quick Belt** - 5 consumable item slots
-2. **Tab 2: Stats** - Base stats (STR, DEX, INT, VIT) with values
+2. **Tab 2: Stats** - Base stats (Resilience, Agility, INT, VIT) with values
 3. **Tab 3: Spells** - Spell hotbar configuration
 4. **Tab 4: Settings** - Game settings (placeholder)
 

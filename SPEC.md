@@ -117,11 +117,21 @@ Registered in `project.godot` under `[autoload]`:
 
 | Name | Path | Purpose |
 |------|------|---------|
-| `PlayerStats` | `res://scripts/systems/player_stats.gd` | Player attributes, health, mana, stamina, gold |
-| `EventBus` | `res://scripts/systems/event_bus.gd` | Central signal hub for decoupled communication |
-| `InventorySystem` | `res://scripts/systems/inventory_system.gd` | Slot-based inventory and equipment |
-| `SpellSystem` | `res://scripts/systems/spell_system.gd` | Element leveling and spell data |
+| `PlayerStats` | `res://scripts/systems/player/player_stats.gd` | Player attributes, health, mana, stamina, gold (facade) |
+| `XPLevelingSystem` | `res://scripts/systems/player/xp_leveling_system.gd` | Base stat XP and leveling |
+| `CurrencySystem` | `res://scripts/systems/resources/currency_system.gd` | Gold management |
+| `ResourceRegenSystem` | `res://scripts/systems/resources/resource_regen_system.gd` | Health/mana/stamina regeneration |
+| `CombatSystem` | `res://scripts/systems/combat/combat_system.gd` | Combat calculations |
+| `MovementSystem` | `res://scripts/systems/movement/movement_system.gd` | Movement calculations |
+| `EventBus` | `res://scripts/systems/events/event_bus.gd` | Central signal hub for decoupled communication |
+| `UIEventBus` | `res://scripts/systems/events/ui_event_bus.gd` | UI-related signals |
+| `GameplayEventBus` | `res://scripts/systems/events/gameplay_event_bus.gd` | Gameplay events |
+| `CombatEventBus` | `res://scripts/systems/events/combat_event_bus.gd` | Combat events |
+| `InventorySystem` | `res://scripts/systems/inventory/inventory_system.gd` | Slot-based inventory and equipment |
+| `SpellSystem` | `res://scripts/systems/spells/spell_system.gd` | Element leveling and spell data |
 | `CraftingSystem` | `res://scripts/systems/crafting_system.gd` | Recipe matching and crafting |
+| `GameBalance` | `res://scripts/systems/resources/game_balance.gd` | Centralized game balance configuration |
+| `ResourceManager` | `res://scripts/systems/resources/resource_manager.gd` | Centralized resource loading with caching |
 
 ---
 
@@ -163,19 +173,23 @@ extends Resource
 class_name EquipmentData
 extends ItemData
 
-@export_enum("head", "body", "gloves", "boots", "weapon", "shield", "ring") var slot: String = "weapon"
-@export var str_bonus: int = 0
-@export var dex_bonus: int = 0
+@export_enum("head", "body", "gloves", "boots", "weapon", "book", "ring1", "ring2", "legs", "amulet") var slot: String = "weapon"
+@export var resilience_bonus: int = 0  # Formerly str_bonus
+@export var agility_bonus: int = 0  # Formerly dex_bonus
 @export var int_bonus: int = 0
 @export var vit_bonus: int = 0
+@export var flat_damage_bonus: int = 0
+@export var damage_percentage_bonus: float = 0.0
 ```
 
 **Properties (LOCKED)**:
-- `slot`: One of exactly: `"head"`, `"body"`, `"gloves"`, `"boots"`, `"weapon"`, `"shield"`, `"ring"`
-- `str_bonus`: Added to STR when equipped
-- `dex_bonus`: Added to DEX when equipped
+- `slot`: One of exactly: `"head"`, `"body"`, `"gloves"`, `"boots"`, `"weapon"`, `"book"`, `"ring1"`, `"ring2"`, `"legs"`, `"amulet"`
+- `resilience_bonus`: Added to Resilience when equipped (formerly str_bonus)
+- `agility_bonus`: Added to Agility when equipped (formerly dex_bonus)
 - `int_bonus`: Added to INT when equipped
 - `vit_bonus`: Added to VIT when equipped
+- `flat_damage_bonus`: Flat damage added to spells
+- `damage_percentage_bonus`: Percentage damage multiplier (0.1 = +10%)
 
 **Note**: EquipmentData automatically has `item_type = "equipment"` and `stackable = false`.
 
@@ -415,7 +429,7 @@ var max_level = GameBalance.get_max_base_stat_level()
 
 #### PlayerStats
 
-**File**: `res://scripts/systems/player_stats.gd`
+**File**: `res://scripts/systems/player/player_stats.gd`
 
 ```gdscript
 extends Node
@@ -429,15 +443,15 @@ signal stat_changed(stat_name: String, new_value: int)
 signal player_died
 
 # Base Stats (LOCKED NAMES, LOCKED DEFAULTS)
-var base_str: int = 5
-var base_dex: int = 5
-var base_int: int = 5
-var base_vit: int = 5
+var base_resilience: int = 1  # Formerly base_str
+var base_agility: int = 1  # Formerly base_dex
+var base_int: int = 1
+var base_vit: int = 1
 
 # Derived Stats (LOCKED FORMULAS)
 # max_health = total_vit * 20
 # max_mana = total_int * 15
-# max_stamina = total_dex * 10
+# max_stamina = total_agility * 10
 
 # Current Values (LOCKED NAMES)
 var health: int = 100
@@ -446,8 +460,8 @@ var stamina: int = 50
 var gold: int = 0
 
 # Methods (LOCKED SIGNATURES)
-func get_total_str() -> int
-func get_total_dex() -> int
+func get_total_resilience() -> int  # Formerly get_total_str()
+func get_total_agility() -> int  # Formerly get_total_dex()
 func get_total_int() -> int
 func get_total_vit() -> int
 func get_max_health() -> int
@@ -498,8 +512,20 @@ signal level_up(element: String, new_level: int)
 **Autoload Registration** (add to project.godot):
 ```
 [autoload]
-PlayerStats="*res://scripts/systems/player_stats.gd"
-EventBus="*res://scripts/systems/event_bus.gd"
+PlayerStats="*res://scripts/systems/player/player_stats.gd"
+XPLevelingSystem="*res://scripts/systems/player/xp_leveling_system.gd"
+CurrencySystem="*res://scripts/systems/resources/currency_system.gd"
+ResourceRegenSystem="*res://scripts/systems/resources/resource_regen_system.gd"
+CombatSystem="*res://scripts/systems/combat/combat_system.gd"
+MovementSystem="*res://scripts/systems/movement/movement_system.gd"
+EventBus="*res://scripts/systems/events/event_bus.gd"
+UIEventBus="*res://scripts/systems/events/ui_event_bus.gd"
+GameplayEventBus="*res://scripts/systems/events/gameplay_event_bus.gd"
+CombatEventBus="*res://scripts/systems/events/combat_event_bus.gd"
+InventorySystem="*res://scripts/systems/inventory/inventory_system.gd"
+SpellSystem="*res://scripts/systems/spells/spell_system.gd"
+GameBalance="*res://scripts/systems/resources/game_balance.gd"
+ResourceManager="*res://scripts/systems/resources/resource_manager.gd"
 ```
 
 ---
@@ -610,7 +636,7 @@ func _process(delta: float) -> void:
 
 ### Commit 2A: Inventory Data Layer
 
-**File**: `res://scripts/systems/inventory_system.gd`
+**File**: `res://scripts/systems/inventory/inventory_system.gd`
 
 ```gdscript
 extends Node
@@ -637,9 +663,11 @@ var equipment: Dictionary = {
     "gloves": null,
     "boots": null,
     "weapon": null,
-    "shield": null,
+    "book": null,  # Off-hand spellbook (replaces shield)
     "ring1": null,
-    "ring2": null
+    "ring2": null,
+    "legs": null,  # Leg armor
+    "amulet": null  # Necklace/amulet
 }
 
 # Methods (LOCKED SIGNATURES)
@@ -657,12 +685,12 @@ func expand_capacity(additional_slots: int) -> void
 func equip(item: EquipmentData) -> bool  # Returns false if wrong type
 func unequip(slot_name: String) -> EquipmentData  # Returns unequipped item or null
 func get_equipped(slot_name: String) -> EquipmentData
-func get_total_stat_bonus(stat_name: String) -> int  # "str", "dex", "int", "vit"
+func get_total_stat_bonus(stat_name: String) -> int  # "resilience", "agility", "int", "vit"
 ```
 
 **Autoload Registration**:
 ```
-InventorySystem="*res://scripts/systems/inventory_system.gd"
+InventorySystem="*res://scripts/systems/inventory/inventory_system.gd"
 ```
 
 ---
@@ -751,20 +779,22 @@ InventoryUI (Control)
                 ├── EquipSlot (gloves)
                 ├── EquipSlot (boots)
                 ├── EquipSlot (weapon)
-                ├── EquipSlot (shield)
+                ├── EquipSlot (book)
                 ├── EquipSlot (ring1)
-                └── EquipSlot (ring2)
+                ├── EquipSlot (ring2)
+                ├── EquipSlot (legs)
+                └── EquipSlot (amulet)
 ```
 
 #### Integration with PlayerStats
 
-In `PlayerStats.get_total_str()`:
+In `PlayerStats.get_total_resilience()`:
 ```gdscript
-func get_total_str() -> int:
-    return base_str + InventorySystem.get_total_stat_bonus("str")
+func get_total_resilience() -> int:
+    return base_resilience + InventorySystem.get_total_stat_bonus("resilience")
 ```
 
-(Same pattern for dex, int, vit)
+(Same pattern for agility, int, vit)
 
 ---
 
@@ -772,7 +802,7 @@ func get_total_str() -> int:
 
 ### Commit 3A: Spell System Foundation
 
-**File**: `res://scripts/systems/spell_system.gd`
+**File**: `res://scripts/systems/spells/spell_system.gd`
 
 ```gdscript
 extends Node
@@ -822,7 +852,7 @@ func get_spell_damage(spell: SpellData) -> int:
 
 **Autoload Registration**:
 ```
-SpellSystem="*res://scripts/systems/spell_system.gd"
+SpellSystem="*res://scripts/systems/spells/spell_system.gd"
 ```
 
 ---
@@ -901,7 +931,7 @@ func get_selected_spell() -> SpellData:
 
 ### Commit 4A: Crafting System Foundation
 
-**File**: `res://scripts/systems/crafting_system.gd`
+**File**: `res://scripts/systems/crafting_system.gd`  # TODO: Create when implementing Milestone 4
 
 ```gdscript
 extends Node
