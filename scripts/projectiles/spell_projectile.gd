@@ -31,7 +31,7 @@ func _ready() -> void:
 		signals_connected = true
 	
 	# Set collision mask to detect terrain/walls (layer 1) and hurtboxes (layer 8)
-	collision_mask = 9  # Layer 1 (terrain) + Layer 8 (hurtbox) = 1 + 8 = 9
+	collision_mask = GameConstants.COLLISION_LAYER_TERRAIN | GameConstants.COLLISION_LAYER_HURTBOX
 	
 	# Connect visibility notifier for off-screen culling (best practice)
 	if visibility_notifier != null:
@@ -111,7 +111,7 @@ func _physics_process(delta: float) -> void:
 
 func _on_body_entered(body: Node) -> void:
 	# Don't collide with the player who shot it
-	if body == owner_node or body.is_in_group("player"):
+	if body == owner_node or body.is_in_group(GameConstants.GROUP_PLAYER):
 		return
 	
 	# Deal damage to enemies
@@ -126,7 +126,7 @@ func _on_area_entered(area: Area2D) -> void:
 		return
 	
 	# Don't collide with other fireballs
-	if area.is_in_group("fireball"):
+	if area.is_in_group(GameConstants.GROUP_FIREBALL):
 		return
 	
 	# Check if this is a hurtbox
@@ -134,7 +134,7 @@ func _on_area_entered(area: Area2D) -> void:
 		var hurtbox := area as Hurtbox
 		
 		# IGNORE player hurtbox entirely (don't hit ourselves!)
-		if hurtbox.owner_node == owner_node or hurtbox.owner_node.is_in_group("player"):
+		if hurtbox.owner_node == owner_node or hurtbox.owner_node.is_in_group(GameConstants.GROUP_PLAYER):
 			return  # <-- IMPORTANT: Don't fall through!
 		
 		# Calculate damage from spell_data if available, otherwise use fallback
@@ -163,7 +163,7 @@ func _on_area_entered(area: Area2D) -> void:
 	
 	# Only deactivate on terrain/walls, not on random areas
 	# Check if it's a static body area (terrain)
-	if area.collision_layer & 1:  # Layer 1 = terrain
+	if area.collision_layer & GameConstants.COLLISION_LAYER_TERRAIN:
 		_spawn_impact()
 		_deactivate()
 
@@ -208,7 +208,7 @@ func _deal_damage_to(body: Node) -> void:
 		final_damage = SpellSystem.get_spell_damage(spell_data)
 	
 	var damage_dealt: bool = false
-	if body.is_in_group("enemy"):
+	if body.is_in_group(GameConstants.GROUP_ENEMY):
 		if body.has_method("take_damage"):
 			_logger.log("Dealing " + str(final_damage) + " damage to enemy: " + body.name)
 			body.take_damage(final_damage, owner_node)

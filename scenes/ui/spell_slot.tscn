@@ -1,6 +1,6 @@
 [gd_scene load_steps=3 format=3 uid="uid://spell_slot_001"]
 
-[ext_resource type="Script" path="res://scripts/ui/spell_slot.gd" id="1_slot_script"]
+[ext_resource type="Script" path="res://scripts/ui/slots/spell_slot.gd" id="1_slot_script"]
 
 [sub_resource type="StyleBoxFlat" id="1_slot_style"]
 bg_color = Color(0.2, 0.2, 0.2, 0.7)

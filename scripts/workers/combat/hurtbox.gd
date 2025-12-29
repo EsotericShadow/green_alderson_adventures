@@ -16,7 +16,7 @@ var _blink_tween: Tween = null  # Track our own tween
 func _on_initialize() -> void:
 	"""Initialize hurtbox - set collision layers."""
 	# Hurtbox layer = 8, doesn't detect anything (gets detected by hitboxes)
-	collision_layer = 8
+	collision_layer = GameConstants.COLLISION_LAYER_HURTBOX
 	collision_mask = 0
 	
 	monitoring = false

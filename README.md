@@ -2,7 +2,7 @@
 
 A Godot 4.5 top-down action RPG with multi-element spell system, elemental leveling, and melee enemy AI.
 
-**Current Status**: Milestone 3 Complete - Elemental Spells system fully implemented. Moving to Milestone 4 (Crafting & Chests).
+**Current Status**: Milestone 3 Complete - Elemental Spells system fully implemented. Codebase cleanup and refactoring completed. Moving to Milestone 4 (Crafting & Chests).
 
 ---
 
@@ -14,7 +14,7 @@ A Godot 4.5 top-down action RPG with multi-element spell system, elemental level
 | Run | Ctrl + Direction |
 | Jump | Space (while running) |
 | Select/Cast Spell | 1-9, 0 (number keys) |
-| Open Inventory | I *(Coming in Milestone 2)* |
+| Open Inventory | I *(Implemented in Milestone 2)* |
 | Open Crafting | C *(Coming in Milestone 4)* |
 | Interact | E *(Coming in Milestone 4)* |
 | Pause | Escape *(Coming in Milestone 5)* |
@@ -223,12 +223,13 @@ The codebase uses a "Coordinator/Worker" architecture:
 | DEATH | Death animation then queue_free |
 
 ### Collision Layers
-| Layer | Purpose |
-|-------|---------|
-| 1 | Terrain/Walls |
-| 2 | Projectiles |
-| 4 | Hitboxes (deal damage) |
-| 8 | Hurtboxes (receive damage) |
+Defined in `GameConstants`:
+| Layer | Constant | Purpose |
+|-------|----------|---------|
+| 1 | `COLLISION_LAYER_TERRAIN` | Terrain/Walls |
+| 2 | `COLLISION_LAYER_PROJECTILE` | Projectiles |
+| 4 | `COLLISION_LAYER_HITBOX` | Hitboxes (deal damage) |
+| 8 | `COLLISION_LAYER_HURTBOX` | Hurtboxes (receive damage) |
 
 ### Z-Index System
 | z_index | Element |
@@ -307,10 +308,11 @@ Where:
 - PlayerStats & EventBus autoloads
 - HUD system (health, mana, stamina bars)
 
-### ⚠️ Milestone 2: Inventory & Equipment (Partial)
-- InventorySystem autoload exists
-- UI scenes exist
-- **Status**: Needs full ItemData/EquipmentData implementation
+### ✅ Milestone 2: Inventory & Equipment (Complete)
+- InventorySystem autoload with slot-based inventory
+- Equipment system with 10 equipment slots
+- Inventory UI and Equipment UI implemented
+- ItemData and EquipmentData resources fully implemented
 
 ### ✅ Milestone 3: Elemental Spells (Complete)
 - SpellSystem with element leveling
@@ -344,9 +346,11 @@ See `MILESTONE_STATUS.md` for detailed progress tracking.
 ## Documentation
 
 - **SPEC.md** - Complete system specification (naming conventions, milestones, file structure)
-- **CONTEXT.md** - Spell hotbar system implementation details
-- **MILESTONE_STATUS.md** - Detailed milestone progress tracking
-- **COMMIT_NOTES.md** - Recent commit summaries
+- **CONTEXT.md** - Complete system overview and architecture
+- **ARCHITECTURE_GUIDELINES.md** - Data flow patterns and worker pattern guidelines
+- **ERROR_HANDLING_GUIDELINES.md** - Error handling patterns and best practices
+- **TESTING_CHECKLIST.md** - Manual testing procedures
+- **SKILL_STATS_LIST.md** - Base stats and element levels reference
 
 ---
 

@@ -1,6 +1,6 @@
 [gd_scene load_steps=4 format=3 uid="uid://inventory_ui_001"]
 
-[ext_resource type="Script" path="res://scripts/ui/inventory_ui.gd" id="1_ui_script"]
+[ext_resource type="Script" path="res://scripts/ui/inventory/inventory_ui.gd" id="1_ui_script"]
 [ext_resource type="PackedScene" uid="uid://equip_slot_001" path="res://scenes/ui/equip_slot.tscn" id="2_equip_slot"]
 
 [sub_resource type="StyleBoxFlat" id="1_panel_style"]

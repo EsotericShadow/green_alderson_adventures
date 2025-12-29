@@ -179,7 +179,7 @@ func _process_idle() -> void:
 	if detection_area != null:
 		var bodies := detection_area.get_overlapping_bodies()
 		for body in bodies:
-			if body.is_in_group("player"):
+			if body.is_in_group(GameConstants.GROUP_PLAYER):
 				# _log("👁️ Player found in detection area - acquiring target")  # Commented out: enemy AI logging
 				if target_tracker != null:
 					target_tracker.set_target(body)
@@ -436,7 +436,7 @@ func _flash_red() -> void:
 # --- SIGNAL HANDLERS ---
 
 func _on_body_entered_detection(body: Node2D) -> void:
-	if body.is_in_group("player"):
+	if body.is_in_group(GameConstants.GROUP_PLAYER):
 		# _log("👁️ PLAYER DETECTED! (" + body.name + " entered detection area)")  # Commented out: enemy AI logging
 		if target_tracker != null:
 			target_tracker.set_target(body)

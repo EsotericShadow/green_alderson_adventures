@@ -1,8 +1,8 @@
 # Context File: Green Alderson Adventures - Complete System Overview
 
 **Date**: Current Session  
-**Last Updated**: After PlayerStats Refactoring (Facade Pattern Implementation)  
-**Status**: Milestone 3 Complete, Milestone 2 Partial, Moving to Milestone 4
+**Last Updated**: After Codebase Cleanup and Refactoring (December 2024)  
+**Status**: Milestone 3 Complete, Milestone 2 Complete, Moving to Milestone 4
 
 ---
 
@@ -95,6 +95,27 @@ This document provides comprehensive context for the entire Green Alderson Adven
 - **ItemData**: Base class with id, display_name, description, icon, stackable, max_stack, item_type, weight
 - **EquipmentData**: Extends ItemData with slot, resilience_bonus, agility_bonus, int_bonus, vit_bonus, flat_damage_bonus, damage_percentage_bonus
 - **Equipment Slots**: head, body, gloves, boots, weapon, book, ring1, ring2, legs, amulet
+
+### Codebase Cleanup and Refactoring (December 2024)
+- **Backup Files Removed**: Deleted 4 backup files (player_stats.gd.backup, .bak, .uid files)
+- **Orphaned UID Files Removed**: Deleted 3 orphaned UID files (base_stat_leveling, health_bar, quick_belt_tab)
+- **Constants Migration**: 
+  - Moved collision layer and group constants from unused `constants.gd` to `game_constants.gd`
+  - Updated all files to use `GameConstants` instead of magic numbers/strings
+  - Added: `COLLISION_LAYER_TERRAIN`, `COLLISION_LAYER_PROJECTILE`, `COLLISION_LAYER_HITBOX`, `COLLISION_LAYER_HURTBOX`
+  - Added: `GROUP_PLAYER`, `GROUP_ENEMY`, `GROUP_FIREBALL`
+- **Scene Path Fixes**: Updated 12 scene files to use new hierarchical script paths:
+  - Bars: `scripts/ui/bars/` (resource_bar, spell_bar, enemy_health_bar, tool_belt)
+  - Slots: `scripts/ui/slots/` (spell_slot, inventory_slot, equip_slot, quick_belt_slot)
+  - Tabs: `scripts/ui/tabs/` (inventory_tab, equipment_tab, stats_tab)
+  - Rows: `scripts/ui/rows/` (base_stat_row, element_stat_row)
+  - Panels: `scripts/ui/panels/` (player_panel)
+  - Inventory: `scripts/ui/inventory/` (inventory_ui)
+- **InventorySystem Refactoring**: 
+  - Removed duplicate code (~30 lines)
+  - `get_total_stat_bonus()`, `get_total_damage_bonus()`, `get_total_damage_percentage()` now delegate to `EquipmentStatCalculator`
+  - Follows DRY principle, single source of truth for equipment calculations
+- **Unused File Removed**: Deleted `constants.gd` (FireballConfig - replaced by SpellData resource system)
 
 ---
 
@@ -750,13 +771,14 @@ resources/
 
 ## Commit History Context
 
-- **Latest**: Health bar refactor, resource bar Background node fix
+- **Latest**: Codebase cleanup, constants migration, scene path fixes, InventorySystem refactoring
+- **Recent**: Health bar refactor, resource bar Background node fix
 - **Recent**: Stat system refactor (Resilience/Agility), base stat leveling system
 - **Recent**: Utility classes extraction, running system improvements
 - **Commit 3C**: Spell Selection & Hotbar (complete)
 - **Commit 3B**: Multi-Element Projectiles (element-specific assets)
 - **Commit 3A**: Spell System Foundation
-- Previous commits: Inventory, Equipment, UI systems
+- Previous commits: Inventory, Equipment, UI systems, hierarchical reorganization
 
 ---
 

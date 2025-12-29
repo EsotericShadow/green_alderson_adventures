@@ -326,44 +326,25 @@ func get_equipped(slot_name: String) -> EquipmentData:
 
 
 func get_total_stat_bonus(stat_name: String) -> int:
-	# Returns sum of stat bonuses from all equipped items
-	# stat_name: StatConstants.STAT_RESILIENCE, STAT_AGILITY, STAT_INT, or STAT_VIT (also supports "str"/"dex" for backwards compat)
-	var total: int = 0
+	"""Returns sum of stat bonuses from all equipped items.
 	
-	for slot_name in equipment:
-		var item: EquipmentData = equipment[slot_name]
-		if item != null:
-			match stat_name:
-				StatConstants.STAT_RESILIENCE, "str":  # Support both for backwards compatibility
-					total += item.resilience_bonus
-				StatConstants.STAT_AGILITY, "dex":  # Support both for backwards compatibility
-					total += item.agility_bonus
-				StatConstants.STAT_INT:
-					total += item.int_bonus
-				StatConstants.STAT_VIT:
-					total += item.vit_bonus
+	Args:
+		stat_name: StatConstants.STAT_RESILIENCE, STAT_AGILITY, STAT_INT, or STAT_VIT
+		           (also supports "str"/"dex" for backwards compatibility)
 	
-	return total
+	Returns: Total stat bonus from all equipped items
+	"""
+	return EquipmentStatCalculator.get_total_stat_bonus(equipment, stat_name)
 
 
 func get_total_damage_bonus() -> int:
 	"""Returns sum of flat damage bonuses from all equipped items."""
-	var total: int = 0
-	for slot_name in equipment:
-		var item: EquipmentData = equipment[slot_name]
-		if item != null:
-			total += item.flat_damage_bonus
-	return total
+	return EquipmentStatCalculator.get_total_damage_bonus(equipment)
 
 
 func get_total_damage_percentage() -> float:
 	"""Returns sum of percentage damage bonuses from all equipped items."""
-	var total: float = 0.0
-	for slot_name in equipment:
-		var item: EquipmentData = equipment[slot_name]
-		if item != null:
-			total += item.damage_percentage_bonus
-	return total
+	return EquipmentStatCalculator.get_total_damage_percentage(equipment)
 
 
 func get_current_carry_weight() -> float:

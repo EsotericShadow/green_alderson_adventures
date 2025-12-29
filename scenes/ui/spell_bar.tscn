@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://spell_bar_001"]
 
-[ext_resource type="Script" path="res://scripts/ui/spell_bar.gd" id="1_spell_bar_script"]
+[ext_resource type="Script" path="res://scripts/ui/bars/spell_bar.gd" id="1_spell_bar_script"]
 
 [node name="SpellBar" type="CanvasLayer"]
 layer = 19

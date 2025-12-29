@@ -14,8 +14,8 @@ signal hit_landed(target: Node, damage: int)
 func _on_initialize() -> void:
 	"""Initialize hitbox - set collision layers and connect signals."""
 	# Hitbox layer = 4, detects Hurtbox layer = 8
-	collision_layer = 4
-	collision_mask = 8
+	collision_layer = GameConstants.COLLISION_LAYER_HITBOX
+	collision_mask = GameConstants.COLLISION_LAYER_HURTBOX
 	
 	# Start disabled
 	monitoring = false

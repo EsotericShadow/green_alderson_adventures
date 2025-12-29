@@ -1,11 +1,11 @@
 [gd_scene load_steps=11 format=3 uid="uid://player_panel_001"]
 
-[ext_resource type="Script" path="res://scripts/ui/player_panel.gd" id="1_player_panel"]
-[ext_resource type="Script" path="res://scripts/ui/inventory_tab.gd" id="2_inventory_tab"]
-[ext_resource type="Script" path="res://scripts/ui/equipment_tab.gd" id="3_equipment_tab"]
-[ext_resource type="Script" path="res://scripts/ui/stats_tab.gd" id="4_stats_tab"]
-[ext_resource type="Script" path="res://scripts/ui/base_stat_row.gd" id="5_base_stat_row"]
-[ext_resource type="Script" path="res://scripts/ui/element_stat_row.gd" id="6_element_stat_row"]
+[ext_resource type="Script" path="res://scripts/ui/panels/player_panel.gd" id="1_player_panel"]
+[ext_resource type="Script" path="res://scripts/ui/tabs/inventory_tab.gd" id="2_inventory_tab"]
+[ext_resource type="Script" path="res://scripts/ui/tabs/equipment_tab.gd" id="3_equipment_tab"]
+[ext_resource type="Script" path="res://scripts/ui/tabs/stats_tab.gd" id="4_stats_tab"]
+[ext_resource type="Script" path="res://scripts/ui/rows/base_stat_row.gd" id="5_base_stat_row"]
+[ext_resource type="Script" path="res://scripts/ui/rows/element_stat_row.gd" id="6_element_stat_row"]
 [ext_resource type="Texture2D" path="res://assets/ui/icons/skills/Hats_Wizard_Mage_Magician_Sorcerer.png" id="7_wizard_hat"]
 [ext_resource type="Texture2D" path="res://skill_icons/skills.png" id="8_skills_icon"]
 
