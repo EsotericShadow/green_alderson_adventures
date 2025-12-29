@@ -17,18 +17,18 @@ config/icon="res://icon.svg"
 
 [autoload]
 
-PlayerStats="*res://scripts/systems/player_stats.gd"
-XPLevelingSystem="*res://scripts/systems/xp_leveling_system.gd"
-CurrencySystem="*res://scripts/systems/currency_system.gd"
-ResourceRegenSystem="*res://scripts/systems/resource_regen_system.gd"
-CombatSystem="*res://scripts/systems/combat_system.gd"
-MovementSystem="*res://scripts/systems/movement_system.gd"
-EventBus="*res://scripts/systems/event_bus.gd"
-InventorySystem="*res://scripts/systems/inventory_system.gd"
-SpellSystem="*res://scripts/systems/spell_system.gd"
-MovementTracker="*res://scripts/systems/movement_tracker.gd"
-GameBalance="*res://scripts/systems/game_balance.gd"
-ResourceManager="*res://scripts/systems/resource_manager.gd"
+PlayerStats="*res://scripts/systems/player/player_stats.gd"
+XPLevelingSystem="*res://scripts/systems/player/xp_leveling_system.gd"
+CurrencySystem="*res://scripts/systems/resources/currency_system.gd"
+ResourceRegenSystem="*res://scripts/systems/resources/resource_regen_system.gd"
+CombatSystem="*res://scripts/systems/combat/combat_system.gd"
+MovementSystem="*res://scripts/systems/movement/movement_system.gd"
+EventBus="*res://scripts/systems/events/event_bus.gd"
+InventorySystem="*res://scripts/systems/inventory/inventory_system.gd"
+SpellSystem="*res://scripts/systems/spells/spell_system.gd"
+MovementTracker="*res://scripts/systems/movement/movement_tracker.gd"
+GameBalance="*res://scripts/systems/resources/game_balance.gd"
+ResourceManager="*res://scripts/systems/resources/resource_manager.gd"
 
 [input]
 

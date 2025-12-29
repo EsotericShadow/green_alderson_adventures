@@ -1,7 +1,7 @@
 # Context File: Green Alderson Adventures - Complete System Overview
 
 **Date**: Current Session  
-**Last Updated**: After Health Bar Refactor & Stat System Overhaul  
+**Last Updated**: After PlayerStats Refactoring (Facade Pattern Implementation)  
 **Status**: Milestone 3 Complete, Milestone 2 Partial, Moving to Milestone 4
 
 ---
@@ -37,16 +37,32 @@ This document provides comprehensive context for the entire Green Alderson Adven
   - Formula: `max_health = vit * 20`
   - Health regen: `rate = BASE_HEALTH_REGEN * (1.0 + vit * 0.1)`
 
-### Base Stat Leveling System (NEW)
-- **Separate from PlayerStats**: Modular `BaseStatLeveling` autoload singleton
+### PlayerStats Refactoring (MAJOR ARCHITECTURAL CHANGE)
+- **Facade Pattern**: PlayerStats is now a thin facade that delegates to focused systems
+- **New Systems Created**:
+  - **XPLevelingSystem**: Base stat XP tracking and leveling (replaces BaseStatLeveling)
+  - **CurrencySystem**: Gold management
+  - **ResourceRegenSystem**: Health/mana/stamina regeneration
+  - **CombatSystem**: Combat calculations (damage reduction)
+  - **MovementSystem**: Movement calculations (stamina consumption, speed multipliers, carry weight)
+- **Carry Weight System**: Moved out of PlayerStats
+  - `get_current_carry_weight()` → InventorySystem
+  - `get_max_carry_weight()` → MovementSystem
+  - `can_carry_item()` → InventorySystem
+  - `get_carry_weight_slow_multiplier()` → MovementSystem
+- **Signal Forwarding**: PlayerStats forwards signals from new systems for backward compatibility
+- **Benefits**: Better separation of concerns, easier testing, more maintainable code
+
+### Base Stat Leveling System
+- **XPLevelingSystem**: Handles all base stat XP tracking and leveling
 - **XP Gain Methods**:
   - **Resilience**: Active (taking/dealing damage), Passive (carrying heavy items >90% weight, distance-based)
   - **Agility**: Using stamina (consumption-based)
   - **Intelligence**: Casting spells (lands or not)
   - **Vitality**: Auto-gain from other stats (1 VIT XP per 8 XP in Resilience/Agility/Intelligence)
 - **Cooldown System**: 0.1 second cooldown per stat to prevent spamming
-- **Max Level**: 64 for all base stats
-- **XP Formula**: `XP_PER_LEVEL = level * 100` (same as element levels)
+- **Max Level**: 110 for all base stats (RuneScape-style exponential curve)
+- **XP Formula**: RuneScape-style exponential curve (not linear)
 - **Vitality XP**: Respects cooldown of source stat (Resilience/Agility/Intelligence)
 
 ### Health Bar Refactor
@@ -87,37 +103,62 @@ This document provides comprehensive context for the entire Green Alderson Adven
 ### Autoload Singletons
 
 #### PlayerStats (`scripts/systems/player_stats.gd`)
-- **Purpose**: Core player attributes and resource management
-- **Base Stats**: Resilience, Agility, Intelligence, Vitality (all start at 5)
-- **Resources**: Health, Mana, Stamina, Gold
-- **Regeneration**: All resources regenerate over time (scaled by relevant stats)
-- **Signals**: health_changed, mana_changed, stamina_changed, gold_changed, stat_changed, player_died
+- **Purpose**: Facade for player attributes and resource management (delegates to focused systems)
+- **Architecture**: Thin facade pattern - delegates to XPLevelingSystem, CurrencySystem, ResourceRegenSystem, CombatSystem, MovementSystem
+- **Base Stats**: Resilience, Agility, Intelligence, Vitality (managed by XPLevelingSystem)
+- **Resources**: Health, Mana, Stamina (current values stored here, max calculated from stats)
+- **Gold**: Managed by CurrencySystem (delegated)
+- **Regeneration**: Handled by ResourceRegenSystem (delegated)
+- **Signals**: health_changed, mana_changed, stamina_changed, gold_changed, stat_changed, player_died, base_stat_xp_gained, base_stat_leveled_up (forwards from XPLevelingSystem)
 - **Key Methods**: 
-  - `get_total_resilience()`, `get_total_agility()`, `get_total_int()`, `get_total_vit()`
-  - `get_max_health()`, `get_max_mana()`, `get_max_stamina()`
-  - `get_max_carry_weight()`, `get_current_carry_weight()`
-  - `take_damage()`, `heal()`, `consume_mana()`, `consume_stamina()`
+  - `get_total_resilience()`, `get_total_agility()`, `get_total_int()`, `get_total_vit()` (combines base + equipment)
+  - `get_max_health()`, `get_max_mana()`, `get_max_stamina()` (calculated from stats)
+  - `get_max_carry_weight()`, `get_current_carry_weight()`, `can_carry_item()` (delegates to MovementSystem/InventorySystem)
+  - `take_damage()`, `heal()`, `consume_mana()`, `consume_stamina()` (manages current values, delegates calculations)
 
-#### BaseStatLeveling (`scripts/systems/base_stat_leveling.gd`)
-- **Purpose**: Base stat XP tracking and leveling (separate from PlayerStats for modularity)
+#### XPLevelingSystem (`scripts/systems/xp_leveling_system.gd`)
+- **Purpose**: Base stat XP tracking and leveling (RuneScape-style exponential curve)
 - **XP Tracking**: Dictionary for resilience, agility, int, vit
 - **XP Gain Methods**: 
   - `gain_base_stat_xp(stat_name, amount, source)` - Main XP gain method
   - Handles cooldowns, Vitality auto-gain, level-up checks
-- **Heavy Carry XP**: Distance-based XP for Resilience when carrying >90% weight
-- **Signals**: base_stat_xp_gained, base_stat_leveled_up
-- **Constants**: 
-  - `BASE_STAT_XP_PER_LEVEL = 100`
-  - `MAX_BASE_STAT_LEVEL = 64`
-  - `VITALITY_XP_RATIO = 8` (1 VIT XP per 8 other stat XP)
-  - `HEAVY_CARRY_THRESHOLD = 0.90` (90% weight for XP)
-  - `HEAVY_CARRY_XP_PER_METER = 0.1` (distance-based XP)
+- **Heavy Carry XP**: Distance-based XP for Resilience when carrying >90% weight (via MovementTracker)
+- **Signals**: base_stat_xp_gained, base_stat_leveled_up, stat_changed, character_level_changed
+- **Max Level**: 110 for all base stats
+- **XP Formula**: RuneScape-style exponential curve (not linear)
+- **Vitality XP**: Auto-gains from other stats (1 VIT XP per 8 other stat XP)
+
+#### CurrencySystem (`scripts/systems/currency_system.gd`)
+- **Purpose**: Gold management
+- **Methods**: `add_gold()`, `spend_gold()`, `has_gold()`, `get_gold()`
+- **Signals**: gold_changed
+
+#### ResourceRegenSystem (`scripts/systems/resource_regen_system.gd`)
+- **Purpose**: Health/mana/stamina regeneration over time
+- **Regeneration Rates**: Scaled by relevant stats (VIT for health, INT for mana, Agility for stamina)
+- **Process**: Runs in `_process()` to regenerate resources
+
+#### CombatSystem (`scripts/systems/combat_system.gd`)
+- **Purpose**: Combat-related calculations
+- **Methods**: `calculate_damage_reduction(incoming_damage, resilience)` - Damage reduction with diminishing returns
+
+#### MovementSystem (`scripts/systems/movement_system.gd`)
+- **Purpose**: Movement-related calculations
+- **Methods**: 
+  - `get_stamina_consumption_multiplier(agility)` - Based on agility
+  - `get_movement_speed_multiplier(agility)` - Based on agility
+  - `get_max_carry_weight()` - Based on resilience
+  - `get_carry_weight_slow_multiplier()` - Movement speed penalty when carrying heavy load
 
 #### InventorySystem (`scripts/systems/inventory_system.gd`)
 - **Purpose**: Slot-based inventory and equipment management
 - **Inventory**: 12 slots (default), expandable to 48
 - **Equipment Slots**: head, body, gloves, boots, weapon, book, ring1, ring2, legs, amulet
-- **Methods**: add_item(), remove_item(), equip(), unequip(), get_total_stat_bonus(), get_total_damage_bonus()
+- **Methods**: 
+  - `add_item()`, `remove_item()`, `equip()`, `unequip()`
+  - `get_total_stat_bonus()`, `get_total_damage_bonus()`, `get_total_damage_percentage()`
+  - `get_current_carry_weight()` - Calculates total weight of inventory + equipment
+  - `can_carry_item()` - Checks if player can carry additional items
 - **Signals**: inventory_changed, item_added, item_removed, equipment_changed
 
 #### SpellSystem (`scripts/systems/spell_system.gd`)
@@ -138,11 +179,36 @@ This document provides comprehensive context for the entire Green Alderson Adven
 - **Purpose**: Central signal hub for decoupled communication
 - **UI Signals**: inventory_opened, inventory_closed, crafting_opened, crafting_closed, merchant_opened, merchant_closed, pause_menu_opened, pause_menu_closed
 - **Game Events**: item_picked_up, item_used, chest_opened, enemy_killed, spell_cast, level_up
+- **Note**: EventBus is split into domain-specific buses (UIEventBus, GameplayEventBus, CombatEventBus) but EventBus still exists for backward compatibility
+
+#### MovementTracker (`scripts/systems/movement_tracker.gd`)
+- **Purpose**: Tracks player movement and carry weight for XP gain
+- **Heavy Carry XP**: Emits signals when player moves while carrying >=90% max weight
+- **Signals**: heavy_carry_moved(distance, weight_percentage)
+- **Integration**: Connected to XPLevelingSystem for Resilience XP gain
 
 #### ProjectilePool (`scripts/systems/projectile_pool.gd`)
 - **Purpose**: Object pooling for fire projectiles (performance optimization)
 - **Pool Size**: 20 projectiles
 - **Methods**: get_projectile(), return_projectile()
+
+#### GameBalance (`scripts/systems/resources/game_balance.gd`)
+- **Purpose**: Centralized game balance configuration system
+- **Configuration**: Loads `GameBalanceConfig` resource from `res://resources/config/default_balance.tres`
+- **Methods**: Provides getters for all game balance values (walk_speed, run_speed, health_per_vit, mana_per_int, etc.)
+- **Benefits**: Data-driven design, easy balancing without code changes, centralized configuration
+- **Fallback**: Uses default values if config file not found
+
+#### ResourceManager (`scripts/systems/resources/resource_manager.gd`)
+- **Purpose**: Centralized resource loading system with caching
+- **Resource Types**: SpellData, ItemData, PotionData, EquipmentData, RecipeData, MerchantData
+- **Caching**: Automatic caching of loaded resources (keyed by type and ID)
+- **Methods**: 
+  - `load_resource(resource_type, resource_id)` - Generic resource loader
+  - `load_spell()`, `load_item()`, `load_potion()`, `load_equipment()`, `load_recipe()`, `load_merchant()` - Type-specific loaders
+  - `load_scene(scene_path)` - Scene loading
+  - `clear_cache()`, `clear_cache_for_type()` - Cache management
+- **Benefits**: Centralized paths, automatic caching, consistent error handling
 
 #### EnemyRespawnManager (`scripts/systems/enemy_respawn_manager.gd`)
 - **Purpose**: Manages enemy respawning for testing
@@ -210,6 +276,31 @@ This document provides comprehensive context for the entire Green Alderson Adven
 - **Properties**: id, display_name, description, icon, element, base_damage, mana_cost, cooldown, hue_shift, projectile_speed
 - **Elements**: "fire", "water", "earth", "air"
 
+### PotionData (`scripts/data/potion_data.gd`)
+- **Extends**: ItemData
+- **Properties**: effect_type, effect_value, duration
+- **Auto-Set**: item_type = "consumable", stackable = true
+
+### RecipeData (`scripts/data/recipe_data.gd`)
+- **Properties**: id, display_name, description, icon, ingredients (Dictionary), result_item, result_count
+- **Purpose**: Crafting recipe definitions
+
+### MerchantData (`scripts/resources/merchant_data.gd`)
+- **Properties**: id, display_name, description, icon, shop_items (Array), buy_multiplier, sell_multiplier
+- **Purpose**: Merchant NPC shop definitions
+
+### GameBalanceConfig (`scripts/resources/game_balance_config.gd`)
+- **Purpose**: Resource containing all game balance values
+- **Properties**: Walk speed, run speed, health per VIT, mana per INT, stamina per Agility, XP formulas, etc.
+- **Location**: `res://resources/config/default_balance.tres`
+- **Access**: Via `GameBalance` autoload singleton
+
+### EntityData (`scripts/entities/entity_data.gd`)
+- **Purpose**: Serializable entity state data
+- **Properties**: entity_id, entity_type, position, network_id
+- **Methods**: `to_dict()`, `from_dict()` for serialization
+- **Usage**: Base class for network synchronization and save/load systems
+
 ---
 
 ## UI Systems
@@ -249,15 +340,51 @@ This document provides comprehensive context for the entire Green Alderson Adven
 
 ---
 
+## Entity & Worker Patterns
+
+### BaseEntity (`scripts/entities/base_entity.gd`)
+- **Purpose**: Base class for all entities (player, enemy, NPC)
+- **Extends**: CharacterBody2D
+- **Features**:
+  - Common worker references (mover, animator, health_tracker, hurtbox)
+  - Entity data serialization (EntityData)
+  - Network synchronization support (network_id, authority)
+  - Logging system
+- **Signals**: entity_died, entity_state_changed (emitted by subclasses)
+- **Methods**: `get_entity_data()`, `load_entity_data()`, `to_dict()`, `from_dict()`
+- **Subclasses**: Player, BaseEnemy
+
+### BaseWorker (`scripts/workers/base/base_worker.gd`)
+- **Purpose**: Base class for all worker nodes
+- **Extends**: Node
+- **Features**:
+  - Consistent initialization pattern (`_on_initialize()`)
+  - Owner node reference
+  - Built-in logging system
+  - Lifecycle management (initialized, cleanup_requested signals)
+- **Methods**: 
+  - `_on_initialize()` - Override for custom initialization
+  - `update(delta)` - Override for per-frame updates
+  - `cleanup()` - Override for cleanup logic
+- **Subclasses**: Mover, Animator, HealthTracker, Hurtbox, Hitbox, SpellSpawner, SpellCaster, InputReader
+
+### Worker Pattern Benefits
+- **Modularity**: Single-purpose components
+- **Reusability**: Workers can be shared across entities
+- **Testability**: Workers can be tested independently
+- **Consistency**: BaseWorker provides common interface
+
 ## Player System
 
 ### Player Coordinator (`scripts/player.gd`)
 - **Purpose**: Main player controller (coordinator pattern)
+- **Extends**: BaseEntity
 - **Workers**: Uses worker pattern for modularity
   - `InputReader`: Reads player input
   - `Mover`: Handles movement and physics
   - `Animator`: Manages animations
   - `SpellSpawner`: Spawns spell projectiles
+  - `SpellCaster`: Handles spell casting logic
   - `HealthTracker`: Tracks health
   - `Hurtbox`: Receives damage
 - **State Management**: idle, walking, running, casting, hurt, dead
@@ -298,8 +425,8 @@ This document provides comprehensive context for the entire Green Alderson Adven
 ### Damage Flow
 1. **Hitbox** detects collision with **Hurtbox**
 2. **Hurtbox** receives hit, applies invincibility frames
-3. **PlayerStats.take_damage()** calculates damage reduction from Resilience
-4. **BaseStatLeveling.gain_base_stat_xp()** grants Resilience XP
+3. **PlayerStats.take_damage()** delegates to **CombatSystem** for damage reduction calculation
+4. **XPLevelingSystem.gain_base_stat_xp()** grants Resilience XP (via PlayerStats facade)
 5. **HealthTracker** updates health display
 6. **Screen shake** and visual feedback
 
@@ -357,46 +484,99 @@ reduced_damage = damage - (resilience * 0.15)
 
 ```
 scripts/
+├── constants/               # Game constants
+│   └── game_constants.gd
 ├── data/                    # Resource class definitions
 │   ├── item_data.gd
 │   ├── equipment_data.gd
-│   └── spell_data.gd (moved from resources/)
-├── systems/                 # Autoload singletons
-│   ├── player_stats.gd
-│   ├── base_stat_leveling.gd
-│   ├── inventory_system.gd
-│   ├── spell_system.gd
-│   ├── event_bus.gd
+│   ├── potion_data.gd
+│   └── recipe_data.gd
+├── entities/                # Entity base classes
+│   ├── base_entity.gd
+│   └── entity_data.gd
+├── resources/               # Resource data classes
+│   ├── spell_data.gd
+│   ├── merchant_data.gd
+│   └── game_balance_config.gd
+├── state/                   # Game state management
+│   ├── game_state.gd
+│   └── player_state.gd
+├── systems/                 # Autoload singletons (organized by domain)
+│   ├── player/              # Player-related systems
+│   │   └── player_stats.gd  # Facade - delegates to focused systems
+│   ├── combat/              # Combat systems
+│   │   └── combat_system.gd
+│   ├── movement/            # Movement systems
+│   │   ├── movement_system.gd
+│   │   └── movement_tracker.gd
+│   ├── inventory/           # Inventory systems
+│   │   └── inventory_system.gd
+│   ├── spells/              # Spell systems
+│   │   └── spell_system.gd
+│   ├── resources/           # Resource management
+│   │   ├── resource_regen_system.gd
+│   │   ├── currency_system.gd
+│   │   ├── resource_manager.gd
+│   │   └── game_balance.gd
+│   ├── events/              # Event systems
+│   │   └── event_bus.gd
+│   ├── xp_leveling_system.gd
 │   ├── projectile_pool.gd
 │   └── enemy_respawn_manager.gd
-├── utils/                   # Utility classes
-│   ├── direction_utils.gd
-│   ├── stat_formulas.gd
-│   ├── damage_calculator.gd
-│   ├── logger.gd (GameLogger)
-│   ├── cooldown_manager.gd
-│   └── xp_cooldown.gd
-├── ui/                      # UI component scripts
-│   ├── resource_bar.gd
-│   ├── spell_bar.gd
-│   ├── spell_slot.gd
-│   ├── base_stat_row.gd
-│   ├── stats_tab.gd
-│   └── inventory_ui.gd
+├── utils/                   # Utility classes (organized by domain)
+│   ├── direction/            # Direction utilities
+│   │   └── direction_utils.gd
+│   ├── stats/               # Stat calculation utilities
+│   │   ├── stat_formulas.gd
+│   │   └── damage_calculator.gd
+│   ├── logging/             # Logging utilities
+│   │   └── logger.gd (GameLogger)
+│   ├── cooldowns/           # Cooldown utilities
+│   │   ├── cooldown_manager.gd
+│   │   └── xp_cooldown.gd
+│   ├── leveling/             # Leveling utilities
+│   └── signals/             # Signal utilities
+├── ui/                      # UI component scripts (organized by type)
+│   ├── bars/                # Resource bars
+│   │   └── resource_bar.gd
+│   ├── slots/                # Slot components
+│   │   ├── spell_slot.gd
+│   │   └── inventory_slot.gd
+│   ├── rows/                 # Row components
+│   │   └── base_stat_row.gd
+│   ├── tabs/                 # Tab components
+│   │   ├── stats_tab.gd
+│   │   └── inventory_tab.gd
+│   ├── panels/               # Panel components
+│   │   └── player_panel.gd
+│   └── inventory/            # Inventory UI
+│       └── inventory_ui.gd
 ├── enemies/                 # Enemy scripts
 │   ├── base_enemy.gd
 │   └── orc_1.gd
 ├── projectiles/            # Projectile scripts
 │   ├── spell_projectile.gd
 │   └── impact.gd
-└── workers/                 # Worker pattern components
-    ├── input_reader.gd
-    ├── mover.gd
-    ├── animator.gd
-    ├── spell_spawner.gd
-    ├── health_tracker.gd
-    ├── hurtbox.gd
-    └── hitbox.gd
+├── workers/                 # Worker pattern components (organized by domain)
+│   ├── base/                 # Base worker classes
+│   │   └── base_worker.gd
+│   ├── input/                # Input workers
+│   │   └── input_reader.gd
+│   ├── movement/             # Movement workers
+│   │   └── mover.gd
+│   ├── animation/            # Animation workers
+│   │   └── animator.gd
+│   ├── combat/               # Combat workers
+│   │   ├── health_tracker.gd
+│   │   ├── hurtbox.gd
+│   │   └── hitbox.gd
+│   ├── spells/               # Spell workers
+│   │   ├── spell_spawner.gd
+│   │   └── spell_caster.gd
+│   └── effects/              # Effect workers
+├── test/                     # Test scripts
+│   └── system_validator.gd
+└── player.gd                # Main player coordinator
 
 scenes/
 ├── characters/
@@ -444,16 +624,21 @@ resources/
 - **Vitality**: Represents health capacity and regeneration
 
 ### 2. Modular Architecture
-- **Worker Pattern**: Player coordinator delegates to workers
+- **Worker Pattern**: Player coordinator delegates to workers (BaseWorker base class)
+- **Entity Pattern**: BaseEntity provides common functionality for all entities
+- **Facade Pattern**: PlayerStats acts as thin facade delegating to focused systems
 - **Utility Classes**: Extracted complex logic into reusable utilities
-- **Separate Systems**: BaseStatLeveling separate from PlayerStats for modularity
+- **Separate Systems**: XPLevelingSystem separate from PlayerStats for modularity
 - **Signal-Based Communication**: Decoupled systems via EventBus
+- **Hierarchical Organization**: Code organized by domain/functionality in subdirectories
+  - Benefits: Easier navigation, clear ownership, better scalability
 
 ### 3. XP and Leveling
-- **Base Stats**: Max level 64, XP = level * 100
+- **Base Stats**: Max level 110, RuneScape-style exponential XP curve (not linear)
 - **Elements**: Max level varies by element (42-54), XP = level * 100
 - **Cooldowns**: 0.1 second cooldown per stat to prevent spamming
 - **Vitality**: Auto-gains from other stats (1 VIT per 8 other stat XP)
+- **Character Level**: Calculated from all base stats + magic elements
 
 ### 4. Damage System
 - **Spell Damage**: Centralized in DamageCalculator
@@ -476,16 +661,19 @@ resources/
   - PlayerStats initialization
   - InventorySystem
   - SpellSystem
-  - BaseStatLeveling
+  - XPLevelingSystem (base stat leveling)
   - StatFormulas
   - DamageCalculator
   - Cooldown systems
-- **Status**: 37 tests, all passing
+- **Status**: 36 tests, all passing
 
 ### Logging
-- **GameLogger**: Centralized logging with prefixes
+- **GameLogger**: Centralized logging with prefixes and log levels (DEBUG, INFO, WARNING, ERROR)
 - **Active Logging**: All major systems have active logging
-- **Prefixes**: [PlayerStats], [BaseStatLeveling], [SpellSystem], etc.
+- **Prefixes**: [PlayerStats], [XPLevelingSystem], [SpellSystem], etc.
+- **Log Levels**: Filterable by level (set via `GameLogger.set_log_level()`)
+- **Static Methods**: `log_debug()`, `log_info()`, `log_warning()`, `log_error()`
+- **Instance Methods**: Create logger instance with `GameLogger.create(prefix)` for per-class logging
 
 ---
 
@@ -512,8 +700,12 @@ resources/
 ## Key Files to Review
 
 ### Critical Systems
-- `scripts/systems/player_stats.gd` - Core player attributes
-- `scripts/systems/base_stat_leveling.gd` - Base stat XP and leveling
+- `scripts/systems/player_stats.gd` - Facade for player attributes (delegates to focused systems)
+- `scripts/systems/xp_leveling_system.gd` - Base stat XP and leveling
+- `scripts/systems/currency_system.gd` - Gold management
+- `scripts/systems/resource_regen_system.gd` - Resource regeneration
+- `scripts/systems/combat_system.gd` - Combat calculations
+- `scripts/systems/movement_system.gd` - Movement calculations
 - `scripts/systems/spell_system.gd` - Elemental spell progression
 - `scripts/systems/inventory_system.gd` - Inventory and equipment
 - `scripts/player.gd` - Player coordinator
@@ -535,14 +727,18 @@ resources/
 
 1. **Do NOT commit/push** unless explicitly asked by user
 2. **Follow SPEC.md** for standardization (though some deviations exist - Resilience/Agility rename)
-3. **Use existing patterns**: Worker pattern, signal-based communication, utility classes
+3. **Use existing patterns**: Worker pattern (BaseWorker), Entity pattern (BaseEntity), Facade pattern (PlayerStats), signal-based communication, utility classes
 4. **Test thoroughly** before suggesting completion
 5. **Check logs** for debugging (comprehensive logging is in place)
 6. **Respect z-index layers**: HUD=10, SpellBar=19, Inventory=20
-7. **Stat names**: Use Resilience/Agility (not STR/DEX)
+7. **Stat names**: Use Resilience/Agility (not STR/DEX) - see StatConstants
 8. **Modularity**: Keep systems separate and modular
 9. **XP Cooldowns**: Always respect 0.1 second cooldown per stat
 10. **Resource Bars**: Health bar has Background node, mana/stamina don't (use get_node_or_null())
+11. **Resource Loading**: Always use ResourceManager for loading resources (not direct load())
+12. **Game Balance**: Use GameBalance autoload for all balance values (not hardcoded constants)
+13. **Directory Structure**: Follow hierarchical organization (systems in subdirectories by domain)
+14. **PlayerStats**: Is a facade - delegate to focused systems (XPLevelingSystem, CurrencySystem, etc.)
 
 ---
 

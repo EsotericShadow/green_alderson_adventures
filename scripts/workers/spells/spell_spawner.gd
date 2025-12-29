@@ -1,4 +1,4 @@
-extends BaseWorker
+extends "res://scripts/workers/base/base_worker.gd"
 class_name SpellSpawner
 
 ## WORKER: Spawns projectiles

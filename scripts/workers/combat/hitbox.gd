@@ -1,4 +1,4 @@
-extends BaseAreaWorker
+extends "res://scripts/workers/base/base_area_worker.gd"
 class_name Hitbox
 
 ## WORKER: Detects when this hitbox hits a hurtbox

@@ -1,4 +1,4 @@
-extends BaseWorker
+extends "res://scripts/workers/base/base_worker.gd"
 ## Worker that handles camera effects like screen shake.
 ## Should be added as a child of an entity with a Camera2D node.
 

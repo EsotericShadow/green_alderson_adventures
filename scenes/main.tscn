@@ -10,7 +10,7 @@
 [ext_resource type="PackedScene" uid="uid://player_panel_001" path="res://scenes/ui/player_panel.tscn" id="6_player_panel"]
 [ext_resource type="PackedScene" path="res://scenes/ui/tool_belt.tscn" id="7_tool_belt"]
 [ext_resource type="Script" path="res://scripts/test/system_validator.gd" id="8_validator"]
-[ext_resource type="Script" path="res://scripts/systems/enemy_respawn_manager.gd" id="9_respawn"]
+[ext_resource type="Script" path="res://scripts/systems/combat/enemy_respawn_manager.gd" id="9_respawn"]
 
 [node name="Node2D" type="Node2D"]
 
