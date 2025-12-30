@@ -191,13 +191,9 @@ func _use_item(slot_index: int) -> void:
 
 
 func _equip_item(slot_index: int) -> void:
-	var slot_data: Dictionary = InventorySystem.get_slot(slot_index)
-	var item: ItemData = slot_data.get("item")
-	
-	if item is EquipmentData:
-		var equip_item: EquipmentData = item as EquipmentData
-		if InventorySystem.equip(equip_item):
-			_update_slots()
+	var result := InventoryUIHandler.equip_slot(slot_index)
+	if result["success"]:
+		_update_slots()
 
 
 func _examine_item(slot_index: int) -> void:

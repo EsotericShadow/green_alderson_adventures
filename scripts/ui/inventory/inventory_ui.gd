@@ -7,11 +7,14 @@ var _logger = GameLogger.create("[InventoryUI] ")
 
 @onready var control: Control = $Control
 @onready var slot_grid: GridContainer = $Control/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/InventoryPanel/CenterContainer/GridContainer
+@onready var currency_row: Control = $Control/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/InventoryPanel/CurrencyRow
 @onready var equip_container: VBoxContainer = $Control/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/EquipmentPanel/VBoxContainer
 @onready var close_button: Button = $Control/PanelContainer/MarginContainer/VBoxContainer/ButtonContainer/Button
 
 const SLOT_SCENE: PackedScene = preload("res://scenes/ui/inventory_slot.tscn")
 const EQUIP_SLOT_SCENE: PackedScene = preload("res://scenes/ui/equip_slot.tscn")
+
+var _equip_slot_nodes: Dictionary = {}
 
 
 func _ready() -> void:
@@ -47,6 +50,8 @@ func _ready() -> void:
 	_logger.log("Refreshing slots...")
 	_refresh_slots()
 	_refresh_equipment_slots()
+	if currency_row != null:
+		currency_row.visible = false
 	
 	# Start hidden (this is the full-screen modal inventory, sidebar inventory is separate)
 	if control != null:
@@ -145,72 +150,73 @@ func _on_slot_clicked(slot_index: int) -> void:
 	var result = InventoryUIHandler.handle_slot_click(slot_index)
 	if result["success"]:
 		_refresh_slots()
-		_refresh_equipment_slots()
 	else:
 		var slot_data: Dictionary = InventorySystem.get_slot(slot_index)
 		if slot_data["item"] != null:
 			print("Clicked slot ", slot_index, ": ", slot_data["item"].display_name, " x", slot_data["count"])
 
 
-func _refresh_equipment_slots() -> void:
-	_refresh_equipment_slots_async()
+func _refresh_equipment_slots(slot_name: String = "") -> void:
+	if equip_container == null or InventorySystem == null:
+		return
+	if _equip_slot_nodes.is_empty():
+		_build_equipment_slots()
+	if slot_name == "":
+		for slot_key in _equip_slot_nodes.keys():
+			_update_equip_slot(slot_key)
+	else:
+		_update_equip_slot(slot_name)
 
 
-func _refresh_equipment_slots_async() -> void:
+func _build_equipment_slots() -> void:
 	if equip_container == null:
 		return
-	
+	_equip_slot_nodes.clear()
+	var rows: Array = []
+	for child in equip_container.get_children():
+		if child is HBoxContainer:
+			var row := child as HBoxContainer
+			for slot_child in row.get_children():
+				row.remove_child(slot_child)
+				slot_child.queue_free()
+			rows.append(row)
+	if rows.is_empty():
+		return
+	var layout := [
+		["head"],
+		["book", "body", "weapon"],
+		["ring1", "ring2", "legs", "gloves"],
+		["amulet", "boots"]
+	]
+	for i in range(layout.size()):
+		if i >= rows.size():
+			break
+		for slot_name in layout[i]:
+			_create_equip_slot(slot_name, rows[i])
+
+
+func _update_equip_slot(slot_name: String) -> void:
 	if InventorySystem == null:
 		return
-	
-	# Clear existing equipment slots from all rows
-	for row in equip_container.get_children():
-		for child in row.get_children():
-			row.remove_child(child)
-			child.queue_free()
-	
-	await get_tree().process_frame
-	
-	# Get row containers
-	var row1: HBoxContainer = equip_container.get_child(0) as HBoxContainer  # head
-	var row2: HBoxContainer = equip_container.get_child(1) as HBoxContainer  # book, body, weapon
-	var row3: HBoxContainer = equip_container.get_child(2) as HBoxContainer  # ring, legs, gloves
-	var row4: HBoxContainer = equip_container.get_child(3) as HBoxContainer  # amulet, boots
-	
-	# Row 1: head (centered single column)
-	_create_equip_slot("head", row1)
-	
-	# Row 2: book, body, weapon (3 columns)
-	_create_equip_slot("book", row2)
-	_create_equip_slot("body", row2)
-	_create_equip_slot("weapon", row2)
-	
-	# Row 3: ring, legs, gloves (3 columns)
-	_create_equip_slot("ring1", row3)  # Using ring1 for "ring"
-	_create_equip_slot("legs", row3)
-	_create_equip_slot("gloves", row3)
-	
-	# Row 4: amulet, boots (2 columns)
-	_create_equip_slot("amulet", row4)
-	_create_equip_slot("boots", row4)
+	var equip_slot: PanelContainer = _equip_slot_nodes.get(slot_name)
+	if equip_slot == null:
+		return
+	var equipped_item: EquipmentData = InventorySystem.get_equipped(slot_name)
+	equip_slot.setup(slot_name, equipped_item)
 
 
 func _create_equip_slot(slot_name: String, parent: HBoxContainer) -> void:
 	var equip_slot: PanelContainer = EQUIP_SLOT_SCENE.instantiate()
 	if equip_slot == null:
 		return
-	
+
 	parent.add_child(equip_slot)
 	equip_slot.slot_clicked.connect(_on_equip_slot_clicked)
-	
-	var equipped_item: EquipmentData = InventorySystem.get_equipped(slot_name)
-	equip_slot.setup(slot_name, equipped_item)
+	_equip_slot_nodes[slot_name] = equip_slot
+	_update_equip_slot(slot_name)
 
 
 func _on_equip_slot_clicked(slot_name: String) -> void:
-	# Unequip item when clicking equipment slot
-	var unequipped: EquipmentData = InventorySystem.unequip(slot_name)
-	if unequipped != null:
+	var result := InventoryUIHandler.unequip_slot(slot_name)
+	if result["success"]:
 		_refresh_slots()
-		_refresh_equipment_slots()
-		print("Unequipped: ", unequipped.display_name)

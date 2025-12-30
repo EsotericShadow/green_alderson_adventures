@@ -28,6 +28,10 @@ class_name BaseEnemy
 signal enemy_died
 signal state_changed(old_state: String, new_state: String)
 
+# Drop visuals
+const GOLD_PICKUP_SCENE: PackedScene = preload("res://scenes/objects/gold_pickup.tscn")
+const ITEM_PICKUP_SCENE: PackedScene = preload("res://scenes/objects/item_pickup.tscn")
+
 # Stats (override in subclass or scene)
 @export_group("Stats")
 @export var max_health: int = 100
@@ -37,6 +41,15 @@ signal state_changed(old_state: String, new_state: String)
 @export var detection_range: float = 200.0
 @export var gold_drop_min: int = 5
 @export var gold_drop_max: int = 15
+
+@export_group("Loot")
+## Optional single-item drop (kept generic for reuse across enemies; configure per-enemy in subclass/scene).
+@export var drop_item_id: String = ""  # e.g. "orc_fang"
+@export_range(0.0, 1.0, 0.01) var drop_item_chance: float = 0.0
+@export var drop_item_min_count: int = 1
+@export var drop_item_max_count: int = 1
+## Optional: spawn the drop in-world instead of instantly adding to inventory.
+@export var spawn_item_pickup: bool = false
 
 @export_group("Combat")
 ## ⚠️ LOCKED: These values work together to prevent spam attacks and lock-on behavior
@@ -498,13 +511,155 @@ func _on_died(_killer: Node) -> void:
 	# Drop gold before changing state
 	if gold_drop_min > 0 and gold_drop_max >= gold_drop_min:
 		var gold_amount: int = randi_range(gold_drop_min, gold_drop_max)
-		if PlayerStats != null:
-			PlayerStats.add_gold(gold_amount)
-			_logger.log("Dropped " + str(gold_amount) + " gold")
-		else:
-			_logger.log_error("PlayerStats is null, cannot drop gold")
+		_spawn_gold_pickup(gold_amount)
+	
+	# Optional item drop (configurable per enemy)
+	_try_drop_item()
 	
 	_change_state(State.DEATH)
+
+
+func _spawn_gold_pickup(amount: int) -> void:
+	if amount <= 0:
+		return
+	
+	var root: Node = get_tree().current_scene
+	if root == null:
+		return
+	
+	if GOLD_PICKUP_SCENE == null:
+		_logger.log_error("GOLD_PICKUP_SCENE is null, cannot spawn gold pickup")
+		return
+	
+	var pickup := GOLD_PICKUP_SCENE.instantiate()
+	if pickup == null:
+		return
+
+	# Set amount if the script exposes it
+	if not _set_pickup_property(pickup, "amount", amount):
+		_logger.log_warning("Gold pickup scene is missing 'amount' property")
+
+	var drop_position: Vector2 = global_position + Vector2(randf_range(-8.0, 8.0), randf_range(-8.0, 8.0))
+	_schedule_pickup_spawn(pickup, drop_position)
+
+
+func _try_drop_item() -> void:
+	if drop_item_id == "":
+		return
+	
+	if drop_item_chance <= 0.0:
+		return
+	
+	if drop_item_max_count < drop_item_min_count:
+		_logger.log_warning("Invalid drop count range for '" + drop_item_id + "': min > max")
+		return
+	
+	# Roll chance
+	if randf() > drop_item_chance:
+		return
+	
+	if ResourceManager == null:
+		_logger.log_error("ResourceManager is null, cannot load drop item: " + drop_item_id)
+		return
+	
+	if InventorySystem == null:
+		_logger.log_error("InventorySystem is null, cannot grant drop item: " + drop_item_id)
+		return
+	
+	var item: ItemData = ResourceManager.load_item(drop_item_id)
+	if item == null:
+		_logger.log_error("Failed to load drop item: " + drop_item_id)
+		return
+	
+	var count: int = randi_range(drop_item_min_count, drop_item_max_count)
+	if count <= 0:
+		return
+
+	if spawn_item_pickup:
+		_spawn_item_pickup(item, count)
+		return
+	
+	var leftover: int = InventorySystem.add_item(item, count)
+	var added: int = count - leftover
+	if added <= 0:
+		_logger.log_warning("Inventory full: could not add dropped item: " + item.display_name)
+		return
+	if leftover > 0:
+		_logger.log_warning("Inventory full: " + str(leftover) + "x " + item.display_name + " could not be added from drop")
+	
+	_spawn_floating_text("+" + item.display_name + (" x" + str(added) if added > 1 else ""), Color(0.9, 0.9, 0.9, 1.0))
+
+
+func _spawn_item_pickup(item: ItemData, count: int) -> void:
+	if item == null or count <= 0:
+		return
+	
+	var root: Node = get_tree().current_scene
+	if root == null:
+		return
+	
+	if ITEM_PICKUP_SCENE == null:
+		return
+	
+	var pickup := ITEM_PICKUP_SCENE.instantiate()
+	if pickup == null:
+		return
+	
+	var item_set: bool = _set_pickup_property(pickup, "item", item)
+	var count_set: bool = _set_pickup_property(pickup, "count", count)
+	if not item_set or not count_set:
+		_logger.log_warning("Item pickup scene missing expected properties: item_set=" + str(item_set) + ", count_set=" + str(count_set))
+	
+	var drop_position: Vector2 = global_position + Vector2(randf_range(-10.0, 10.0), randf_range(-10.0, 10.0))
+	_schedule_pickup_spawn(pickup, drop_position)
+
+
+func _spawn_floating_text(text: String, color: Color) -> void:
+	var root: Node = get_tree().current_scene
+	if root == null:
+		return
+
+	# Use a lightweight Label so the player can see what happened without requiring a pickup system yet.
+	var label := Label.new()
+	label.text = text
+	label.z_index = 1000
+	label.modulate = color
+	label.position = global_position + Vector2(-10, -50)
+	label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	root.add_child(label)
+
+	var tween := label.create_tween()
+	tween.tween_property(label, "position", label.position + Vector2(0, -20), 0.8).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+	tween.parallel().tween_property(label, "modulate:a", 0.0, 0.8).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN)
+	tween.tween_callback(label.queue_free)
+
+
+func _set_pickup_property(target: Object, property_name: String, value) -> bool:
+	if target == null or property_name == "":
+		return false
+
+	for property_info in target.get_property_list():
+		if property_info.get("name", "") == property_name:
+			target.set(property_name, value)
+			return true
+	return false
+
+
+func _schedule_pickup_spawn(pickup: Node, drop_position: Vector2) -> void:
+	if pickup == null:
+		return
+	call_deferred("_add_pickup_to_scene", pickup, drop_position)
+
+
+func _add_pickup_to_scene(pickup: Node, drop_position: Vector2) -> void:
+	if pickup == null:
+		return
+	var root: Node = get_tree().current_scene
+	if root == null:
+		return
+	root.add_child(pickup)
+	if pickup is Node2D:
+		(pickup as Node2D).global_position = drop_position
 
 
 func _on_animation_finished(anim_name: String) -> void:

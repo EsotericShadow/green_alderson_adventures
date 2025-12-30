@@ -133,7 +133,11 @@ func setup(index: int, item_data: ItemData, item_count: int) -> void:
 		if item is PotionData:
 			_setup_potion_animation(item as PotionData)
 		else:
-			_setup_static_icon(item.icon)
+			# Gold coins use amount-based coin pile sprites.
+			if item.id == "gold_coins":
+				_setup_static_icon(GoldVisuals.load_gold_texture(count))
+			else:
+				_setup_static_icon(item.icon)
 		
 		if count > 1 and item.stackable:
 			count_label.text = str(count)

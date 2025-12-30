@@ -52,8 +52,9 @@ func _create_slots() -> void:
 	_create_equip_slot("body", row2)
 	_create_equip_slot("weapon", row2)
 	
-	# Row 3: ring1, legs, gloves (3 columns)
+	# Row 3: ring slots + armor (4 columns)
 	_create_equip_slot("ring1", row3)
+	_create_equip_slot("ring2", row3)
 	_create_equip_slot("legs", row3)
 	_create_equip_slot("gloves", row3)
 	
@@ -67,26 +68,40 @@ func _create_slots() -> void:
 func _create_equip_slot(slot_name: String, parent: HBoxContainer) -> void:
 	var slot: Control = EQUIP_SLOT_SCENE.instantiate()
 	parent.add_child(slot)
+	if slot.has_signal("slot_clicked"):
+		slot.slot_clicked.connect(_on_slot_clicked)
 	slots[slot_name] = slot
 	print(LOG_PREFIX + "Created slot: ", slot_name)
 
 
-func _update_slots() -> void:
+func _update_slots(slot_name: String = "") -> void:
 	if InventorySystem == null:
 		print(LOG_PREFIX + "InventorySystem is null!")
 		return
-	
-	print(LOG_PREFIX + "Updating ", slots.size(), " equipment slots...")
-	
-	for slot_name in slots:
-		var slot: Control = slots[slot_name]
-		var equipment: EquipmentData = InventorySystem.get_equipped(slot_name)
-		
-		if slot.has_method("setup"):
-			slot.setup(slot_name, equipment)
-		else:
-			push_error(LOG_PREFIX + "Slot ", slot_name, " doesn't have setup() method!")
+
+	if slot_name == "":
+		for slot_key in slots.keys():
+			_update_slot(slot_key)
+	else:
+		_update_slot(slot_name)
 
 
-func _on_equipment_changed() -> void:
-	_update_slots()
+func _update_slot(slot_name: String) -> void:
+	if not slots.has(slot_name):
+		return
+	var slot: Control = slots[slot_name]
+	var equipment: EquipmentData = InventorySystem.get_equipped(slot_name)
+	if slot.has_method("setup"):
+		slot.setup(slot_name, equipment)
+	else:
+		push_error(LOG_PREFIX + "Slot ", slot_name, " doesn't have setup() method!")
+
+
+func _on_equipment_changed(slot_name: String = "") -> void:
+	_update_slots(slot_name)
+
+
+func _on_slot_clicked(slot_name: String) -> void:
+	var result := InventoryUIHandler.unequip_slot(slot_name)
+	if result["success"]:
+		_update_slots(slot_name)
