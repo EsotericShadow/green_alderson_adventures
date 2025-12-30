@@ -3,7 +3,7 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://braxwy71qa1d3"
-path="res://.godot/imported/spell_icon_lvl_1(earth).png-b0a55069e76611eb8a668dcb56fa4294.ctex"
+path="res://.godot/imported/spell_icon_lvl_1(earth).png-0aae59f2a199c7b5cbf3f373e4e3e517.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://resources/assets/animations/UI/spell_hotbar_icons/spell_ball_blast/spell_icon_lvl_1(earth).png"
-dest_files=["res://.godot/imported/spell_icon_lvl_1(earth).png-b0a55069e76611eb8a668dcb56fa4294.ctex"]
+dest_files=["res://.godot/imported/spell_icon_lvl_1(earth).png-0aae59f2a199c7b5cbf3f373e4e3e517.ctex"]
 
 [params]
 

@@ -48,6 +48,7 @@ A Godot 4.5 top-down action RPG with multi-element spell system, elemental level
 - **HUD** - Health, Mana, and Stamina bars (top-left)
 - **Spell Hotbar** - 10-slot spell selection bar (bottom-center)
 - **Enemy Health Bars** - Health bars above enemy heads
+- **Inventory & Equipment Panel** - Sidebar inventory shows 28 slots, gold coins consume real inventory space, and the equipment tab displays RuneScape-style Base / Equipment / Total stat bonuses
 
 ### Technical ✅
 
@@ -55,6 +56,8 @@ A Godot 4.5 top-down action RPG with multi-element spell system, elemental level
 - **Animation System** - Smooth transitions between all action states
 - **Z-Index Layering** - Proper depth sorting for north vs south-facing projectiles
 - **Coordinator/Worker Pattern** - Clean architecture preventing code drift
+- **Responsive Window Scaling** - Game launches fullscreen, can be resized freely, and all canvas items stretch proportionally via `canvas_items` + `expand` aspect
+- **Inventory-Backed Currency** - `CurrencySystem` manages gold as a real `gold_coins` stack inside InventorySystem, so pickups and merchants interact with the same data the player sees
 
 ---
 

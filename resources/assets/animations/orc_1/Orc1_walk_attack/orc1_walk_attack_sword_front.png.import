@@ -3,7 +3,7 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://c1vm3cwhuaj3y"
-path="res://.godot/imported/orc1_walk_attack_sword_front.png-39f50bcbcf0ed4cdf4807381b3678e6c.ctex"
+path="res://.godot/imported/orc1_walk_attack_sword_front.png-272864ea5fc7c14b281141e05e261d2c.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://resources/assets/animations/orc_1/Orc1_walk_attack/orc1_walk_attack_sword_front.png"
-dest_files=["res://.godot/imported/orc1_walk_attack_sword_front.png-39f50bcbcf0ed4cdf4807381b3678e6c.ctex"]
+dest_files=["res://.godot/imported/orc1_walk_attack_sword_front.png-272864ea5fc7c14b281141e05e261d2c.ctex"]
 
 [params]
 

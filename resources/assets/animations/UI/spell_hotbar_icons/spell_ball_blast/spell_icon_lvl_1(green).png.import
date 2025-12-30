@@ -3,7 +3,7 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dtc38j233ptsg"
-path="res://.godot/imported/spell_icon_lvl_1(green).png-2115c14fed8c52a095130e070556d839.ctex"
+path="res://.godot/imported/spell_icon_lvl_1(green).png-9863e7c65cabc1a7f6695a6b7871e778.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://resources/assets/animations/UI/spell_hotbar_icons/spell_ball_blast/spell_icon_lvl_1(green).png"
-dest_files=["res://.godot/imported/spell_icon_lvl_1(green).png-2115c14fed8c52a095130e070556d839.ctex"]
+dest_files=["res://.godot/imported/spell_icon_lvl_1(green).png-9863e7c65cabc1a7f6695a6b7871e778.ctex"]
 
 [params]
 

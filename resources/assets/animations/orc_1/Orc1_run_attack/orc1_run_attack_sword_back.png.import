@@ -3,7 +3,7 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dayovs1vmhjjj"
-path="res://.godot/imported/orc1_run_attack_sword_back.png-24137601c587161144b70a9f67f817f4.ctex"
+path="res://.godot/imported/orc1_run_attack_sword_back.png-a337fdd57a4371a85ac121603f8fb044.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://resources/assets/animations/orc_1/Orc1_run_attack/orc1_run_attack_sword_back.png"
-dest_files=["res://.godot/imported/orc1_run_attack_sword_back.png-24137601c587161144b70a9f67f817f4.ctex"]
+dest_files=["res://.godot/imported/orc1_run_attack_sword_back.png-a337fdd57a4371a85ac121603f8fb044.ctex"]
 
 [params]
 

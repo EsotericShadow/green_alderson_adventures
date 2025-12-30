@@ -3,7 +3,7 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://befwks0q14s0w"
-path="res://.godot/imported/orc1_idle_sword_front.png-463f9a59af52e4f5ee26616699c06480.ctex"
+path="res://.godot/imported/orc1_idle_sword_front.png-fd20cb384c7689694334fdd9ba687b6d.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://resources/assets/animations/orc_1/Orc1_idle/orc1_idle_sword_front.png"
-dest_files=["res://.godot/imported/orc1_idle_sword_front.png-463f9a59af52e4f5ee26616699c06480.ctex"]
+dest_files=["res://.godot/imported/orc1_idle_sword_front.png-fd20cb384c7689694334fdd9ba687b6d.ctex"]
 
 [params]
 

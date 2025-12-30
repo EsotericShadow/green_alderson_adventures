@@ -3,7 +3,7 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://c5rdp3dr4bkvx"
-path="res://.godot/imported/potion_02g.png-1076acc5ffb6c30c48a899a64941b753.ctex"
+path="res://.godot/imported/potion_02g.png-e4a0d162ab204404acf9f025a593a380.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://resources/assets/Kyrise's 16x16 RPG Icon Pack - V1.3/icons/48x48/potion_02g.png"
-dest_files=["res://.godot/imported/potion_02g.png-1076acc5ffb6c30c48a899a64941b753.ctex"]
+dest_files=["res://.godot/imported/potion_02g.png-e4a0d162ab204404acf9f025a593a380.ctex"]
 
 [params]
 

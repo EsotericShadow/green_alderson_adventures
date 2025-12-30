@@ -3,7 +3,7 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dkmckjionh1bl"
-path="res://.godot/imported/Shroomlands_Rocks.png-08203b8954636213b6c2968d3869a328.ctex"
+path="res://.godot/imported/Shroomlands_Rocks.png-5f59721ba8d7e97715f667fd9beae714.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://resources/assets/Cute_Fantasy_ShroomLands/Props/Shroomlands_Rocks.png"
-dest_files=["res://.godot/imported/Shroomlands_Rocks.png-08203b8954636213b6c2968d3869a328.ctex"]
+dest_files=["res://.godot/imported/Shroomlands_Rocks.png-5f59721ba8d7e97715f667fd9beae714.ctex"]
 
 [params]
 

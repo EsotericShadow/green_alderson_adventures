@@ -3,7 +3,7 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://b76iqtciidymp"
-path="res://.godot/imported/multi_spell_icon_lvl_2(blue).png.png-c1323d6d86abd552a6b3dd0a6222ab61.ctex"
+path="res://.godot/imported/multi_spell_icon_lvl_2(blue).png.png-19fce36e2d6f3c1f6e2f6fd15b177d1f.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://resources/assets/animations/UI/spell_hotbar_icons/spell_multi_blast/multi_spell_icon_lvl_2(blue).png.png"
-dest_files=["res://.godot/imported/multi_spell_icon_lvl_2(blue).png.png-c1323d6d86abd552a6b3dd0a6222ab61.ctex"]
+dest_files=["res://.godot/imported/multi_spell_icon_lvl_2(blue).png.png-19fce36e2d6f3c1f6e2f6fd15b177d1f.ctex"]
 
 [params]
 

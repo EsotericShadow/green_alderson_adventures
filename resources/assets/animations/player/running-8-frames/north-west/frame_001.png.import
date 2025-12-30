@@ -3,7 +3,7 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dnt0a2y4pq83i"
-path="res://.godot/imported/frame_001.png-19e2c9ca8e7b948ea666c3b241dfaf61.ctex"
+path="res://.godot/imported/frame_001.png-b3f5c99f50073ce68f9bf3f13feb22e4.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://resources/assets/animations/player/running-8-frames/north-west/frame_001.png"
-dest_files=["res://.godot/imported/frame_001.png-19e2c9ca8e7b948ea666c3b241dfaf61.ctex"]
+dest_files=["res://.godot/imported/frame_001.png-b3f5c99f50073ce68f9bf3f13feb22e4.ctex"]
 
 [params]
 

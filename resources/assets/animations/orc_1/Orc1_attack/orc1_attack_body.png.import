@@ -3,7 +3,7 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bqc4oi1jekydx"
-path="res://.godot/imported/orc1_attack_body.png-3110a1ad9fb807cb3a7f01bb1aee0ec7.ctex"
+path="res://.godot/imported/orc1_attack_body.png-e3a4c635e927b0036201524a6f9f6509.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://resources/assets/animations/orc_1/Orc1_attack/orc1_attack_body.png"
-dest_files=["res://.godot/imported/orc1_attack_body.png-3110a1ad9fb807cb3a7f01bb1aee0ec7.ctex"]
+dest_files=["res://.godot/imported/orc1_attack_body.png-e3a4c635e927b0036201524a6f9f6509.ctex"]
 
 [params]
 

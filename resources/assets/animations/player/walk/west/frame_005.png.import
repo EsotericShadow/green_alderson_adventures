@@ -3,7 +3,7 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://byrttjnu41at6"
-path="res://.godot/imported/frame_005.png-d4e3786ffb4ffcc2a27cc2ce489559ea.ctex"
+path="res://.godot/imported/frame_005.png-89299abe05bb2e1136a9109b4960effd.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://resources/assets/animations/player/walk/west/frame_005.png"
-dest_files=["res://.godot/imported/frame_005.png-d4e3786ffb4ffcc2a27cc2ce489559ea.ctex"]
+dest_files=["res://.godot/imported/frame_005.png-89299abe05bb2e1136a9109b4960effd.ctex"]
 
 [params]
 

@@ -3,7 +3,7 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bhuxwj0fkfflr"
-path="res://.godot/imported/sword_03d.png-dcddd8beef481d057029f31d9d8254fc.ctex"
+path="res://.godot/imported/sword_03d.png-02b68d4ebc8338a9b3abfaf18778650e.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://resources/assets/Kyrise's 16x16 RPG Icon Pack - V1.3/icons/48x48/sword_03d.png"
-dest_files=["res://.godot/imported/sword_03d.png-dcddd8beef481d057029f31d9d8254fc.ctex"]
+dest_files=["res://.godot/imported/sword_03d.png-02b68d4ebc8338a9b3abfaf18778650e.ctex"]
 
 [params]
 

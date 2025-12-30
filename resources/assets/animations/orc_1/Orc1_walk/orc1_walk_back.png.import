@@ -3,7 +3,7 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://cdlyau0u3b2hh"
-path="res://.godot/imported/orc1_walk_back.png-a8ca3be20229d77b4a354c0c179241e5.ctex"
+path="res://.godot/imported/orc1_walk_back.png-e9965626c5a7c920d4b2f2e851a773d0.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://resources/assets/animations/orc_1/Orc1_walk/orc1_walk_back.png"
-dest_files=["res://.godot/imported/orc1_walk_back.png-a8ca3be20229d77b4a354c0c179241e5.ctex"]
+dest_files=["res://.godot/imported/orc1_walk_back.png-e9965626c5a7c920d4b2f2e851a773d0.ctex"]
 
 [params]
 

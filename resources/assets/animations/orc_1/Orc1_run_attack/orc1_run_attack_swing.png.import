@@ -3,7 +3,7 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://ds5q0w28dohdb"
-path="res://.godot/imported/orc1_run_attack_swing.png-0012772f70c8a8e0baaa2e762efa0834.ctex"
+path="res://.godot/imported/orc1_run_attack_swing.png-9d54da59543c8ca65a87d0f637842cfc.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://resources/assets/animations/orc_1/Orc1_run_attack/orc1_run_attack_swing.png"
-dest_files=["res://.godot/imported/orc1_run_attack_swing.png-0012772f70c8a8e0baaa2e762efa0834.ctex"]
+dest_files=["res://.godot/imported/orc1_run_attack_swing.png-9d54da59543c8ca65a87d0f637842cfc.ctex"]
 
 [params]
 

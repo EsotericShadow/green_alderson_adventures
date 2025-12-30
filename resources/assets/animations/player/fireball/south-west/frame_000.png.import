@@ -3,7 +3,7 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://cby8c4l5x010"
-path="res://.godot/imported/frame_000.png-7ff83055665e6931d3978e5beec89104.ctex"
+path="res://.godot/imported/frame_000.png-98ff6e302d451d4204019e49734cdb6f.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://resources/assets/animations/player/fireball/south-west/frame_000.png"
-dest_files=["res://.godot/imported/frame_000.png-7ff83055665e6931d3978e5beec89104.ctex"]
+dest_files=["res://.godot/imported/frame_000.png-98ff6e302d451d4204019e49734cdb6f.ctex"]
 
 [params]
 

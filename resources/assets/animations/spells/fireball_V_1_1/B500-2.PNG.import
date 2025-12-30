@@ -3,7 +3,7 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://c2ebush6blfgm"
-path="res://.godot/imported/B500-2.PNG-04f67b418d56e26fff0535dcad979946.ctex"
+path="res://.godot/imported/B500-2.PNG-81258ef5d410adde392c1ffa1b84bab4.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://resources/assets/animations/spells/fireball_V_1_1/B500-2.PNG"
-dest_files=["res://.godot/imported/B500-2.PNG-04f67b418d56e26fff0535dcad979946.ctex"]
+dest_files=["res://.godot/imported/B500-2.PNG-81258ef5d410adde392c1ffa1b84bab4.ctex"]
 
 [params]
 

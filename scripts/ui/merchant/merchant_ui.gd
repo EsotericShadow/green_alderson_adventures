@@ -209,9 +209,18 @@ func _update_inventory_display() -> void:
 			inventory_list.add_item(display_text)
 
 
-func _update_gold_display() -> void:
-	if gold_display != null and PlayerStats != null:
-		gold_display.text = "Gold: " + str(PlayerStats.gold)
+func _update_gold_display(amount: int = -1) -> void:
+	# NOTE: PlayerStats.gold_changed emits the new gold amount.
+	# We accept an optional argument so this method can be used both as a signal handler
+	# (1 arg) and as an internal refresh method (0 args).
+	if gold_display == null:
+		return
+	
+	var display_amount: int = amount
+	if display_amount < 0 and PlayerStats != null:
+		display_amount = PlayerStats.gold
+	
+	gold_display.text = "Gold: " + str(display_amount)
 
 
 func _refresh_displays() -> void:

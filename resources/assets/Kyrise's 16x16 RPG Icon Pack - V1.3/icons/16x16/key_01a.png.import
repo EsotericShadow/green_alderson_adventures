@@ -3,7 +3,7 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://b7gc4tpvcjote"
-path="res://.godot/imported/key_01a.png-73663dbcc0c58decf148e5596cd5e182.ctex"
+path="res://.godot/imported/key_01a.png-c5a7bd1a557de3d59ac7794e9393f199.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://resources/assets/Kyrise's 16x16 RPG Icon Pack - V1.3/icons/16x16/key_01a.png"
-dest_files=["res://.godot/imported/key_01a.png-73663dbcc0c58decf148e5596cd5e182.ctex"]
+dest_files=["res://.godot/imported/key_01a.png-c5a7bd1a557de3d59ac7794e9393f199.ctex"]
 
 [params]
 

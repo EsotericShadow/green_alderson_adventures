@@ -3,7 +3,7 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://23uowjbso8gl"
-path="res://.godot/imported/fish_01e.png-8db3c00ecc62143fce980ad0b82c1004.ctex"
+path="res://.godot/imported/fish_01e.png-d1b472e2fac3606f79436fcf730028df.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://resources/assets/Kyrise's 16x16 RPG Icon Pack - V1.3/icons/32x32/fish_01e.png"
-dest_files=["res://.godot/imported/fish_01e.png-8db3c00ecc62143fce980ad0b82c1004.ctex"]
+dest_files=["res://.godot/imported/fish_01e.png-d1b472e2fac3606f79436fcf730028df.ctex"]
 
 [params]
 

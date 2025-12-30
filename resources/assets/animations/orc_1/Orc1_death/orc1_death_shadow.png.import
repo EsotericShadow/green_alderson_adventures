@@ -3,7 +3,7 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bf7f2ba7hhpix"
-path="res://.godot/imported/orc1_death_shadow.png-c01e4dcb318ac1aef15fa42890ae6607.ctex"
+path="res://.godot/imported/orc1_death_shadow.png-3768c001882a5050514869473fa1653d.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://resources/assets/animations/orc_1/Orc1_death/orc1_death_shadow.png"
-dest_files=["res://.godot/imported/orc1_death_shadow.png-c01e4dcb318ac1aef15fa42890ae6607.ctex"]
+dest_files=["res://.godot/imported/orc1_death_shadow.png-3768c001882a5050514869473fa1653d.ctex"]
 
 [params]
 

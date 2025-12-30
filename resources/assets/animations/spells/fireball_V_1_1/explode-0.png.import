@@ -3,7 +3,7 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://f5af566cs07g"
-path="res://.godot/imported/explode-0.png-68d472a0a1acbddfcd6f931884341f9e.ctex"
+path="res://.godot/imported/explode-0.png-e8006d6e93ce0e33c89fea2c03e5015a.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://resources/assets/animations/spells/fireball_V_1_1/explode-0.png"
-dest_files=["res://.godot/imported/explode-0.png-68d472a0a1acbddfcd6f931884341f9e.ctex"]
+dest_files=["res://.godot/imported/explode-0.png-e8006d6e93ce0e33c89fea2c03e5015a.ctex"]
 
 [params]
 

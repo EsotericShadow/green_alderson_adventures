@@ -3,7 +3,7 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://4snc50dirr8k"
-path="res://.godot/imported/bigboom3.png-d4df40c7b5627d7811ff6415ec1c2d48.ctex"
+path="res://.godot/imported/bigboom3.png-172bf3e17488a75a8b1f104840c8978f.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://resources/assets/animations/spells/Pixel Explosions Free Pack/PNGs/bigboom/bigboom3.png"
-dest_files=["res://.godot/imported/bigboom3.png-d4df40c7b5627d7811ff6415ec1c2d48.ctex"]
+dest_files=["res://.godot/imported/bigboom3.png-172bf3e17488a75a8b1f104840c8978f.ctex"]
 
 [params]
 

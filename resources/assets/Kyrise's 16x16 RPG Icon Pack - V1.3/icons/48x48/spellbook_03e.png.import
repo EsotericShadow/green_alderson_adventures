@@ -3,7 +3,7 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://b3mjkv1lxup0p"
-path="res://.godot/imported/spellbook_03e.png-8c99b2caa95409ba4ca61662a76d60ec.ctex"
+path="res://.godot/imported/spellbook_03e.png-72ee7bdd01ea010cbc59355e1dd00ce1.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://resources/assets/Kyrise's 16x16 RPG Icon Pack - V1.3/icons/48x48/spellbook_03e.png"
-dest_files=["res://.godot/imported/spellbook_03e.png-8c99b2caa95409ba4ca61662a76d60ec.ctex"]
+dest_files=["res://.godot/imported/spellbook_03e.png-72ee7bdd01ea010cbc59355e1dd00ce1.ctex"]
 
 [params]
 

@@ -3,7 +3,7 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://0sjjvsm41cgn"
-path="res://.godot/imported/jumping-sprite-sheet.png-0.png-3f74b19d5c3237d6fae2a430705ad3f9.ctex"
+path="res://.godot/imported/jumping-sprite-sheet.png-0.png-14c8efc73f7668607f2628c6aa83dc34.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://resources/assets/animations/player/jumping-1/jumping-sprite-sheet.png-0.png"
-dest_files=["res://.godot/imported/jumping-sprite-sheet.png-0.png-3f74b19d5c3237d6fae2a430705ad3f9.ctex"]
+dest_files=["res://.godot/imported/jumping-sprite-sheet.png-0.png-14c8efc73f7668607f2628c6aa83dc34.ctex"]
 
 [params]
 

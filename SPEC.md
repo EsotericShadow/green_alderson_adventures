@@ -92,6 +92,14 @@ res://
 
 ---
 
+## Display Settings
+
+- `project.godot` must define a 1600×900 viewport under `[display/window]` (`size/viewport_width = 1600`, `size/viewport_height = 900`).
+- `size/resizable` must be `true` and `size/fullscreen` must be `true` so the game launches fullscreen but can be resized freely on desktop builds.
+- Stretch settings: `stretch/mode = "canvas_items"` and `stretch/aspect = "expand"` to keep HUD/UI responsive regardless of window size.
+
+---
+
 ## Input Actions
 
 All input actions to be added to `project.godot`:
@@ -483,6 +491,8 @@ func spend_gold(amount: int) -> bool  # Returns false if insufficient
 func has_gold(amount: int) -> bool
 ```
 
+`add_gold()`, `spend_gold()`, and `has_gold()` must delegate to `CurrencySystem` so there is a single source of truth (the `gold_coins` stack inside InventorySystem).
+
 #### EventBus
 
 **File**: `res://scripts/systems/event_bus.gd`
@@ -527,6 +537,13 @@ SpellSystem="*res://scripts/systems/spells/spell_system.gd"
 GameBalance="*res://scripts/systems/resources/game_balance.gd"
 ResourceManager="*res://scripts/systems/resources/resource_manager.gd"
 ```
+
+#### CurrencySystem Implementation
+
+- `res://scripts/systems/resources/currency_system.gd` defines `signal gold_changed(amount: int)`, `const GOLD_ITEM_ID := "gold_coins"`, a mirrored `var gold: int`, and a cached ItemData reference.
+- `_ready()` loads `res://resources/items/gold_coins.tres`, connects to `InventorySystem.inventory_changed`, and keeps the mirrored `gold` value synchronized with the inventory stack.
+- `add_gold()` / `spend_gold()` call `InventorySystem.add_item()` / `InventorySystem.remove_item()` so currency always matches the player backpack; log partial deposits when inventory space is limited.
+- `has_gold()` queries InventorySystem when available and only falls back to the mirror integer during early boot.
 
 ---
 
@@ -642,7 +659,7 @@ func _process(delta: float) -> void:
 extends Node
 
 # Constants (LOCKED)
-const DEFAULT_CAPACITY: int = 12
+const DEFAULT_CAPACITY: int = 28
 const MAX_CAPACITY: int = 48
 
 # Signals (LOCKED NAMES)
@@ -795,6 +812,37 @@ func get_total_resilience() -> int:
 ```
 
 (Same pattern for agility, int, vit)
+
+### Commit 2D: Player Panel Sidebar
+
+**File**: `res://scenes/ui/player_panel.tscn`
+
+```
+PlayerPanel (CanvasLayer, layer = 20)
+└── Control
+    └── PanelContainer
+        └── MarginContainer
+            └── VBoxContainer
+                ├── HBoxContainer (tab buttons)
+                └── TabContent (Stacked sub-panels)
+                    ├── InventoryPanel (InventoryTab script)
+                    │   └── VBoxContainer
+                    │       ├── Label ("Inventory")
+                    │       └── GridContainer (columns = 4, 28 slots)
+                    ├── EquipmentPanel (EquipmentTab script)
+                    │   └── VBoxContainer
+                    │       ├── Label ("Equipment")
+                    │       ├── EquipContainer (rows of EquipSlot instances)
+                    │       └── EquipmentStats (VBoxContainer)
+                    │           ├── Label ("Bonuses")
+                    │           └── VBoxContainer (stats rows)
+                    └── StatsPanel (StatsTab script)
+```
+
+**Behavior**:
+- Inventory tab shares the same InventorySystem grid (28 visible slots) used in-game; gold coins occupy real slots.
+- Equipment tab listens to `InventorySystem.equipment_changed` and displays RuneScape-style stat rows showing Base / Equipment / Total for Resilience, Agility, Intelligence, and Vitality.
+- Equipment bonuses are updated whenever gear changes or when `PlayerStats.stat_changed` fires for a base stat.
 
 ---
 
@@ -1022,43 +1070,36 @@ Chest (Area2D)
 
 ### Commit 5A: Currency System
 
-Already defined in PlayerStats:
-- `gold: int`
-- `add_gold(amount: int)`
-- `spend_gold(amount: int) -> bool`
-- `has_gold(amount: int) -> bool`
-- `gold_changed` signal
+- Currency is represented by the `gold_coins` ItemData located at `res://resources/items/gold_coins.tres` (stackable, `item_type = "material"`, `weight = 0`).
+- `CurrencySystem` (see earlier section) is responsible for syncing the inventory stack and emitting the `gold_changed` signal; PlayerStats simply mirrors the total.
 
 #### Enemy Gold Drops
 
 **Edit**: `res://scripts/enemies/base_enemy.gd`
 
-Add:
-```gdscript
-@export var gold_drop_min: int = 5
-@export var gold_drop_max: int = 15
+- Preload `const GOLD_PICKUP_SCENE := preload("res://scenes/objects/gold_pickup.tscn")`.
+- Export `gold_drop_min: int = 5` and `gold_drop_max: int = 15` on the enemy.
+- On death, call `_spawn_gold_pickup(gold_amount)` instead of adding gold directly to PlayerStats.
+- `_spawn_gold_pickup()` must instantiate the scene, set its `amount` export, and defer `add_child()` via `call_deferred()` so the pickup spawns safely outside the physics flush.
 
-func _on_died() -> void:
-    # ... existing death logic
-    var gold_amount: int = randi_range(gold_drop_min, gold_drop_max)
-    PlayerStats.add_gold(gold_amount)
-    EventBus.enemy_killed.emit(name, global_position)
+#### Gold Pickup Scene
+
+**File**: `res://scenes/objects/gold_pickup.tscn`
+
+```
+GoldPickup (Area2D)
+├── Sprite2D
+├── CollisionShape2D
+└── (script) res://scripts/objects/gold_pickup.gd
 ```
 
-#### HUD Gold Display
-
-Add to `res://scenes/ui/hud.tscn`:
-```
-HUD
-└── MarginContainer
-    └── VBoxContainer
-        ├── HealthBar
-        ├── ManaBar
-        ├── StaminaBar
-        └── HBoxContainer (gold display)
-            ├── TextureRect (coin icon)
-            └── Label (gold_label)
-```
+**Script requirements**:
+- `@export var amount: int = 1`
+- Loads the correct gold pile sprite via `GoldVisuals` in `_ready()`.
+- Connects `body_entered` and, when the player enters, calls `CurrencySystem.add_gold(amount)`.
+- If inventory is full, reduce `amount` by the portion that couldn’t be deposited, refresh the sprite, and leave the pickup in the world.
+- Emits `EventBus.item_picked_up` with the actual collected amount.
+- Gold is surfaced to the player as the `gold_coins` stack inside the Inventory tab; no additional HUD element is required.
 
 ---
 
@@ -1170,4 +1211,3 @@ After each commit, verify:
 ---
 
 *This document is the source of truth. Any deviation must be documented here first.*
-

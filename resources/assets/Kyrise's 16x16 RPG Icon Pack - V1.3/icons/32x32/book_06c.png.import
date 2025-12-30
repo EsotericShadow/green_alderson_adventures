@@ -3,7 +3,7 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dkxispelouivq"
-path="res://.godot/imported/book_06c.png-0b43de45991948f7209db06361de767d.ctex"
+path="res://.godot/imported/book_06c.png-7661146c2674fb5449e3752665f729a1.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://resources/assets/Kyrise's 16x16 RPG Icon Pack - V1.3/icons/32x32/book_06c.png"
-dest_files=["res://.godot/imported/book_06c.png-0b43de45991948f7209db06361de767d.ctex"]
+dest_files=["res://.godot/imported/book_06c.png-7661146c2674fb5449e3752665f729a1.ctex"]
 
 [params]
 

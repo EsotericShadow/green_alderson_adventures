@@ -3,7 +3,7 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bqyv35w07dbxm"
-path="res://.godot/imported/arrow_01a.png-f76b58967cd5950b01e74f54a9e8fc3a.ctex"
+path="res://.godot/imported/arrow_01a.png-d5f1478bb3b11d8a15240f1890105b45.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://resources/assets/Kyrise's 16x16 RPG Icon Pack - V1.3/icons/16x16/arrow_01a.png"
-dest_files=["res://.godot/imported/arrow_01a.png-f76b58967cd5950b01e74f54a9e8fc3a.ctex"]
+dest_files=["res://.godot/imported/arrow_01a.png-d5f1478bb3b11d8a15240f1890105b45.ctex"]
 
 [params]
 

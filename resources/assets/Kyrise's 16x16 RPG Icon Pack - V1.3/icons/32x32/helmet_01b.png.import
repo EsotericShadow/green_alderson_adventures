@@ -3,7 +3,7 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://cptl7ccgbdtmo"
-path="res://.godot/imported/helmet_01b.png-c02df4d61fd9aff85d1feddf64fead6e.ctex"
+path="res://.godot/imported/helmet_01b.png-a623d94c920f46aa75e78bb4d94238ae.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://resources/assets/Kyrise's 16x16 RPG Icon Pack - V1.3/icons/32x32/helmet_01b.png"
-dest_files=["res://.godot/imported/helmet_01b.png-c02df4d61fd9aff85d1feddf64fead6e.ctex"]
+dest_files=["res://.godot/imported/helmet_01b.png-a623d94c920f46aa75e78bb4d94238ae.ctex"]
 
 [params]
 

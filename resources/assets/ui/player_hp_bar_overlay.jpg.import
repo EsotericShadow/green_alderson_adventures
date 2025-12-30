@@ -3,7 +3,7 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bmn5nejnqi1px"
-path="res://.godot/imported/player_hp_bar_overlay.jpg-90f163980175fab3755c3e07ce87d6a6.ctex"
+path="res://.godot/imported/player_hp_bar_overlay.jpg-4309fe370dba79a5b52b47482d7ebce5.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://resources/assets/ui/player_hp_bar_overlay.jpg"
-dest_files=["res://.godot/imported/player_hp_bar_overlay.jpg-90f163980175fab3755c3e07ce87d6a6.ctex"]
+dest_files=["res://.godot/imported/player_hp_bar_overlay.jpg-4309fe370dba79a5b52b47482d7ebce5.ctex"]
 
 [params]
 

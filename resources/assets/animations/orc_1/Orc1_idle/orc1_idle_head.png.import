@@ -3,7 +3,7 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://ci711ig2mkgkf"
-path="res://.godot/imported/orc1_idle_head.png-bab317bd448a2cb02c1f75b8110373d9.ctex"
+path="res://.godot/imported/orc1_idle_head.png-beb268b3c62b1026ebf49894f7e9c52a.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://resources/assets/animations/orc_1/Orc1_idle/orc1_idle_head.png"
-dest_files=["res://.godot/imported/orc1_idle_head.png-bab317bd448a2cb02c1f75b8110373d9.ctex"]
+dest_files=["res://.godot/imported/orc1_idle_head.png-beb268b3c62b1026ebf49894f7e9c52a.ctex"]
 
 [params]
 

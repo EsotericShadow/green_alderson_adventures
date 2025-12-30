@@ -3,7 +3,7 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://l336jdtdft4l"
-path="res://.godot/imported/stat_dex.png-9907f3f3a3de4a29bd7959f890b8cc67.ctex"
+path="res://.godot/imported/stat_dex.png-f9040c1b03843bacb8b3a6c8b4c29a53.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://resources/assets/ui/icons/skills/stat_dex.png"
-dest_files=["res://.godot/imported/stat_dex.png-9907f3f3a3de4a29bd7959f890b8cc67.ctex"]
+dest_files=["res://.godot/imported/stat_dex.png-f9040c1b03843bacb8b3a6c8b4c29a53.ctex"]
 
 [params]
 

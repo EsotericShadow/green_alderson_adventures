@@ -3,7 +3,7 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://df86fgbhrc8x6"
-path="res://.godot/imported/coin_01b.png-ec81226fe11500a6984a5fb7dcc268d4.ctex"
+path="res://.godot/imported/coin_01b.png-7c592b5a9d1aa251a6143478a0103c5a.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://resources/assets/Kyrise's 16x16 RPG Icon Pack - V1.3/icons/16x16/coin_01b.png"
-dest_files=["res://.godot/imported/coin_01b.png-ec81226fe11500a6984a5fb7dcc268d4.ctex"]
+dest_files=["res://.godot/imported/coin_01b.png-7c592b5a9d1aa251a6143478a0103c5a.ctex"]
 
 [params]
 

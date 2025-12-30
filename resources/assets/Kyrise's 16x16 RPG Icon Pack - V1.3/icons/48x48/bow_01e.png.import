@@ -3,7 +3,7 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://b3j1o8k32impl"
-path="res://.godot/imported/bow_01e.png-c170e803a486aacb73c33c50ab3e6a34.ctex"
+path="res://.godot/imported/bow_01e.png-a1eae473e8ae5422aa245679bde79255.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://resources/assets/Kyrise's 16x16 RPG Icon Pack - V1.3/icons/48x48/bow_01e.png"
-dest_files=["res://.godot/imported/bow_01e.png-c170e803a486aacb73c33c50ab3e6a34.ctex"]
+dest_files=["res://.godot/imported/bow_01e.png-a1eae473e8ae5422aa245679bde79255.ctex"]
 
 [params]
 

@@ -85,6 +85,19 @@ theme_override_font_sizes/font_size = 20
 text = "Inventory"
 horizontal_alignment = 1
 
+[node name="CurrencyRow" type="HBoxContainer" parent="Control/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/InventoryPanel"]
+layout_mode = 2
+theme_override_constants/separation = 8
+alignment = 1
+
+[node name="GoldLabel" type="Label" parent="Control/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/InventoryPanel/CurrencyRow"]
+layout_mode = 2
+text = "Gold"
+
+[node name="GoldSlotHost" type="Control" parent="Control/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/InventoryPanel/CurrencyRow"]
+layout_mode = 2
+custom_minimum_size = Vector2(72, 72)
+
 [node name="CenterContainer" type="CenterContainer" parent="Control/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/InventoryPanel"]
 layout_mode = 2
 size_flags_horizontal = 4

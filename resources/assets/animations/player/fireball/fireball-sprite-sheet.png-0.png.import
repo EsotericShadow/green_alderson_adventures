@@ -3,7 +3,7 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bar25sypjcjwg"
-path="res://.godot/imported/fireball-sprite-sheet.png-0.png-9c40b85145e31ac521165f7c8be4d088.ctex"
+path="res://.godot/imported/fireball-sprite-sheet.png-0.png-1196d7a3f636548ef0ae0c846177d521.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://resources/assets/animations/player/fireball/fireball-sprite-sheet.png-0.png"
-dest_files=["res://.godot/imported/fireball-sprite-sheet.png-0.png-9c40b85145e31ac521165f7c8be4d088.ctex"]
+dest_files=["res://.godot/imported/fireball-sprite-sheet.png-0.png-1196d7a3f636548ef0ae0c846177d521.ctex"]
 
 [params]
 

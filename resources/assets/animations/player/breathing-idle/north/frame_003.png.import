@@ -3,7 +3,7 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dn3p44fpu887e"
-path="res://.godot/imported/frame_003.png-60e9cbefd086c4b3adb15b1b1acd56e0.ctex"
+path="res://.godot/imported/frame_003.png-17905b99fb5cecea97f1dcff846460f2.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://resources/assets/animations/player/breathing-idle/north/frame_003.png"
-dest_files=["res://.godot/imported/frame_003.png-60e9cbefd086c4b3adb15b1b1acd56e0.ctex"]
+dest_files=["res://.godot/imported/frame_003.png-17905b99fb5cecea97f1dcff846460f2.ctex"]
 
 [params]
 

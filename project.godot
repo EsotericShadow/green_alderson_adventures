@@ -38,6 +38,14 @@ ResourceManager="*res://scripts/systems/resources/resource_manager.gd"
 CraftingSystem="*res://scripts/systems/crafting/crafting_system.gd"
 AlchemySystem="*res://scripts/systems/alchemy/alchemy_system.gd"
 
+[display]
+
+window/size/viewport_width=1600
+window/size/viewport_height=900
+window/stretch/mode="canvas_items"
+window/stretch/aspect="expand"
+window/size/fullscreen=true
+
 [input]
 
 ui_up={

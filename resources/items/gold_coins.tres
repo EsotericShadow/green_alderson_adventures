@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/item_data.gd" id="1"]
+[ext_resource type="Texture2D" path="res://resources/assets/gold_pieces/1_coin.png" id="2"]
+
+[resource]
+script = ExtResource("1")
+id = "gold_coins"
+display_name = "Gold Coins"
+description = "A stack of coins used for buying and selling."
+icon = ExtResource("2")
+stackable = true
+max_stack = 999999999
+item_type = "material"
+weight = 0.0
+
+

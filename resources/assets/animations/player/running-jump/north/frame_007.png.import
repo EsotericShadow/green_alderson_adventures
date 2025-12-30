@@ -3,7 +3,7 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://hb0f7dcl5fb6"
-path="res://.godot/imported/frame_007.png-798b17e4d06f780c5488a4b929dfe248.ctex"
+path="res://.godot/imported/frame_007.png-e2a0929229333f24c71c1b2c691bd1ac.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://resources/assets/animations/player/running-jump/north/frame_007.png"
-dest_files=["res://.godot/imported/frame_007.png-798b17e4d06f780c5488a4b929dfe248.ctex"]
+dest_files=["res://.godot/imported/frame_007.png-e2a0929229333f24c71c1b2c691bd1ac.ctex"]
 
 [params]
 

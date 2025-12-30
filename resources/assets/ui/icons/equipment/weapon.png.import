@@ -3,7 +3,7 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://qq5j5uhkg4eh"
-path="res://.godot/imported/weapon.png-59230ae84793398453e67dfa74d867a5.ctex"
+path="res://.godot/imported/weapon.png-d11fff487543e51dd85c9d689d8ca58a.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://resources/assets/ui/icons/equipment/weapon.png"
-dest_files=["res://.godot/imported/weapon.png-59230ae84793398453e67dfa74d867a5.ctex"]
+dest_files=["res://.godot/imported/weapon.png-d11fff487543e51dd85c9d689d8ca58a.ctex"]
 
 [params]
 

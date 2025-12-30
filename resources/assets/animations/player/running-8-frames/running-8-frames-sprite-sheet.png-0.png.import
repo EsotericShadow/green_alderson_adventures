@@ -3,7 +3,7 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://d0qmpnfh40015"
-path="res://.godot/imported/running-8-frames-sprite-sheet.png-0.png-978a373a1b61550dcf300af79d8c72ec.ctex"
+path="res://.godot/imported/running-8-frames-sprite-sheet.png-0.png-84473bf20576dd6f0383a3251636b58b.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://resources/assets/animations/player/running-8-frames/running-8-frames-sprite-sheet.png-0.png"
-dest_files=["res://.godot/imported/running-8-frames-sprite-sheet.png-0.png-978a373a1b61550dcf300af79d8c72ec.ctex"]
+dest_files=["res://.godot/imported/running-8-frames-sprite-sheet.png-0.png-84473bf20576dd6f0383a3251636b58b.ctex"]
 
 [params]
 

@@ -3,7 +3,7 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://du2dsq56hxp8n"
-path="res://.godot/imported/Hats_Wizard_Mage_Magician_Sorcerer.png-1397d05a2f870e291538b017136ab777.ctex"
+path="res://.godot/imported/Hats_Wizard_Mage_Magician_Sorcerer.png-bfbfc6b4844dafd82f6d0c1d7273e6a9.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://resources/assets/ui/icons/skills/Hats_Wizard_Mage_Magician_Sorcerer.png"
-dest_files=["res://.godot/imported/Hats_Wizard_Mage_Magician_Sorcerer.png-1397d05a2f870e291538b017136ab777.ctex"]
+dest_files=["res://.godot/imported/Hats_Wizard_Mage_Magician_Sorcerer.png-bfbfc6b4844dafd82f6d0c1d7273e6a9.ctex"]
 
 [params]
 

@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bh6bcc82oewcn"
-path="res://.godot/imported/blood_magic_swordslvl1.png-f8d2c6805578d3df80562947f184ec11.ctex"
+path="res://.godot/imported/blood_magic_swordslvl1.png-16dbb02a05bf833864fd11b4cff59b5b.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://uiicons/blood_magic_swordslvl1.png"
-dest_files=["res://.godot/imported/blood_magic_swordslvl1.png-f8d2c6805578d3df80562947f184ec11.ctex"]
+source_file="res://resources/assets/uiicons/blood_magic_swordslvl1.png"
+dest_files=["res://.godot/imported/blood_magic_swordslvl1.png-16dbb02a05bf833864fd11b4cff59b5b.ctex"]
 
 [params]
 

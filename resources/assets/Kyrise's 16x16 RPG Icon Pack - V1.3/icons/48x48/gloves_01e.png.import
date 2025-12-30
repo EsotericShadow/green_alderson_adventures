@@ -3,7 +3,7 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://kq6ed00gyuof"
-path="res://.godot/imported/gloves_01e.png-04c69c34ee6fc44130883ce62cdbff7c.ctex"
+path="res://.godot/imported/gloves_01e.png-98baa38aecc26359ad3b65437c3ed330.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://resources/assets/Kyrise's 16x16 RPG Icon Pack - V1.3/icons/48x48/gloves_01e.png"
-dest_files=["res://.godot/imported/gloves_01e.png-04c69c34ee6fc44130883ce62cdbff7c.ctex"]
+dest_files=["res://.godot/imported/gloves_01e.png-98baa38aecc26359ad3b65437c3ed330.ctex"]
 
 [params]
 

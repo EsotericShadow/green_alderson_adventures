@@ -96,6 +96,12 @@ This document provides comprehensive context for the entire Green Alderson Adven
 - **EquipmentData**: Extends ItemData with slot, resilience_bonus, agility_bonus, int_bonus, vit_bonus, flat_damage_bonus, damage_percentage_bonus
 - **Equipment Slots**: head, body, gloves, boots, weapon, book, ring1, ring2, legs, amulet
 
+### Inventory & Currency Integration (January 2025)
+- **Gold as an Item**: CurrencySystem now mirrors the `gold_coins` ItemData stack stored inside InventorySystem, so pickups, merchants, and UI all reference the same inventory state
+- **Deferred Pickups**: Gold/item pickups spawn via `_schedule_pickup_spawn()` to avoid physics flush errors and update their visuals if inventory is full
+- **Responsive Inventory UI**: Sidebar inventory always shows 28 slots, equipment slots no longer rebuild on every change, and the equipment tab displays RuneScape-style Base / Equipment / Total stat bonuses for each core stat
+- **Fullscreen & Stretch**: `project.godot` defaults to a resizable 1600×900 window using `canvas_items` stretch with `expand` aspect so HUD/UI scale cleanly in fullscreen or windowed mode
+
 ### Codebase Cleanup and Refactoring (December 2024)
 - **Backup Files Removed**: Deleted 4 backup files (player_stats.gd.backup, .bak, .uid files)
 - **Orphaned UID Files Removed**: Deleted 3 orphaned UID files (base_stat_leveling, health_bar, quick_belt_tab)
@@ -128,7 +134,7 @@ This document provides comprehensive context for the entire Green Alderson Adven
 - **Architecture**: Thin facade pattern - delegates to XPLevelingSystem, CurrencySystem, ResourceRegenSystem, CombatSystem, MovementSystem
 - **Base Stats**: Resilience, Agility, Intelligence, Vitality (managed by XPLevelingSystem)
 - **Resources**: Health, Mana, Stamina (current values stored here, max calculated from stats)
-- **Gold**: Managed by CurrencySystem (delegated)
+- **Gold**: Managed by CurrencySystem; PlayerStats mirrors the authoritative `gold_coins` stack stored inside InventorySystem so UI listeners can continue to consume the `gold_changed` signal
 - **Regeneration**: Handled by ResourceRegenSystem (delegated)
 - **Signals**: health_changed, mana_changed, stamina_changed, gold_changed, stat_changed, player_died, base_stat_xp_gained, base_stat_leveled_up (forwards from XPLevelingSystem)
 - **Key Methods**: 
@@ -150,9 +156,12 @@ This document provides comprehensive context for the entire Green Alderson Adven
 - **Vitality XP**: Auto-gains from other stats (1 VIT XP per 8 other stat XP)
 
 #### CurrencySystem (`scripts/systems/currency_system.gd`)
-- **Purpose**: Gold management
-- **Methods**: `add_gold()`, `spend_gold()`, `has_gold()`, `get_gold()`
-- **Signals**: gold_changed
+- **Purpose**: Gold management backed by the actual `gold_coins` ItemData inside InventorySystem (no separate hidden counter)
+- **Behavior**:
+  - Loads `res://resources/items/gold_coins.tres` during `_ready()` and listens to `InventorySystem.inventory_changed`
+  - `add_gold()`/`spend_gold()` add or remove from the real inventory stack; if inventory is full the leftover amount stays on the pickup
+  - Maintains the legacy `gold` integer as a mirror so PlayerStats and HUD listeners continue to function unchanged
+- **Signals**: gold_changed (emitted whenever the mirrored total changes)
 
 #### ResourceRegenSystem (`scripts/systems/resource_regen_system.gd`)
 - **Purpose**: Health/mana/stamina regeneration over time
@@ -171,9 +180,8 @@ This document provides comprehensive context for the entire Green Alderson Adven
   - `get_max_carry_weight()` - Based on resilience
   - `get_carry_weight_slow_multiplier()` - Movement speed penalty when carrying heavy load
 
-#### InventorySystem (`scripts/systems/inventory_system.gd`)
 - **Purpose**: Slot-based inventory and equipment management
-- **Inventory**: 12 slots (default), expandable to 48
+- **Inventory**: 28 slots (default sidebar grid), expandable to 48
 - **Equipment Slots**: head, body, gloves, boots, weapon, book, ring1, ring2, legs, amulet
 - **Methods**: 
   - `add_item()`, `remove_item()`, `equip()`, `unequip()`
@@ -348,10 +356,10 @@ This document provides comprehensive context for the entire Green Alderson Adven
 - **Z-Index**: CanvasLayer layer = 19
 
 ### Player Panel (`scenes/ui/player_panel.tscn`)
-- **Tabs**: Stats, Inventory, Equipment
+- **Tabs**: Stats, Inventory, Equipment (Inventory and Equipment tabs share the same sidebar root used in-game)
 - **Stats Tab**: Shows base stats with XP bars and level display
-- **Inventory Tab**: 12-slot grid
-- **Equipment Tab**: Equipment slots with icons
+- **Inventory Tab**: 28-slot grid plus drag-and-drop interactions; gold coins occupy real slots just like any other stack
+- **Equipment Tab**: Displays gear slots with icons and a RuneScape-style “Bonuses” section listing Base / Equipment / Total values for Resilience, Agility, Intelligence, and Vitality
 - **Z-Index**: CanvasLayer layer = 20
 
 ### Base Stat Row (`scripts/ui/base_stat_row.gd`)

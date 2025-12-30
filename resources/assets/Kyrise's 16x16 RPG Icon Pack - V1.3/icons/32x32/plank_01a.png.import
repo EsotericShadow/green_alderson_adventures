@@ -3,7 +3,7 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dbk04gfpngmq"
-path="res://.godot/imported/plank_01a.png-27b57a7b22a49e80b313ca66cba3bf93.ctex"
+path="res://.godot/imported/plank_01a.png-44b7e5905adfda3d3b079ab04ec19008.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://resources/assets/Kyrise's 16x16 RPG Icon Pack - V1.3/icons/32x32/plank_01a.png"
-dest_files=["res://.godot/imported/plank_01a.png-27b57a7b22a49e80b313ca66cba3bf93.ctex"]
+dest_files=["res://.godot/imported/plank_01a.png-44b7e5905adfda3d3b079ab04ec19008.ctex"]
 
 [params]
 

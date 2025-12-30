@@ -3,7 +3,7 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://cka6qaf8sqa4l"
-path="res://.godot/imported/frame_001.png-1a739d90e596edc657af84dc07ce5516.ctex"
+path="res://.godot/imported/frame_001.png-b8a5a48e55f6e1368b163f0bf99db6f7.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://resources/assets/animations/player/jumping-1/south-west/frame_001.png"
-dest_files=["res://.godot/imported/frame_001.png-1a739d90e596edc657af84dc07ce5516.ctex"]
+dest_files=["res://.godot/imported/frame_001.png-b8a5a48e55f6e1368b163f0bf99db6f7.ctex"]
 
 [params]
 

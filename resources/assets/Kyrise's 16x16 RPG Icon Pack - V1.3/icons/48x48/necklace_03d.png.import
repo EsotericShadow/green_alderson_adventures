@@ -3,7 +3,7 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://ccpf4bl7l5uly"
-path="res://.godot/imported/necklace_03d.png-2a02ebddc5d0077262142a2b828ec511.ctex"
+path="res://.godot/imported/necklace_03d.png-7962b4d1ab457c5fe329db45b65fc0d0.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://resources/assets/Kyrise's 16x16 RPG Icon Pack - V1.3/icons/48x48/necklace_03d.png"
-dest_files=["res://.godot/imported/necklace_03d.png-2a02ebddc5d0077262142a2b828ec511.ctex"]
+dest_files=["res://.godot/imported/necklace_03d.png-7962b4d1ab457c5fe329db45b65fc0d0.ctex"]
 
 [params]
 

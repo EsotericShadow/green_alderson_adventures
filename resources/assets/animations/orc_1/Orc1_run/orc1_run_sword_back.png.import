@@ -3,7 +3,7 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bpmaxqc43uwnx"
-path="res://.godot/imported/orc1_run_sword_back.png-1db66bc2574556dadb6e39fd172b0e90.ctex"
+path="res://.godot/imported/orc1_run_sword_back.png-1b2f83d2b3d27a02bf03b69411aa0595.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://resources/assets/animations/orc_1/Orc1_run/orc1_run_sword_back.png"
-dest_files=["res://.godot/imported/orc1_run_sword_back.png-1db66bc2574556dadb6e39fd172b0e90.ctex"]
+dest_files=["res://.godot/imported/orc1_run_sword_back.png-1b2f83d2b3d27a02bf03b69411aa0595.ctex"]
 
 [params]
 

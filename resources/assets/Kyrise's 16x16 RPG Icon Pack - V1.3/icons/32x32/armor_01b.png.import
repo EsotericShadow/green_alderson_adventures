@@ -3,7 +3,7 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://babqyx26jbvht"
-path="res://.godot/imported/armor_01b.png-60fdbeb2f8f302fea2d1d6a9129a0732.ctex"
+path="res://.godot/imported/armor_01b.png-b6c6f1179caba60dd05c3bed5e0b6634.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://resources/assets/Kyrise's 16x16 RPG Icon Pack - V1.3/icons/32x32/armor_01b.png"
-dest_files=["res://.godot/imported/armor_01b.png-60fdbeb2f8f302fea2d1d6a9129a0732.ctex"]
+dest_files=["res://.godot/imported/armor_01b.png-b6c6f1179caba60dd05c3bed5e0b6634.ctex"]
 
 [params]
 

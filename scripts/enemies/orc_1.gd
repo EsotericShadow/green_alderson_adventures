@@ -41,6 +41,13 @@ func _ready() -> void:
 	attack_hit_duration = 0.18 # Wider hit window
 	separation_distance = 30.0  # ⚠️ LOCKED: Maintain minimum distance (prevents getting too close) - DO NOT REDUCE BELOW 30
 	post_attack_backoff_time = 1.0  # ⚠️ LOCKED: Pause after attack before can attack again (prevents spam) - DO NOT REDUCE BELOW 1.0
+
+	# Loot: Orcs can drop Orc Fangs (used in strength recipes)
+	drop_item_id = "orc_fang"
+	drop_item_chance = 0.25
+	drop_item_min_count = 1
+	drop_item_max_count = 1
+	spawn_item_pickup = true
 	
 	# Call parent ready
 	super._ready()

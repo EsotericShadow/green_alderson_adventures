@@ -3,7 +3,7 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bti56xdhmbksn"
-path="res://.godot/imported/boots_01a.png-a37e98313d97f7e2c54a845f128af96e.ctex"
+path="res://.godot/imported/boots_01a.png-8471b5896459550f182ff170426e0d33.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://resources/assets/Kyrise's 16x16 RPG Icon Pack - V1.3/icons/48x48/boots_01a.png"
-dest_files=["res://.godot/imported/boots_01a.png-a37e98313d97f7e2c54a845f128af96e.ctex"]
+dest_files=["res://.godot/imported/boots_01a.png-8471b5896459550f182ff170426e0d33.ctex"]
 
 [params]
 

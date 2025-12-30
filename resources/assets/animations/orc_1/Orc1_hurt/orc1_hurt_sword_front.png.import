@@ -3,7 +3,7 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://xrbxcrwu50k8"
-path="res://.godot/imported/orc1_hurt_sword_front.png-103f4c8b33f9f4d1346ee0a17b93a5f6.ctex"
+path="res://.godot/imported/orc1_hurt_sword_front.png-8a0b7cd48e6fea2fcc31c664ef7d37ac.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://resources/assets/animations/orc_1/Orc1_hurt/orc1_hurt_sword_front.png"
-dest_files=["res://.godot/imported/orc1_hurt_sword_front.png-103f4c8b33f9f4d1346ee0a17b93a5f6.ctex"]
+dest_files=["res://.godot/imported/orc1_hurt_sword_front.png-8a0b7cd48e6fea2fcc31c664ef7d37ac.ctex"]
 
 [params]
 
