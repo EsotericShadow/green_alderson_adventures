@@ -21,3 +21,9 @@ const BASE_STAT_DISPLAY_NAMES: Dictionary = {
 	STAT_VIT: "VIT"
 }
 
+
+
+
+
+
+

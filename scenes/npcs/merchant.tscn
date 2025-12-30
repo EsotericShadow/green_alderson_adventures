@@ -1,0 +1,19 @@
+[gd_scene load_steps=3 format=3 uid="uid://merchant_001"]
+
+[ext_resource type="Script" path="res://scripts/npcs/merchant.gd" id="1_merchant"]
+
+[sub_resource type="RectangleShape2D" id="1_rectangle_shape"]
+size = Vector2(32, 32)
+
+[node name="Merchant" type="CharacterBody2D"]
+script = ExtResource("1_merchant")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+position = Vector2(0, -16)
+scale = Vector2(2, 2)
+
+[node name="InteractionArea" type="Area2D" parent="."]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="InteractionArea"]
+shape = SubResource("1_rectangle_shape")
+

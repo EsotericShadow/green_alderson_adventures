@@ -141,16 +141,15 @@ func _refresh_slots() -> void:
 
 
 func _on_slot_clicked(slot_index: int) -> void:
-	# Placeholder for future functionality (item use, drag-drop, etc.)
-	var slot_data: Dictionary = InventorySystem.get_slot(slot_index)
-	if slot_data["item"] != null:
-		print("Clicked slot ", slot_index, ": ", slot_data["item"].display_name, " x", slot_data["count"])
-		# If it's equipment, try to equip it
-		if slot_data["item"] is EquipmentData:
-			var equip_item: EquipmentData = slot_data["item"] as EquipmentData
-			if InventorySystem.equip(equip_item):
-				_refresh_slots()
-				_refresh_equipment_slots()
+	# Handle slot click via InventoryUIHandler
+	var result = InventoryUIHandler.handle_slot_click(slot_index)
+	if result["success"]:
+		_refresh_slots()
+		_refresh_equipment_slots()
+	else:
+		var slot_data: Dictionary = InventorySystem.get_slot(slot_index)
+		if slot_data["item"] != null:
+			print("Clicked slot ", slot_index, ": ", slot_data["item"].display_name, " x", slot_data["count"])
 
 
 func _refresh_equipment_slots() -> void:

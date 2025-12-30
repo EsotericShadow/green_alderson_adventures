@@ -1,0 +1,283 @@
+[gd_scene load_steps=2 format=3 uid="uid://crafting_ui_001"]
+
+[ext_resource type="Script" path="res://scripts/ui/crafting/crafting_ui.gd" id="1_crafting_ui"]
+
+[sub_resource type="StyleBoxFlat" id="1_panel_style"]
+bg_color = Color(0.25, 0.2, 0.15, 1)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.4, 0.3, 0.25, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[node name="CraftingUI" type="CanvasLayer"]
+layer = 20
+script = ExtResource("1_crafting_ui")
+
+[node name="Control" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 0
+visible = false
+
+[node name="ColorRect" type="ColorRect" parent="Control"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.5)
+
+[node name="PanelContainer" type="PanelContainer" parent="Control"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -500.0
+offset_top = -300.0
+offset_right = 500.0
+offset_bottom = 300.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("1_panel_style")
+
+[node name="MarginContainer" type="MarginContainer" parent="Control/PanelContainer"]
+layout_mode = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 16
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 16
+
+[node name="HBoxContainer" type="HBoxContainer" parent="Control/PanelContainer/MarginContainer"]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="RecipeList" type="VBoxContainer" parent="Control/PanelContainer/MarginContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 8
+
+[node name="Label" type="Label" parent="Control/PanelContainer/MarginContainer/HBoxContainer/RecipeList"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "Recipes"
+horizontal_alignment = 1
+
+[node name="RecipeList" type="ItemList" parent="Control/PanelContainer/MarginContainer/HBoxContainer/RecipeList"]
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 3
+custom_minimum_size = Vector2(200, 0)
+
+[node name="RecipeDetail" type="VBoxContainer" parent="Control/PanelContainer/MarginContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 8
+
+[node name="RecipeName" type="Label" parent="Control/PanelContainer/MarginContainer/HBoxContainer/RecipeDetail"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "Select a Recipe"
+horizontal_alignment = 1
+
+[node name="IngredientsList" type="VBoxContainer" parent="Control/PanelContainer/MarginContainer/HBoxContainer/RecipeDetail"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 4
+
+[node name="HSeparator" type="HSeparator" parent="Control/PanelContainer/MarginContainer/HBoxContainer/RecipeDetail"]
+layout_mode = 2
+
+[node name="ResultDisplay" type="HBoxContainer" parent="Control/PanelContainer/MarginContainer/HBoxContainer/RecipeDetail"]
+layout_mode = 2
+theme_override_constants/separation = 8
+alignment = 1
+
+[node name="ResultIcon" type="TextureRect" parent="Control/PanelContainer/MarginContainer/HBoxContainer/RecipeDetail/ResultDisplay"]
+layout_mode = 2
+custom_minimum_size = Vector2(32, 32)
+stretch_mode = 4
+
+[node name="ResultName" type="Label" parent="Control/PanelContainer/MarginContainer/HBoxContainer/RecipeDetail/ResultDisplay"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Result"
+vertical_alignment = 1
+
+[node name="CraftButton" type="Button" parent="Control/PanelContainer/MarginContainer/HBoxContainer/RecipeDetail"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 40)
+text = "Craft"
+disabled = true
+
+[node name="CloseButton" type="Button" parent="Control/PanelContainer/MarginContainer/HBoxContainer/RecipeDetail"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 32)
+text = "Close"
+
+[node name="AlchemyRoot" type="HBoxContainer" parent="Control/PanelContainer/MarginContainer"]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="InventoryPanel" type="VBoxContainer" parent="Control/PanelContainer/MarginContainer/AlchemyRoot"]
+layout_mode = 2
+custom_minimum_size = Vector2(260, 0)
+size_flags_horizontal = 3
+theme_override_constants/separation = 8
+
+[node name="Title" type="Label" parent="Control/PanelContainer/MarginContainer/AlchemyRoot/InventoryPanel"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "Inventory"
+horizontal_alignment = 1
+
+[node name="InventoryScroll" type="ScrollContainer" parent="Control/PanelContainer/MarginContainer/AlchemyRoot/InventoryPanel"]
+layout_mode = 2
+size_flags_vertical = 3
+scroll_horizontal_enabled = false
+
+[node name="Hint" type="Label" parent="Control/PanelContainer/MarginContainer/AlchemyRoot/InventoryPanel"]
+layout_mode = 2
+text = "Drag items into the alchemy grid. Click a grid slot to remove."
+autowrap_mode = 3
+
+[node name="InventoryGrid" type="GridContainer" parent="Control/PanelContainer/MarginContainer/AlchemyRoot/InventoryPanel/InventoryScroll"]
+layout_mode = 2
+columns = 4
+theme_override_constants/h_separation = 8
+theme_override_constants/v_separation = 8
+
+[node name="GridPanel" type="VBoxContainer" parent="Control/PanelContainer/MarginContainer/AlchemyRoot"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 8
+
+[node name="Title" type="Label" parent="Control/PanelContainer/MarginContainer/AlchemyRoot/GridPanel"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "Alchemy Grid (Shapeless)"
+horizontal_alignment = 1
+
+[node name="Grid" type="GridContainer" parent="Control/PanelContainer/MarginContainer/AlchemyRoot/GridPanel"]
+layout_mode = 2
+columns = 3
+theme_override_constants/h_separation = 8
+theme_override_constants/v_separation = 8
+
+[node name="ClearButton" type="Button" parent="Control/PanelContainer/MarginContainer/AlchemyRoot/GridPanel"]
+layout_mode = 2
+text = "Clear Grid"
+
+[node name="OutputPanel" type="VBoxContainer" parent="Control/PanelContainer/MarginContainer/AlchemyRoot"]
+layout_mode = 2
+custom_minimum_size = Vector2(260, 0)
+size_flags_horizontal = 3
+theme_override_constants/separation = 8
+
+[node name="Title" type="Label" parent="Control/PanelContainer/MarginContainer/AlchemyRoot/OutputPanel"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "Output"
+horizontal_alignment = 1
+
+[node name="OutputDisplay" type="HBoxContainer" parent="Control/PanelContainer/MarginContainer/AlchemyRoot/OutputPanel"]
+layout_mode = 2
+theme_override_constants/separation = 8
+alignment = 1
+
+[node name="OutputIcon" type="TextureRect" parent="Control/PanelContainer/MarginContainer/AlchemyRoot/OutputPanel/OutputDisplay"]
+layout_mode = 2
+custom_minimum_size = Vector2(40, 40)
+stretch_mode = 4
+
+[node name="OutputName" type="Label" parent="Control/PanelContainer/MarginContainer/AlchemyRoot/OutputPanel/OutputDisplay"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Place ingredients"
+vertical_alignment = 1
+
+[node name="ToolsTitle" type="Label" parent="Control/PanelContainer/MarginContainer/AlchemyRoot/OutputPanel"]
+layout_mode = 2
+text = "Tools"
+horizontal_alignment = 1
+
+[node name="Tools" type="GridContainer" parent="Control/PanelContainer/MarginContainer/AlchemyRoot/OutputPanel"]
+layout_mode = 2
+columns = 2
+theme_override_constants/h_separation = 8
+theme_override_constants/v_separation = 6
+
+[node name="Mortar" type="HBoxContainer" parent="Control/PanelContainer/MarginContainer/AlchemyRoot/OutputPanel/Tools"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Icon" type="TextureRect" parent="Control/PanelContainer/MarginContainer/AlchemyRoot/OutputPanel/Tools/Mortar"]
+layout_mode = 2
+custom_minimum_size = Vector2(24, 24)
+stretch_mode = 4
+
+[node name="Status" type="Label" parent="Control/PanelContainer/MarginContainer/AlchemyRoot/OutputPanel/Tools/Mortar"]
+layout_mode = 2
+text = "Mortar: ?"
+
+[node name="Burner" type="HBoxContainer" parent="Control/PanelContainer/MarginContainer/AlchemyRoot/OutputPanel/Tools"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Icon" type="TextureRect" parent="Control/PanelContainer/MarginContainer/AlchemyRoot/OutputPanel/Tools/Burner"]
+layout_mode = 2
+custom_minimum_size = Vector2(24, 24)
+stretch_mode = 4
+
+[node name="Status" type="Label" parent="Control/PanelContainer/MarginContainer/AlchemyRoot/OutputPanel/Tools/Burner"]
+layout_mode = 2
+text = "Burner: ?"
+
+[node name="Flask" type="HBoxContainer" parent="Control/PanelContainer/MarginContainer/AlchemyRoot/OutputPanel/Tools"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Icon" type="TextureRect" parent="Control/PanelContainer/MarginContainer/AlchemyRoot/OutputPanel/Tools/Flask"]
+layout_mode = 2
+custom_minimum_size = Vector2(24, 24)
+stretch_mode = 4
+
+[node name="Status" type="Label" parent="Control/PanelContainer/MarginContainer/AlchemyRoot/OutputPanel/Tools/Flask"]
+layout_mode = 2
+text = "Flask: ?"
+
+[node name="Filter" type="HBoxContainer" parent="Control/PanelContainer/MarginContainer/AlchemyRoot/OutputPanel/Tools"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Icon" type="TextureRect" parent="Control/PanelContainer/MarginContainer/AlchemyRoot/OutputPanel/Tools/Filter"]
+layout_mode = 2
+custom_minimum_size = Vector2(24, 24)
+stretch_mode = 4
+
+[node name="Status" type="Label" parent="Control/PanelContainer/MarginContainer/AlchemyRoot/OutputPanel/Tools/Filter"]
+layout_mode = 2
+text = "Filter: ?"
+
+[node name="CraftButton" type="Button" parent="Control/PanelContainer/MarginContainer/AlchemyRoot/OutputPanel"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 40)
+text = "Craft"
+disabled = true
+
+[node name="CloseButton" type="Button" parent="Control/PanelContainer/MarginContainer/AlchemyRoot/OutputPanel"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 32)
+text = "Close"
+

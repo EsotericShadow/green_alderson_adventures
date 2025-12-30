@@ -1,0 +1,49 @@
+[gd_resource type="Resource" script_class="StartingEquipmentData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/starting_equipment_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+equipment = [
+	{
+		"slot": "head",
+		"equipment_id": "dark_wizard_hat"
+	},
+	{
+		"slot": "body",
+		"equipment_id": "dark_wizard_robe_top"
+	},
+	{
+		"slot": "legs",
+		"equipment_id": "dark_wizard_robe_bottom"
+	},
+	{
+		"slot": "gloves",
+		"equipment_id": "dark_wizard_gloves"
+	},
+	{
+		"slot": "boots",
+		"equipment_id": "dark_wizard_boots"
+	},
+	{
+		"slot": "weapon",
+		"equipment_id": "dark_wizard_corrupt_staff"
+	},
+	{
+		"slot": "book",
+		"equipment_id": "dark_wizard_book"
+	},
+	{
+		"slot": "ring",
+		"equipment_id": "dark_wizard_ring"
+	},
+	{
+		"slot": "ring",
+		"equipment_id": "jiraiyas_blessing_ring"
+	},
+	{
+		"slot": "amulet",
+		"equipment_id": "dark_wizard_amulet"
+	}
+]
+

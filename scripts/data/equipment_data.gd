@@ -3,7 +3,7 @@ extends ItemData
 ## Equipment items that can be equipped to player slots.
 ## Automatically sets item_type to "equipment" and stackable to false.
 
-@export_enum("head", "body", "gloves", "boots", "weapon", "shield", "ring") var slot: String = "weapon"
+@export_enum("head", "body", "gloves", "boots", "weapon", "book", "ring", "legs", "amulet") var slot: String = "weapon"
 @export var resilience_bonus: int = 0  # Formerly str_bonus
 @export var agility_bonus: int = 0  # Formerly dex_bonus
 @export var int_bonus: int = 0

@@ -1,0 +1,68 @@
+[gd_scene load_steps=9 format=3 uid="uid://moonphase_token_purple"]
+
+[ext_resource type="Texture2D" uid="uid://bjkd61wxdoe5q" path="res://resources/assets/animations/potions/PURPLE/Small Elixir - PURPLE - Spritesheet.png" id="1_spritesheet"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_frame0"]
+atlas = ExtResource("1_spritesheet")
+region = Rect2(0, 0, 15, 30)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_frame1"]
+atlas = ExtResource("1_spritesheet")
+region = Rect2(15, 0, 15, 30)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_frame2"]
+atlas = ExtResource("1_spritesheet")
+region = Rect2(30, 0, 15, 30)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_frame3"]
+atlas = ExtResource("1_spritesheet")
+region = Rect2(45, 0, 15, 30)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_frame4"]
+atlas = ExtResource("1_spritesheet")
+region = Rect2(60, 0, 15, 30)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_frame5"]
+atlas = ExtResource("1_spritesheet")
+region = Rect2(75, 0, 15, 30)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_frame6"]
+atlas = ExtResource("1_spritesheet")
+region = Rect2(90, 0, 15, 30)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_potion"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_frame0")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_frame1")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_frame2")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_frame3")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_frame4")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_frame5")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_frame6")
+}],
+"loop": true,
+"name": &"potion",
+"speed": 10.0
+}]
+
+[node name="MoonphaseTokenPurple" type="Node2D"]
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+sprite_frames = SubResource("SpriteFrames_potion")
+animation = &"potion"
+autoplay = "potion"
+

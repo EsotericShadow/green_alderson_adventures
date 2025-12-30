@@ -1,12 +1,13 @@
 extends Node
-## Global inventory and equipment system (autoload singleton).
-## Manages slot-based inventory and equipment slots with stat bonuses.
+## Global inventory system (autoload singleton) - FACADE.
+## Manages slot-based inventory. Delegates equipment to EquipmentSystem.
+## Delegates item usage to ItemUsageHandler.
 
 # Logging
 var _logger = GameLogger.create("[InventorySystem] ")
 
 # Constants (LOCKED per SPEC.md)
-const DEFAULT_CAPACITY: int = 12
+const DEFAULT_CAPACITY: int = 28  # 7 rows of 4 slots
 const MAX_CAPACITY: int = 48
 
 # Signals (LOCKED NAMES per SPEC.md)
@@ -20,27 +21,28 @@ signal equipment_changed(slot_name: String)
 var slots: Array[Dictionary] = []
 var capacity: int = DEFAULT_CAPACITY
 
-# Equipment Slots (LOCKED NAMES per SPEC.md)
-var equipment: Dictionary = {
-	"head": null,
-	"body": null,
-	"gloves": null,
-	"boots": null,
-	"weapon": null,
-	"book": null,  # Off-hand spellbook (replaces shield)
-	"ring1": null,
-	"ring2": null,
-	"legs": null,  # Leg armor
-	"amulet": null  # Necklace/amulet
-}
-
-
 func _ready() -> void:
 	_logger.log("InventorySystem initialized")
 	_logger.log("  Capacity: " + str(capacity))
-	_logger.log("  Equipment slots: " + str(equipment.keys()))
 	_init_slots()
 	_logger.log("  Initialized " + str(slots.size()) + " inventory slots")
+	
+	# Connect to EquipmentSystem signals and forward them
+	if EquipmentSystem != null:
+		EquipmentSystem.equipment_changed.connect(_on_equipment_changed)
+	else:
+		_logger.log_warning("EquipmentSystem not available - equipment features will not work")
+	
+	# Load starting inventory from data file
+	_load_starting_inventory()
+	
+	# Load starting equipment from data file (delegates to EquipmentSystem)
+	_load_starting_equipment()
+
+
+func _on_equipment_changed(slot_name: String) -> void:
+	"""Forwards equipment_changed signal from EquipmentSystem."""
+	equipment_changed.emit(slot_name)
 
 
 func _init_slots() -> void:
@@ -147,6 +149,22 @@ func has_item(item: ItemData, count: int = 1) -> bool:
 	return false
 
 
+func use_item(item: ItemData, count: int = 1) -> bool:
+	"""Uses a consumable item from inventory - delegates to ItemUsageHandler."""
+	if ItemUsageHandler != null:
+		return ItemUsageHandler.use_item(item, count)
+	_logger.log_error("ItemUsageHandler autoload not available")
+	return false
+
+
+func use_item_at_slot(slot_index: int) -> bool:
+	"""Uses an item at a specific slot - delegates to ItemUsageHandler."""
+	if ItemUsageHandler != null:
+		return ItemUsageHandler.use_item_at_slot(slot_index)
+	_logger.log_error("ItemUsageHandler autoload not available")
+	return false
+
+
 func get_item_count(item: ItemData) -> int:
 	if item == null:
 		return 0
@@ -240,147 +258,175 @@ func expand_capacity(additional_slots: int) -> void:
 	inventory_changed.emit()
 
 
-# Equipment Methods (LOCKED SIGNATURES per SPEC.md)
+# Equipment Methods (LOCKED SIGNATURES per SPEC.md) - delegates to EquipmentSystem
 
 func equip(item: EquipmentData) -> bool:
-	# Returns false if wrong slot type or inventory full when unequipping
-	if item == null:
-		_logger.log_error("equip() called with null item")
-		return false
-	
-	_logger.log("Equipping: " + item.display_name + " (slot: " + item.slot + ")")
-	var slot_name: String = item.slot
-	
-	# Handle ring slots (ring1 or ring2)
-	if item.slot == "ring":
-		# Try ring1 first, then ring2
-		if equipment["ring1"] == null:
-			slot_name = "ring1"
-		elif equipment["ring2"] == null:
-			slot_name = "ring2"
-		else:
-			# Both rings full, unequip ring1
-			_logger.log("  Both ring slots full, unequipping ring1")
-			var unequipped: EquipmentData = unequip("ring1")
-			if unequipped == null:
-				_logger.log_error("  Failed to unequip ring1 (inventory full)")
-				return false  # Failed to unequip (inventory full)
-			slot_name = "ring1"
-	else:
-		# For non-ring items, slot_name must match item.slot
-		slot_name = item.slot
-	
-	# Validate slot type (for non-ring items, slot_name should equal item.slot)
-	# For ring items, slot_name will be "ring1" or "ring2" and item.slot will be "ring"
-	if item.slot != "ring" and slot_name != item.slot:
-		_logger.log_error("  Invalid slot type: " + item.slot + " != " + slot_name)
-		return false
-	
-	# Unequip existing item if any
-	var old_item: EquipmentData = equipment[slot_name]
-	if old_item != null:
-		_logger.log("  Unequipping existing item: " + old_item.display_name)
-		var unequipped: EquipmentData = unequip(slot_name)
-		if unequipped == null:
-			_logger.log_error("  Failed to unequip existing item (inventory full)")
-			return false  # Failed to unequip (inventory full)
-	
-	# Equip new item
-	equipment[slot_name] = item
-	_logger.log("  ✓ Equipped " + item.display_name + " to " + slot_name)
-	equipment_changed.emit(slot_name)
-	return true
+	"""Equips an item - delegates to EquipmentSystem."""
+	if EquipmentSystem != null:
+		return EquipmentSystem.equip(item)
+	_logger.log_error("EquipmentSystem not available")
+	return false
 
 
 func unequip(slot_name: String) -> EquipmentData:
-	# Returns unequipped item or null if slot empty or inventory full
-	if not equipment.has(slot_name):
-		_logger.log_error("unequip() called with invalid slot: " + slot_name)
-		return null
-	
-	var item: EquipmentData = equipment[slot_name]
-	if item == null:
-		_logger.log("  Slot " + slot_name + " is already empty")
-		return null
-	
-	_logger.log("Unequipping: " + item.display_name + " from " + slot_name)
-	
-	# Try to add to inventory
-	var leftover: int = add_item(item, 1)
-	if leftover > 0:
-		# Inventory full, can't unequip
-		_logger.log_error("  Failed to unequip (inventory full)")
-		return null
-	
-	# Remove from equipment slot
-	equipment[slot_name] = null
-	_logger.log("  ✓ Unequipped " + item.display_name)
-	equipment_changed.emit(slot_name)
-	return item
+	"""Unequips an item - delegates to EquipmentSystem."""
+	if EquipmentSystem != null:
+		return EquipmentSystem.unequip(slot_name)
+	_logger.log_error("EquipmentSystem not available")
+	return null
 
 
 func get_equipped(slot_name: String) -> EquipmentData:
-	if not equipment.has(slot_name):
-		return null
-	return equipment[slot_name]
+	"""Gets equipped item - delegates to EquipmentSystem."""
+	if EquipmentSystem != null:
+		return EquipmentSystem.get_equipped(slot_name)
+	return null
 
 
 func get_total_stat_bonus(stat_name: String) -> int:
-	"""Returns sum of stat bonuses from all equipped items.
-	
-	Args:
-		stat_name: StatConstants.STAT_RESILIENCE, STAT_AGILITY, STAT_INT, or STAT_VIT
-		           (also supports "str"/"dex" for backwards compatibility)
-	
-	Returns: Total stat bonus from all equipped items
-	"""
-	return EquipmentStatCalculator.get_total_stat_bonus(equipment, stat_name)
+	"""Returns sum of stat bonuses from all equipped items - delegates to EquipmentSystem."""
+	if EquipmentSystem != null:
+		return EquipmentSystem.get_total_stat_bonus(stat_name)
+	return 0
 
 
 func get_total_damage_bonus() -> int:
-	"""Returns sum of flat damage bonuses from all equipped items."""
-	return EquipmentStatCalculator.get_total_damage_bonus(equipment)
+	"""Returns sum of flat damage bonuses - delegates to EquipmentSystem."""
+	if EquipmentSystem != null:
+		return EquipmentSystem.get_total_damage_bonus()
+	return 0
 
 
 func get_total_damage_percentage() -> float:
-	"""Returns sum of percentage damage bonuses from all equipped items."""
-	return EquipmentStatCalculator.get_total_damage_percentage(equipment)
+	"""Returns sum of percentage damage bonuses - delegates to EquipmentSystem."""
+	if EquipmentSystem != null:
+		return EquipmentSystem.get_total_damage_percentage()
+	return 0.0
+
+
+# Backwards compatibility: expose equipment dictionary (read-only access)
+var equipment: Dictionary:
+	get:
+		if EquipmentSystem != null:
+			return EquipmentSystem.equipment
+		return {}
 
 
 func get_current_carry_weight() -> float:
-	"""Calculates current total weight of all items in inventory and equipment."""
-	var total_weight: float = 0.0
-	
-	# Count inventory items
-	for i in range(capacity):
-		var slot: Dictionary = get_slot(i)
-		var item: ItemData = slot.get("item")
-		var count: int = slot.get("count", 0)
-		if item != null and count > 0:
-			total_weight += item.weight * count
-	
-	# Also count equipped items
-	for slot_name in equipment:
-		var item: EquipmentData = equipment[slot_name]
-		if item != null:
-			total_weight += item.weight
-	
-	return total_weight
+	"""Calculates current total weight - delegates to CarryWeightSystem."""
+	if CarryWeightSystem != null:
+		return CarryWeightSystem.get_current_carry_weight()
+	return 0.0
 
 
 func can_carry_item(item: ItemData, count: int = 1) -> bool:
-	"""Checks if player can carry additional items."""
-	if item == null:
+	"""Checks if player can carry additional items - delegates to CarryWeightSystem."""
+	if CarryWeightSystem == null or PlayerStats == null:
 		return false
+	var resilience: int = PlayerStats.get_total_resilience()
+	return CarryWeightSystem.can_carry_item(item, count, resilience)
+
+
+func _load_starting_inventory() -> void:
+	"""Loads starting inventory from data file."""
+	var starting_inventory_path: String = "res://resources/config/starting_inventory.tres"
+	var starting_data: StartingInventoryData = load(starting_inventory_path) as StartingInventoryData
 	
-	var current_weight: float = get_current_carry_weight()
-	var additional_weight: float = item.weight * count
+	if starting_data == null:
+		_logger.log_warning("Starting inventory data not found at " + starting_inventory_path + " - skipping")
+		return
 	
-	# Get max weight from MovementSystem
-	if MovementSystem != null:
-		var max_weight: float = MovementSystem.get_max_carry_weight()
-		return (current_weight + additional_weight) <= max_weight
+	if starting_data.items.is_empty():
+		_logger.log("Starting inventory data is empty - skipping")
+		return
 	
-	# Fallback if MovementSystem not available
-	_logger.log_warning("MovementSystem not available for can_carry_item check")
-	return true
+	_logger.log("Loading starting inventory (" + str(starting_data.items.size()) + " item types)...")
+	
+	for entry in starting_data.items:
+		var item_id: String = entry.get("item_id", "")
+		var count: int = entry.get("count", 1)
+		
+		if item_id.is_empty():
+			_logger.log_warning("Skipping entry with empty item_id")
+			continue
+		
+		# Try loading as ItemData first (check if file exists to avoid error logs)
+		var item: ItemData = null
+		var item_path: String = ResourceManager.ITEMS_PATH + item_id + ".tres"
+		if ResourceLoader.exists(item_path):
+			item = ResourceManager.load_item(item_id)
+		
+		# If not found, try as PotionData
+		if item == null:
+			var potion_path: String = ResourceManager.POTIONS_PATH + item_id + ".tres"
+			if ResourceLoader.exists(potion_path):
+				item = ResourceManager.load_potion(item_id) as ItemData
+		
+		if item == null:
+			_logger.log_warning("Could not load item: " + item_id + " - skipping (not found in items/ or potions/)")
+			continue
+		
+		var added: int = add_item(item, count)
+		if added > 0:
+			_logger.log_warning("Could not add all " + str(count) + "x " + item.display_name + " (" + str(added) + " remaining)")
+		else:
+			_logger.log("  Added " + str(count) + "x " + item.display_name)
+	
+	_logger.log("Starting inventory loaded")
+
+
+func _load_starting_equipment() -> void:
+	"""Loads starting equipment from data file - delegates to EquipmentSystem."""
+	if EquipmentSystem == null:
+		_logger.log_warning("EquipmentSystem not available - cannot load starting equipment")
+		return
+	
+	var starting_equipment_path: String = "res://resources/config/starting_equipment.tres"
+	var starting_data: StartingEquipmentData = load(starting_equipment_path) as StartingEquipmentData
+	
+	if starting_data == null:
+		_logger.log_warning("Starting equipment data not found at " + starting_equipment_path + " - skipping")
+		return
+	
+	if starting_data.equipment.is_empty():
+		_logger.log("Starting equipment data is empty - skipping")
+		return
+	
+	_logger.log("Loading starting equipment (" + str(starting_data.equipment.size()) + " items)...")
+	
+	for entry in starting_data.equipment:
+		var expected_slot: String = entry.get("slot", "")
+		var equipment_id: String = entry.get("equipment_id", "")
+		
+		if equipment_id.is_empty():
+			_logger.log_warning("Skipping entry with empty equipment_id")
+			continue
+		
+		# Load equipment resource
+		var equipment_item: EquipmentData = ResourceManager.load_equipment(equipment_id)
+		
+		if equipment_item == null:
+			_logger.log_warning("Could not load equipment: " + equipment_id + " - skipping")
+			continue
+		
+		# Validate slot matches (optional - slot field is for documentation/validation)
+		if not expected_slot.is_empty() and equipment_item.slot != "ring":
+			# For non-ring items, slot should match
+			if expected_slot != equipment_item.slot:
+				_logger.log_warning("  Slot mismatch for " + equipment_id + ": data file says '" + expected_slot + "' but equipment has '" + equipment_item.slot + "'")
+		
+		# Equip the item via EquipmentSystem
+		var success: bool = EquipmentSystem.equip(equipment_item)
+		if success:
+			var actual_slot: String = equipment_item.slot
+			if actual_slot == "ring":
+				# Find which ring slot it was equipped to
+				if EquipmentSystem.equipment["ring1"] == equipment_item:
+					actual_slot = "ring1"
+				elif EquipmentSystem.equipment["ring2"] == equipment_item:
+					actual_slot = "ring2"
+			_logger.log("  Equipped " + equipment_item.display_name + " to " + actual_slot)
+		else:
+			_logger.log_warning("  Failed to equip " + equipment_item.display_name + " to " + equipment_item.slot)
+	
+	_logger.log("Starting equipment loaded")

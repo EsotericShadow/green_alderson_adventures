@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/item_data.gd" id="1"]
+[ext_resource type="Texture2D" path="res://resources/assets/ingredients/swiftroot.png" id="2"]
+
+[resource]
+script = ExtResource("1")
+id = "swiftroot"
+display_name = "Swiftroot"
+description = "A speed and stamina ingredient. Used in stamina potions, movement speed buffs, and agility potions."
+icon = ExtResource("2")
+stackable = true
+max_stack = 99
+item_type = "material"
+weight = 0.1
+

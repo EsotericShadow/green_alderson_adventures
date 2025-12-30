@@ -16,6 +16,8 @@
 [ext_resource type="Script" uid="uid://btw7thnk5neex" path="res://scripts/workers/spells/spell_spawner.gd" id="13_spell"]
 [ext_resource type="Script" uid="uid://bq5rikhj0ftsg" path="res://scripts/workers/movement/running_state_manager.gd" id="14_running"]
 [ext_resource type="Script" uid="uid://c88soxu87qfom" path="res://scripts/workers/spells/spell_caster.gd" id="15_caster"]
+[ext_resource type="Script" path="res://scripts/workers/spells/spell_selection_manager.gd" id="16_spell_select"]
+[ext_resource type="Script" path="res://scripts/workers/effects/camera_effects_worker.gd" id="17_camera_effects"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_xrqxk"]
 atlas = ExtResource("2_k4v7y")
@@ -2109,3 +2111,9 @@ script = ExtResource("14_running")
 
 [node name="SpellCaster" type="Node" parent="."]
 script = ExtResource("15_caster")
+
+[node name="SpellSelectionManager" type="Node" parent="."]
+script = ExtResource("16_spell_select")
+
+[node name="CameraEffectsWorker" type="Node" parent="."]
+script = ExtResource("17_camera_effects")

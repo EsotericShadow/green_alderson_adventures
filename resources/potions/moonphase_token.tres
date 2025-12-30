@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="PotionData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/potion_data.gd" id="1"]
+[ext_resource type="Texture2D" path="res://resources/assets/animations/potions/PURPLE/Sprites/Small Elixir - PURPLE -0000.png" id="2"]
+
+[resource]
+script = ExtResource("1")
+id = "moonphase_token"
+display_name = "Moonphase Token"
+description = "A token that shifts with the moon's phases. Grants a random elemental buff that changes based on the current phase."
+icon = ExtResource("2")
+stackable = true
+max_stack = 99
+item_type = "consumable"
+effect = "buff_random_element"
+potency = 25
+duration = 240.0
+

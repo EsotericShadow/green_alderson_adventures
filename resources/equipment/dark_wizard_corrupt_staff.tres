@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="EquipmentData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/equipment_data.gd" id="1"]
+[ext_resource type="Texture2D" path="res://resources/assets/equipment/dark_wizard_corrupt_staff.png" id="2"]
+
+[resource]
+script = ExtResource("1")
+id = "dark_wizard_corrupt_staff"
+display_name = "Corrupt Staff"
+description = "A twisted staff pulsing with dark energy. Greatly enhances spell damage and intelligence."
+icon = ExtResource("2")
+stackable = false
+item_type = "equipment"
+weight = 2.0
+slot = "weapon"
+resilience_bonus = 1
+agility_bonus = 0
+int_bonus = 5
+vit_bonus = 0
+flat_damage_bonus = 5
+damage_percentage_bonus = 0.1
+

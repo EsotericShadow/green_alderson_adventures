@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/item_data.gd" id="1"]
+[ext_resource type="Texture2D" path="res://resources/assets/ingredients/pheonix_feather.png" id="2"]
+
+[resource]
+script = ExtResource("1")
+id = "phoenix_feather"
+display_name = "Phoenix Feather"
+description = "A fire element and high-tier combat ingredient. Used in fire potions, high-tier fire spells, and fire resistance."
+icon = ExtResource("2")
+stackable = true
+max_stack = 99
+item_type = "material"
+weight = 0.1
+

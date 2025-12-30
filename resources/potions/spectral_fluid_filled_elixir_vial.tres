@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="PotionData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/potion_data.gd" id="1"]
+[ext_resource type="Texture2D" path="res://resources/assets/animations/potions/resilience_potion_black/Sprites/Small Elixir - BLACK - 0000.png" id="2"]
+
+[resource]
+script = ExtResource("1")
+id = "spectral_fluid_filled_elixir_vial"
+display_name = "Spectral Fluid Filled Elixir Vial"
+description = "Ghostly fluid that phases through matter. Provides temporary damage reduction."
+icon = ExtResource("2")
+stackable = true
+max_stack = 99
+item_type = "consumable"
+effect = "buff_defense"
+potency = 20
+duration = 240.0
+

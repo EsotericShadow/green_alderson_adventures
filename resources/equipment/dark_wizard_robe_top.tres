@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="EquipmentData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/equipment_data.gd" id="1"]
+[ext_resource type="Texture2D" path="res://resources/assets/equipment/dark_wizard_robe_top.png" id="2"]
+
+[resource]
+script = ExtResource("1")
+id = "dark_wizard_robe_top"
+display_name = "Dark Wizard Robe"
+description = "A flowing robe woven with arcane threads. Provides protection and enhances magical power."
+icon = ExtResource("2")
+stackable = false
+item_type = "equipment"
+weight = 1.5
+slot = "body"
+resilience_bonus = 2
+agility_bonus = 1
+int_bonus = 4
+vit_bonus = 2
+flat_damage_bonus = 0
+damage_percentage_bonus = 0.05
+

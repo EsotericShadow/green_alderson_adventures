@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/item_data.gd" id="1"]
+[ext_resource type="Texture2D" path="res://resources/assets/alchemy_tools/bunsen_burner.png" id="2"]
+
+[resource]
+script = ExtResource("1")
+id = "bunsen_burner"
+display_name = "Bunsen Burner"
+description = "A portable burner used to heat vials and simmer mixtures into stable essences."
+icon = ExtResource("2")
+stackable = false
+max_stack = 1
+item_type = "material"
+weight = 1.5
+
+

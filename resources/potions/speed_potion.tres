@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="PotionData" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/potion_data.gd" id="1"]
+[ext_resource type="Texture2D" path="res://resources/assets/animations/potions/YELLOW/Sprites/Small Elixir - YELLOW - 0000.png" id="2"]
+
+[resource]
+script = ExtResource("1")
+id = "speed_potion"
+display_name = "Speed Potion"
+description = "Increases movement speed by 25% for 45 seconds."
+icon = ExtResource("2")
+stackable = true
+max_stack = 99
+item_type = "consumable"
+effect = "buff_speed"
+potency = 25
+duration = 45.0
+

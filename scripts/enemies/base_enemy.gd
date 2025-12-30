@@ -35,6 +35,8 @@ signal state_changed(old_state: String, new_state: String)
 @export var attack_damage: int = 10
 @export var attack_range: float = 40.0
 @export var detection_range: float = 200.0
+@export var gold_drop_min: int = 5
+@export var gold_drop_max: int = 15
 
 @export_group("Combat")
 ## ⚠️ LOCKED: These values work together to prevent spam attacks and lock-on behavior
@@ -62,6 +64,10 @@ var is_dead: bool = false
 
 # Effects
 var _hit_flash_tween: Tween = null
+
+# Debuff system
+var movement_speed_multiplier: float = 1.0
+var debuff_timer: float = 0.0
 
 
 func _get_entity_type() -> String:
@@ -147,6 +153,14 @@ func _physics_process(delta: float) -> void:
 	if post_attack_backoff_timer > 0.0:
 		post_attack_backoff_timer -= delta
 	
+	# Process debuff timer
+	if debuff_timer > 0.0:
+		debuff_timer -= delta
+		if debuff_timer <= 0.0:
+			movement_speed_multiplier = 1.0
+			debuff_timer = 0.0
+			_logger.log("Debuff expired: movement speed restored")
+	
 	# Process current state
 	match current_state:
 		State.IDLE:
@@ -213,6 +227,7 @@ func _process_chase() -> void:
 	# 4. Post-attack backoff expired
 	# In attack range and can attack?
 	var dist := target_tracker.get_distance_to_target()
+	var effective_speed: float = move_speed * movement_speed_multiplier
 	
 	# PROVEN PATTERN: During backoff, enemy backs away to give player escape window
 	if post_attack_backoff_timer > 0.0:
@@ -220,8 +235,8 @@ func _process_chase() -> void:
 		# _log("⏳ Post-attack backoff active (" + str(post_attack_backoff_timer) + "s remaining) - backing away")  # Commented out: enemy AI logging
 		var backoff_dir := target_tracker.get_direction_to_target()
 		if mover != null:
-			# Back away from player during recovery period
-			mover.move(-backoff_dir, move_speed * 0.6)  # Back away at 60% speed
+			# Back away from player during recovery period (apply debuff multiplier)
+			mover.move(-backoff_dir, effective_speed * 0.6)  # Back away at 60% speed
 		# Update facing direction (face away from player while backing off)
 		last_direction = DirectionUtils.vector_to_dir4(-backoff_dir, last_direction)
 		if animator != null:
@@ -241,11 +256,11 @@ func _process_chase() -> void:
 		# Only back away if too close (separation distance)
 		if dist < separation_distance:
 			dir = -dir  # Reverse direction to back away
-			mover.move(dir, move_speed * 0.8)  # Back away slower
+			mover.move(dir, effective_speed * 0.8)  # Back away slower (apply multiplier)
 			# _log("📏 Too close (" + str(int(dist)) + " < " + str(int(separation_distance)) + ") - backing away")  # Commented out: enemy AI logging
 		else:
 			# Safe to approach or maintain position
-			mover.move(dir, move_speed)
+			mover.move(dir, effective_speed)  # Apply multiplier
 	
 	# Update facing direction
 	last_direction = DirectionUtils.vector_to_dir4(dir, last_direction)
@@ -479,6 +494,16 @@ func _on_hurt(damage: int, knockback: Vector2, attacker: Node) -> void:
 
 func _on_died(_killer: Node) -> void:
 	# _log("💀 KILLED by " + (str(killer.name) if killer != null else "unknown") + "!")  # Commented out: enemy AI logging
+	
+	# Drop gold before changing state
+	if gold_drop_min > 0 and gold_drop_max >= gold_drop_min:
+		var gold_amount: int = randi_range(gold_drop_min, gold_drop_max)
+		if PlayerStats != null:
+			PlayerStats.add_gold(gold_amount)
+			_logger.log("Dropped " + str(gold_amount) + " gold")
+		else:
+			_logger.log_error("PlayerStats is null, cannot drop gold")
+	
 	_change_state(State.DEATH)
 
 
@@ -517,3 +542,24 @@ func take_damage(amount: int, source: Node = null) -> void:
 		if source != null and source is Node2D:
 			knockback = (global_position - source.global_position).normalized() * 100.0
 		hurtbox.receive_hit(amount, knockback, source)
+
+
+## Applies a debuff effect to this enemy.
+## 
+## Args:
+##   effect: Debuff effect type ("slow", "freeze")
+##   potency: Effect potency (0.0 to 1.0, where 1.0 = 100% slow/freeze)
+##   duration: Duration in seconds
+func apply_debuff(effect: String, potency: float, duration: float) -> void:
+	if duration <= 0.0:
+		_logger.log_error("apply_debuff() called with invalid duration: " + str(duration))
+		return
+	
+	match effect:
+		"slow", "freeze":
+			movement_speed_multiplier = 1.0 - potency  # potency is percentage (0.0 to 1.0)
+			debuff_timer = duration
+			var percentage: int = int(potency * 100)
+			_logger.log("Debuff applied: " + effect + " (" + str(percentage) + "% slow) for " + str(duration) + "s")
+		_:
+			_logger.log_error("Unknown debuff effect: " + effect)

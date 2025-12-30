@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/item_data.gd" id="1"]
+[ext_resource type="Texture2D" path="res://resources/assets/ingredients/mana_crystal.png" id="2"]
+
+[resource]
+script = ExtResource("1")
+id = "mana_crystal"
+display_name = "Mana Crystal"
+description = "A magic and mana ingredient. Used in mana potions, spell enhancement, and intelligence potions."
+icon = ExtResource("2")
+stackable = true
+max_stack = 99
+item_type = "material"
+weight = 0.1
+

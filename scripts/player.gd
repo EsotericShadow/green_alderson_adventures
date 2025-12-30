@@ -20,20 +20,13 @@ var min_stamina_to_run: int = 5  # Use GameBalance.get_min_stamina_to_run() inst
 @onready var spell_spawner: SpellSpawner = $SpellSpawner
 @onready var running_state_manager: RunningStateManager = $RunningStateManager
 @onready var spell_caster: SpellCaster = $SpellCaster
+@onready var spell_selection_manager: SpellSelectionManager = $SpellSelectionManager
+@onready var camera_effects_worker: CameraEffectsWorker = $CameraEffectsWorker
 
 # State
 var last_direction: String = "down"
 var is_dead: bool = false
 var spawn_position: Vector2 = Vector2(0, -2)  # Default spawn position (will be set from scene)
-
-# Spell system (Commit 3C: 10 spell slots)
-var equipped_spells: Array[SpellData] = []  # Size 10
-var selected_spell_index: int = 0
-var spell_bar: Node = null  # Reference to spell bar UI (CanvasLayer)
-
-# Screen shake
-var _camera: Camera2D = null
-var _shake_tween: Tween = null
 
 # Logging (logger inherited from BaseEntity)
 var _last_logged_state := ""
@@ -108,25 +101,17 @@ func _ready() -> void:
 			running_state_manager.min_stamina_to_run = min_stamina_to_run
 		_logger.log_debug("  ✓ RunningStateManager ready")
 	
-	# Find camera for screen shake
-	_camera = get_node_or_null("Camera2D")
-	if _camera != null:
-		_logger.log_debug("  ✓ Camera2D found (screen shake enabled)")
+	# Set up spell selection manager
+	if spell_selection_manager == null:
+		_log_error("SpellSelectionManager worker is MISSING! Spell selection will not work.")
 	else:
-		_logger.log_debug("  ⚠ No Camera2D found (screen shake disabled)")
+		_logger.log_debug("  ✓ SpellSelectionManager ready")
 	
-	# Load default spells (Commit 3C: 10 spell slots)
-	equipped_spells.resize(10)
-	equipped_spells[0] = ResourceManager.load_spell("fireball")
-	equipped_spells[1] = ResourceManager.load_spell("waterball")
-	equipped_spells[2] = ResourceManager.load_spell("earthball")
-	equipped_spells[3] = ResourceManager.load_spell("airball")
-	# Slots 4-9 remain null for now
-	
-	# Find and connect to spell bar UI
-	_find_spell_bar()
-	
-	_logger.log_info("  ✓ Loaded " + str(_count_equipped_spells()) + " spells")
+	# Set up camera effects worker
+	if camera_effects_worker == null:
+		_logger.log_debug("  ⚠ CameraEffectsWorker not found (screen shake disabled)")
+	else:
+		_logger.log_debug("  ✓ CameraEffectsWorker ready")
 	_logger.log_info("Player ready! All systems: " + ("GO" if _all_workers_ready() else "SOME MISSING"))
 
 
@@ -135,7 +120,7 @@ func _get_entity_type() -> String:
 
 
 func _all_workers_ready() -> bool:
-	return mover != null and animator != null and input_reader != null and health_tracker != null and hurtbox != null and spell_spawner != null and running_state_manager != null and spell_caster != null
+	return mover != null and animator != null and input_reader != null and health_tracker != null and hurtbox != null and spell_spawner != null and running_state_manager != null and spell_caster != null and spell_selection_manager != null
 
 
 func _physics_process(delta: float) -> void:
@@ -165,8 +150,13 @@ func _physics_process(delta: float) -> void:
 	for i in range(10):
 		var action_name := "spell_" + str(i + 1) if i < 9 else "spell_0"
 		if input_reader.is_action_just_pressed(action_name):
+			# Get current selected index
+			var current_selected: int = 0
+			if spell_selection_manager != null:
+				current_selected = spell_selection_manager.selected_spell_index
+			
 			# If already selected, cast it; otherwise just select
-			if selected_spell_index == i:
+			if current_selected == i:
 				# Cast the spell
 				var spell := get_selected_spell()
 				if spell != null and spell_caster != null:
@@ -175,11 +165,12 @@ func _physics_process(delta: float) -> void:
 						cast_dir = DirectionUtils.vector_to_dir8(input_vec, last_direction)
 					
 					_start_spell_cast(spell, cast_dir)
-				# else:
-				# 	_logger.log_debug("🔥 Spell key pressed but no spell in slot " + str(i + 1))
 			else:
 				# Select the spell
-				_select_spell(i)
+				if spell_selection_manager != null:
+					spell_selection_manager.select_spell(i)
+				else:
+					_select_spell(i)  # Fallback
 			break
 	
 	# --- HANDLE RUN JUMP ---
@@ -278,67 +269,17 @@ func _spawn_spell(spell: SpellData, direction: String, z_index_value: int) -> vo
 
 
 func get_selected_spell() -> SpellData:
-	"""Returns the currently selected spell."""
-	if selected_spell_index >= 0 and selected_spell_index < equipped_spells.size():
-		return equipped_spells[selected_spell_index]
+	"""Returns the currently selected spell - delegates to SpellSelectionManager."""
+	if spell_selection_manager != null:
+		return spell_selection_manager.get_selected_spell()
+	# Fallback for backwards compatibility
 	return null
 
 
 func _select_spell(index: int) -> void:
-	"""Selects a spell slot (0-9)."""
-	if index < 0 or index >= equipped_spells.size():
-		return
-	
-	if equipped_spells[index] == null:
-		_logger.log_debug("⚠️ Spell slot " + str(index + 1) + " is empty")
-		return
-	
-	selected_spell_index = index
-	_logger.log_debug("📖 Selected spell slot " + str(index + 1) + ": " + equipped_spells[index].display_name)
-	
-	# Update spell bar UI
-	if spell_bar != null and spell_bar.has_method("select_slot"):
-		spell_bar.select_slot(index)
-
-
-func _find_spell_bar() -> void:
-	"""Finds the spell bar UI in the scene tree."""
-	# Spell bar is now a CanvasLayer, so find it directly in the scene
-	spell_bar = get_tree().current_scene.get_node_or_null("SpellBar")
-	if spell_bar == null:
-		# Try finding it in HUD (if it's still there)
-		var hud := get_tree().current_scene.get_node_or_null("HUD")
-		if hud != null:
-			spell_bar = hud.get_node_or_null("SpellBar")
-	
-	if spell_bar == null:
-		_log_error("⚠️ SpellBar not found - spell bar UI unavailable")
-		_logger.log_debug("   Searching for SpellBar in scene tree...")
-		var scene := get_tree().current_scene
-		if scene != null:
-			_logger.log_debug("   Current scene: " + scene.name)
-			# for child in scene.get_children():
-			# 	_logger.log_debug("   - Child: " + child.name + " (type: " + child.get_class() + ")")
-		return
-	
-	_logger.log_debug("  ✓ SpellBar found: " + str(spell_bar.name) + " (type: " + spell_bar.get_class() + ")")
-	
-	# Setup spell bar with equipped spells
-	if spell_bar.has_method("setup_spells"):
-		spell_bar.setup_spells(equipped_spells)
-		spell_bar.select_slot(selected_spell_index)
-		_logger.log_debug("  ✓ Spell bar connected and spells set up")
-	else:
-		_log_error("SpellBar missing setup_spells() method!")
-
-
-func _count_equipped_spells() -> int:
-	"""Returns the number of equipped spells."""
-	var count := 0
-	for spell in equipped_spells:
-		if spell != null:
-			count += 1
-	return count
+	"""Selects a spell slot (0-9) - delegates to SpellSelectionManager."""
+	if spell_selection_manager != null:
+		spell_selection_manager.select_spell(index)
 
 
 # --- SIGNAL HANDLERS ---
@@ -399,8 +340,11 @@ func _on_hurt(damage: int, knockback: Vector2, attacker: Node) -> void:
 	_logger.log_debug("💥 PLAYER HIT! Damage: " + str(damage) + " from " + (str(attacker.name) if attacker != null else "unknown"))
 	_logger.log_debug("   Knockback: " + str(knockback))
 	
-	# SCREEN SHAKE!
-	_screen_shake(8.0, 0.2)
+	# SCREEN SHAKE! - delegates to CameraEffectsWorker
+	if camera_effects_worker != null:
+		camera_effects_worker.screen_shake(8.0, 0.2)
+	else:
+		_logger.log_warning("CameraEffectsWorker not available - screen shake disabled")
 	
 	# Apply knockback
 	if mover != null:
@@ -468,37 +412,6 @@ func _respawn() -> void:
 		running_state_manager.reset()
 	
 	_logger.log_info("✅ Player respawned successfully!")
-
-
-## Shake the camera for impact feel
-func _screen_shake(intensity: float, duration: float) -> void:
-	if _camera == null:
-		return
-	
-	_logger.log_debug("📳 SCREEN SHAKE! Intensity: " + str(intensity))
-	
-	# Kill any existing shake
-	if _shake_tween != null and _shake_tween.is_valid():
-		_shake_tween.kill()
-	
-	_shake_tween = create_tween()
-	var base_offset := _camera.offset
-	
-	# Do a series of random shakes
-	var shake_count := int(duration * 30)  # ~30 shakes per second
-	var time_per_shake := duration / shake_count
-	
-	for i in shake_count:
-		var random_offset := Vector2(
-			randf_range(-intensity, intensity),
-			randf_range(-intensity, intensity)
-		)
-		# Reduce intensity over time
-		var falloff := 1.0 - (float(i) / shake_count)
-		_shake_tween.tween_property(_camera, "offset", base_offset + random_offset * falloff, time_per_shake)
-	
-	# Return to original position
-	_shake_tween.tween_property(_camera, "offset", base_offset, 0.05)
 
 
 # --- PUBLIC API ---

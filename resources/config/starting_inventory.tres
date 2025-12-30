@@ -1,0 +1,173 @@
+[gd_resource type="Resource" script_class="StartingInventoryData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/starting_inventory_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+items = [
+	{
+		"item_id": "stonebloom",
+		"count": 5
+	},
+	{
+		"item_id": "red_cap_mushroom",
+		"count": 3
+	},
+	{
+		"item_id": "healing_moss",
+		"count": 4
+	},
+	{
+		"item_id": "mana_crystal",
+		"count": 3
+	},
+	{
+		"item_id": "spider_silk",
+		"count": 2
+	},
+	{
+		"item_id": "orc_fang",
+		"count": 2
+	},
+	{
+		"item_id": "phoenix_feather",
+		"count": 1
+	},
+	{
+		"item_id": "swiftroot",
+		"count": 3
+	},
+	{
+		"item_id": "storm_dust",
+		"count": 2
+	},
+	{
+		"item_id": "wisdom_bloom",
+		"count": 2
+	},
+	{
+		"item_id": "arcane_dust",
+		"count": 2
+	},
+	{
+		"item_id": "fire_herb",
+		"count": 2
+	},
+	{
+		"item_id": "water_herb",
+		"count": 2
+	},
+	{
+		"item_id": "air_herb",
+		"count": 2
+	},
+	{
+		"item_id": "empty_elixir_vial",
+		"count": 5
+	},
+	{
+		"item_id": "mortar_and_pestle",
+		"count": 1
+	},
+	{
+		"item_id": "test_health_potion",
+		"count": 3
+	},
+	{
+		"item_id": "mana_potion",
+		"count": 2
+	},
+	{
+		"item_id": "stamina_potion",
+		"count": 2
+	},
+	{
+		"item_id": "speed_potion",
+		"count": 1
+	},
+	{
+		"item_id": "strength_potion",
+		"count": 1
+	},
+	{
+		"item_id": "defense_potion",
+		"count": 1
+	},
+	{
+		"item_id": "greater_health_potion",
+		"count": 1
+	},
+	{
+		"item_id": "greater_mana_potion",
+		"count": 1
+	},
+	{
+		"item_id": "gold_potion",
+		"count": 1
+	},
+	{
+		"item_id": "intelligence_boost_potion",
+		"count": 1
+	},
+	{
+		"item_id": "blood_filled_elixir_vial",
+		"count": 2
+	},
+	{
+		"item_id": "water_filled_elixir_vial",
+		"count": 1
+	},
+	{
+		"item_id": "wisdom_filled_elixir_vial",
+		"count": 1
+	},
+	{
+		"item_id": "ether_filled_elixir_vial",
+		"count": 1
+	},
+	{
+		"item_id": "psychotropic_filled_elixir_vial",
+		"count": 1
+	},
+	{
+		"item_id": "spectral_fluid_filled_elixir_vial",
+		"count": 1
+	},
+	{
+		"item_id": "dark_matter_filled_elixir_vial",
+		"count": 1
+	},
+	{
+		"item_id": "deepwater_script",
+		"count": 1
+	},
+	{
+		"item_id": "voidward_glyph",
+		"count": 1
+	},
+	{
+		"item_id": "ashpulse_knot",
+		"count": 1
+	},
+	{
+		"item_id": "moonphase_token",
+		"count": 1
+	},
+	{
+		"item_id": "stormlink_sigil",
+		"count": 1
+	},
+	{
+		"item_id": "stoneward_seal",
+		"count": 1
+	},
+	{
+		"item_id": "sunflare_disk",
+		"count": 1
+	},
+	{
+		"item_id": "sigil_of_still_air",
+		"count": 1
+	}
+]
+

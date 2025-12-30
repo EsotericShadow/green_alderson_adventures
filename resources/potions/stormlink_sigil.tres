@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="PotionData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/potion_data.gd" id="1"]
+[ext_resource type="Texture2D" path="res://resources/assets/animations/potions/YELLOW/Sprites/Small Elixir - YELLOW - 0000.png" id="2"]
+
+[resource]
+script = ExtResource("1")
+id = "stormlink_sigil"
+display_name = "Stormlink Sigil"
+description = "A sigil crackling with lightning. Causes lightning spells to chain between enemies. Cracks after use."
+icon = ExtResource("2")
+stackable = true
+max_stack = 99
+item_type = "consumable"
+effect = "buff_lightning_chaining"
+potency = 30
+duration = 180.0
+

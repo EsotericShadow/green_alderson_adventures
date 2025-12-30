@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="EquipmentData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/equipment_data.gd" id="1"]
+[ext_resource type="Texture2D" path="res://resources/assets/equipment/dark_wizard_robe_bottom.png" id="2"]
+
+[resource]
+script = ExtResource("1")
+id = "dark_wizard_robe_bottom"
+display_name = "Dark Wizard Leggings"
+description = "Matching leggings that complete the dark wizard set. Enhances agility and resilience."
+icon = ExtResource("2")
+stackable = false
+item_type = "equipment"
+weight = 1.0
+slot = "legs"
+resilience_bonus = 2
+agility_bonus = 2
+int_bonus = 1
+vit_bonus = 1
+flat_damage_bonus = 0
+damage_percentage_bonus = 0.0
+

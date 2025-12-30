@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="EquipmentData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/equipment_data.gd" id="1"]
+[ext_resource type="Texture2D" path="res://resources/assets/equipment/jiraiya's_blessing_ring.png" id="2"]
+
+[resource]
+script = ExtResource("1")
+id = "jiraiyas_blessing_ring"
+display_name = "Jiraiya's Blessing Ring"
+description = "A blessed ring that enhances vitality and resilience. A gift from a wise master."
+icon = ExtResource("2")
+stackable = false
+item_type = "equipment"
+weight = 0.1
+slot = "ring"
+resilience_bonus = 2
+agility_bonus = 1
+int_bonus = 1
+vit_bonus = 3
+flat_damage_bonus = 0
+damage_percentage_bonus = 0.0
+

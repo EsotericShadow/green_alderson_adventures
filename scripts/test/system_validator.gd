@@ -110,49 +110,59 @@ func _test_player_stats_formulas() -> void:
 	if PlayerStats == null:
 		return
 	
-	# Test max health calculation (VIT * 20)
-	var expected_max_health: int = PlayerStats.base_vit * 20
+	# Get GameBalance multipliers (formulas use these, not hardcoded values)
+	var health_per_vit: int = GameBalance.get_health_per_vit() if GameBalance != null else 20
+	var mana_per_int: int = GameBalance.get_mana_per_int() if GameBalance != null else 15
+	var stamina_per_agility: int = GameBalance.get_stamina_per_agility() if GameBalance != null else 10
+	
+	# Test max health calculation (get_total_vit() * health_per_vit)
+	# Note: Uses total stats (base + equipment bonuses), not just base stats
+	var total_vit: int = PlayerStats.get_total_vit()
+	var expected_max_health: int = total_vit * health_per_vit
 	var actual_max_health: int = PlayerStats.get_max_health()
 	_total_tests += 1
 	if actual_max_health == expected_max_health:
 		_passed_tests += 1
-		_logger.log("  ✓ Max Health formula: " + str(actual_max_health) + " (VIT: " + str(PlayerStats.base_vit) + " * 20)")
+		_logger.log("  ✓ Max Health formula: " + str(actual_max_health) + " (Total VIT: " + str(total_vit) + " * " + str(health_per_vit) + ", Base: " + str(PlayerStats.base_vit) + ")")
 	else:
 		_failed_tests += 1
-		_logger.log_error("  ✗ Max Health formula wrong! Expected: " + str(expected_max_health) + ", Got: " + str(actual_max_health))
+		_logger.log_error("  ✗ Max Health formula wrong! Expected: " + str(expected_max_health) + " (Total VIT: " + str(total_vit) + " * " + str(health_per_vit) + "), Got: " + str(actual_max_health))
 	
-	# Test max mana calculation (INT * 15)
-	var expected_max_mana: int = PlayerStats.base_int * 15
+	# Test max mana calculation (get_total_int() * mana_per_int)
+	var total_int: int = PlayerStats.get_total_int()
+	var expected_max_mana: int = total_int * mana_per_int
 	var actual_max_mana: int = PlayerStats.get_max_mana()
 	_total_tests += 1
 	if actual_max_mana == expected_max_mana:
 		_passed_tests += 1
-		_logger.log("  ✓ Max Mana formula: " + str(actual_max_mana) + " (INT: " + str(PlayerStats.base_int) + " * 15)")
+		_logger.log("  ✓ Max Mana formula: " + str(actual_max_mana) + " (Total INT: " + str(total_int) + " * " + str(mana_per_int) + ", Base: " + str(PlayerStats.base_int) + ")")
 	else:
 		_failed_tests += 1
-		_logger.log_error("  ✗ Max Mana formula wrong! Expected: " + str(expected_max_mana) + ", Got: " + str(actual_max_mana))
+		_logger.log_error("  ✗ Max Mana formula wrong! Expected: " + str(expected_max_mana) + " (Total INT: " + str(total_int) + " * " + str(mana_per_int) + "), Got: " + str(actual_max_mana))
 	
-	# Test max stamina calculation (Agility * 10)
-	var expected_max_stamina: int = PlayerStats.base_agility * 10
+	# Test max stamina calculation (get_total_agility() * stamina_per_agility)
+	var total_agility: int = PlayerStats.get_total_agility()
+	var expected_max_stamina: int = total_agility * stamina_per_agility
 	var actual_max_stamina: int = PlayerStats.get_max_stamina()
 	_total_tests += 1
 	if actual_max_stamina == expected_max_stamina:
 		_passed_tests += 1
-		_logger.log("  ✓ Max Stamina formula: " + str(actual_max_stamina) + " (Agility: " + str(PlayerStats.base_agility) + " * 10)")
+		_logger.log("  ✓ Max Stamina formula: " + str(actual_max_stamina) + " (Total Agility: " + str(total_agility) + " * " + str(stamina_per_agility) + ", Base: " + str(PlayerStats.base_agility) + ")")
 	else:
 		_failed_tests += 1
-		_logger.log_error("  ✗ Max Stamina formula wrong! Expected: " + str(expected_max_stamina) + ", Got: " + str(actual_max_stamina))
+		_logger.log_error("  ✗ Max Stamina formula wrong! Expected: " + str(expected_max_stamina) + " (Total Agility: " + str(total_agility) + " * " + str(stamina_per_agility) + "), Got: " + str(actual_max_stamina))
 	
-	# Test carry weight (45.0 + Resilience * 2.0)
-	var expected_carry_weight: float = 45.0 + (PlayerStats.base_resilience * 2.0)
+	# Test carry weight (uses StatFormulas.calculate_max_carry_weight(get_total_resilience()))
+	var total_resilience: int = PlayerStats.get_total_resilience()
+	var expected_carry_weight: float = StatFormulas.calculate_max_carry_weight(total_resilience)
 	var actual_carry_weight: float = PlayerStats.get_max_carry_weight()
 	_total_tests += 1
 	if abs(actual_carry_weight - expected_carry_weight) < 0.01:
 		_passed_tests += 1
-		_logger.log("  ✓ Max Carry Weight: " + str(actual_carry_weight) + "kg (45.0 + Resilience: " + str(PlayerStats.base_resilience) + " * 2.0)")
+		_logger.log("  ✓ Max Carry Weight: " + str(actual_carry_weight) + "kg (Total Resilience: " + str(total_resilience) + ", Base: " + str(PlayerStats.base_resilience) + ")")
 	else:
 		_failed_tests += 1
-		_logger.log_error("  ✗ Max Carry Weight wrong! Expected: " + str(expected_carry_weight) + ", Got: " + str(actual_carry_weight))
+		_logger.log_error("  ✗ Max Carry Weight wrong! Expected: " + str(expected_carry_weight) + " (Total Resilience: " + str(total_resilience) + "), Got: " + str(actual_carry_weight))
 
 
 func _test_inventory_system() -> void:

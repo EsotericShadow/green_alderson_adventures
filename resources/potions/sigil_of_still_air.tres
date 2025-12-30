@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="PotionData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/potion_data.gd" id="1"]
+[ext_resource type="Texture2D" path="res://resources/assets/animations/potions/intelligence_potion_cyan/Sprites/Small Elixir - CYAN -0000.png" id="2"]
+
+[resource]
+script = ExtResource("1")
+id = "sigil_of_still_air"
+display_name = "Sigil of Still Air"
+description = "A sigil used by sky monks. Creates a zone of still air that freezes enemies in place."
+icon = ExtResource("2")
+stackable = true
+max_stack = 99
+item_type = "consumable"
+effect = "area_enemy_slow"
+potency = 100
+duration = 5.0
+

@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/item_data.gd" id="1"]
+[ext_resource type="Texture2D" path="res://resources/assets/ingredients/zephyr's_sage.png" id="2"]
+
+[resource]
+script = ExtResource("1")
+id = "air_herb"
+display_name = "Zephyr's Sage"
+description = "An air element herb. Used in air potions, air spell enhancement, speed potions, and stamina potions."
+icon = ExtResource("2")
+stackable = true
+max_stack = 99
+item_type = "material"
+weight = 0.1
+

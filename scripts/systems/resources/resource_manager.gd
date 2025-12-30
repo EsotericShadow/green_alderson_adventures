@@ -21,6 +21,7 @@ var _cache: Dictionary = {
 	"PotionData": {},
 	"EquipmentData": {},
 	"RecipeData": {},
+	"PotionRecipeData": {},
 	"MerchantData": {}
 }
 
@@ -80,7 +81,7 @@ func _get_path_for_type(resource_type: String) -> String:
 			return POTIONS_PATH
 		"EquipmentData":
 			return EQUIPMENT_PATH
-		"RecipeData":
+		"RecipeData", "PotionRecipeData":
 			return RECIPES_PATH
 		"MerchantData":
 			return MERCHANTS_PATH
@@ -107,6 +108,10 @@ func load_equipment(equipment_id: String) -> EquipmentData:
 
 
 func load_recipe(recipe_id: String) -> RecipeData:
+	# Try loading as PotionRecipeData first, fall back to RecipeData
+	var potion_recipe = load_resource("PotionRecipeData", recipe_id) as PotionRecipeData
+	if potion_recipe != null:
+		return potion_recipe
 	return load_resource("RecipeData", recipe_id) as RecipeData
 
 

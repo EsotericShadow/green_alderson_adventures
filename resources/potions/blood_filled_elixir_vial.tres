@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="PotionData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/potion_data.gd" id="1"]
+[ext_resource type="Texture2D" path="res://resources/assets/animations/potions/health_potion_red/Sprites/Small Elixir - RED - 0000.png" id="2"]
+
+[resource]
+script = ExtResource("1")
+id = "blood_filled_elixir_vial"
+display_name = "Blood Filled Elixir Vial"
+description = "A vial filled with crimson blood essence. Restores health when consumed."
+icon = ExtResource("2")
+stackable = true
+max_stack = 99
+item_type = "consumable"
+effect = "restore_health"
+potency = 75
+duration = 0.0
+

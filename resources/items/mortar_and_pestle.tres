@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/item_data.gd" id="1"]
+[ext_resource type="Texture2D" path="res://resources/assets/alchemy_tools/mortar_and_pestle.png" id="2"]
+
+[resource]
+script = ExtResource("1")
+id = "mortar_and_pestle"
+display_name = "Mortar and Pestle"
+description = "A heavy stone mortar and pestle used for grinding herbs and crystals into fine powders. Essential for advanced alchemy."
+icon = ExtResource("2")
+stackable = false
+max_stack = 1
+item_type = "material"
+weight = 2.0
+
