@@ -1,0 +1,280 @@
+{
+  "recipes": [
+    {
+      "recipe_id": "recipe_health_potion",
+      "result": "health_potion",
+      "display_name": "Health Potion Recipe",
+      "tier": 1,
+      "required_alchemy_level": 1,
+      "xp_reward": 25,
+      "result_count": 1,
+      "base_potency": 50,
+      "potency_per_level": 3,
+      "base_liquid": {
+        "id": "water_filled_elixir_vial"
+      },
+      "primary_ingredient": {
+        "id": "healing_moss",
+        "count": 2
+      },
+      "secondary_ingredient": null,
+      "catalyst": {
+        "id": "stonebloom",
+        "count": 1
+      },
+      "additional_ingredients": []
+    },
+    {
+      "recipe_id": "recipe_mana_potion",
+      "result": "mana_potion",
+      "display_name": "Mana Potion Recipe",
+      "tier": 1,
+      "required_alchemy_level": 1,
+      "xp_reward": 25,
+      "result_count": 1,
+      "base_potency": 30,
+      "potency_per_level": 3,
+      "base_liquid": {
+        "id": "water_filled_elixir_vial"
+      },
+      "primary_ingredient": {
+        "id": "air_herb",
+        "count": 2
+      },
+      "secondary_ingredient": null,
+      "catalyst": {
+        "id": "mana_crystal",
+        "count": 1
+      },
+      "additional_ingredients": []
+    },
+    {
+      "recipe_id": "recipe_stamina_potion",
+      "result": "stamina_potion",
+      "display_name": "Stamina Potion Recipe",
+      "tier": 1,
+      "required_alchemy_level": 3,
+      "xp_reward": 25,
+      "result_count": 1,
+      "base_potency": 50,
+      "potency_per_level": 3,
+      "base_liquid": {
+        "id": "water_filled_elixir_vial"
+      },
+      "primary_ingredient": {
+        "id": "swiftroot",
+        "count": 2
+      },
+      "secondary_ingredient": {
+        "id": "healing_moss",
+        "count": 1
+      },
+      "catalyst": {
+        "id": "spider_silk",
+        "count": 1
+      },
+      "additional_ingredients": []
+    },
+    {
+      "recipe_id": "recipe_defense_potion",
+      "result": "defense_potion",
+      "display_name": "Defense Potion Recipe",
+      "tier": 2,
+      "required_alchemy_level": 15,
+      "xp_reward": 60,
+      "result_count": 1,
+      "base_potency": 15,
+      "potency_per_level": 2,
+      "base_liquid": {
+        "id": "spectral_fluid_filled_elixir_vial"
+      },
+      "primary_ingredient": {
+        "id": "stonebloom",
+        "count": 2
+      },
+      "secondary_ingredient": {
+        "id": "healing_moss",
+        "count": 1
+      },
+      "catalyst": {
+        "id": "storm_dust",
+        "count": 1
+      },
+      "additional_ingredients": []
+    },
+    {
+      "recipe_id": "recipe_speed_potion",
+      "result": "speed_potion",
+      "display_name": "Speed Potion Recipe",
+      "tier": 2,
+      "required_alchemy_level": 18,
+      "xp_reward": 60,
+      "result_count": 1,
+      "base_potency": 25,
+      "potency_per_level": 2,
+      "base_liquid": {
+        "id": "psychotropic_filled_elixir_vial"
+      },
+      "primary_ingredient": {
+        "id": "swiftroot",
+        "count": 2
+      },
+      "secondary_ingredient": {
+        "id": "air_herb",
+        "count": 1
+      },
+      "catalyst": {
+        "id": "spider_silk",
+        "count": 1
+      },
+      "additional_ingredients": []
+    },
+    {
+      "recipe_id": "recipe_strength_potion",
+      "result": "strength_potion",
+      "display_name": "Strength Potion Recipe",
+      "tier": 3,
+      "required_alchemy_level": 24,
+      "xp_reward": 90,
+      "result_count": 1,
+      "base_potency": 20,
+      "potency_per_level": 3,
+      "base_liquid": {
+        "id": "dark_matter_filled_elixir_vial"
+      },
+      "primary_ingredient": {
+        "id": "orc_fang",
+        "count": 2
+      },
+      "secondary_ingredient": {
+        "id": "stonebloom",
+        "count": 1
+      },
+      "catalyst": {
+        "id": "phoenix_feather",
+        "count": 1
+      },
+      "additional_ingredients": []
+    },
+    {
+      "recipe_id": "recipe_greater_health_potion",
+      "result": "greater_health_potion",
+      "display_name": "Greater Health Potion Recipe",
+      "tier": 2,
+      "required_alchemy_level": 20,
+      "xp_reward": 80,
+      "result_count": 1,
+      "base_potency": 100,
+      "potency_per_level": 4,
+      "base_liquid": {
+        "id": "blood_filled_elixir_vial"
+      },
+      "primary_ingredient": {
+        "id": "healing_moss",
+        "count": 2
+      },
+      "secondary_ingredient": {
+        "id": "stonebloom",
+        "count": 1
+      },
+      "catalyst": {
+        "id": "phoenix_feather",
+        "count": 1
+      },
+      "additional_ingredients": []
+    },
+    {
+      "recipe_id": "recipe_greater_mana_potion",
+      "result": "greater_mana_potion",
+      "display_name": "Greater Mana Potion Recipe",
+      "tier": 3,
+      "required_alchemy_level": 25,
+      "xp_reward": 90,
+      "result_count": 1,
+      "base_potency": 75,
+      "potency_per_level": 5,
+      "base_liquid": {
+        "id": "ether_filled_elixir_vial"
+      },
+      "primary_ingredient": {
+        "id": "air_herb",
+        "count": 2
+      },
+      "secondary_ingredient": {
+        "id": "wisdom_bloom",
+        "count": 1
+      },
+      "catalyst": {
+        "id": "mana_crystal",
+        "count": 1
+      },
+      "additional_ingredients": [
+        {
+          "id": "arcane_dust",
+          "count": 1,
+          "role": "additional"
+        }
+      ]
+    },
+    {
+      "recipe_id": "recipe_gold_potion",
+      "result": "gold_potion",
+      "display_name": "Gold Elixir Recipe",
+      "tier": 3,
+      "required_alchemy_level": 35,
+      "xp_reward": 120,
+      "result_count": 1,
+      "base_potency": 50,
+      "potency_per_level": 5,
+      "base_liquid": {
+        "id": "ether_filled_elixir_vial"
+      },
+      "primary_ingredient": {
+        "id": "healing_moss",
+        "count": 1
+      },
+      "secondary_ingredient": {
+        "id": "wisdom_bloom",
+        "count": 1
+      },
+      "catalyst": {
+        "id": "mana_crystal",
+        "count": 1
+      },
+      "additional_ingredients": [
+        {
+          "id": "swiftroot",
+          "count": 1,
+          "role": "additional"
+        }
+      ]
+    },
+    {
+      "recipe_id": "recipe_intelligence_boost_potion",
+      "result": "intelligence_boost_potion",
+      "display_name": "Intelligence Boost Potion Recipe",
+      "tier": 3,
+      "required_alchemy_level": 26,
+      "xp_reward": 85,
+      "result_count": 1,
+      "base_potency": 5,
+      "potency_per_level": 1,
+      "base_liquid": {
+        "id": "ether_filled_elixir_vial"
+      },
+      "primary_ingredient": {
+        "id": "wisdom_bloom",
+        "count": 2
+      },
+      "secondary_ingredient": {
+        "id": "air_herb",
+        "count": 1
+      },
+      "catalyst": {
+        "id": "mana_crystal",
+        "count": 1
+      },
+      "additional_ingredients": []
+    }
+  ]
+}

@@ -1,0 +1,26 @@
+[gd_resource type="Resource" script_class="PotionRecipeData" load_steps=7 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/potion_recipe_data.gd" id="1"]
+[ext_resource type="Resource" path="res://resources/potions/stamina_potion.tres" id="2"]
+[ext_resource type="Resource" path="res://resources/items/water_filled_elixir_vial.tres" id="3"]
+[ext_resource type="Resource" path="res://resources/items/swiftroot.tres" id="4"]
+[ext_resource type="Resource" path="res://resources/items/healing_moss.tres" id="5"]
+[ext_resource type="Resource" path="res://resources/items/spider_silk.tres" id="6"]
+
+[resource]
+script = ExtResource("1")
+id = "recipe_stamina_potion"
+display_name = "Stamina Potion Recipe"
+result = ExtResource("2")
+result_count = 1
+ingredients = [ExtResource("3"), ExtResource("4"), ExtResource("5"), ExtResource("6")]
+ingredient_counts = [1, 2, 1, 1]
+tier = 1
+required_alchemy_level = 3
+base_potency = 50
+potency_per_level = 3
+xp_reward = 25
+base_liquid = ExtResource("3")
+primary_ingredient = ExtResource("4")
+secondary_ingredient = ExtResource("5")
+catalyst = ExtResource("6")

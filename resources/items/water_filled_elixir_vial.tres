@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/item_data.gd" id="1"]
+[ext_resource type="Texture2D" path="res://resources/assets/alchemy_tools/water_filled_elixir_vial.png" id="2"]
+
+[resource]
+script = ExtResource("1")
+id = "water_filled_elixir_vial"
+display_name = "Water Filled Elixir Vial"
+description = "Pure magical water collected from a sacred spring. Instantly restores 50 mana and serves as the base liquid for tier I restorative brews."
+icon = ExtResource("2")
+stackable = true
+max_stack = 99
+item_type = "alchemy_tool"
+weight = 0.2

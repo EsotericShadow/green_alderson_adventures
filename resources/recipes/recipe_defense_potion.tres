@@ -1,0 +1,26 @@
+[gd_resource type="Resource" script_class="PotionRecipeData" load_steps=7 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/potion_recipe_data.gd" id="1"]
+[ext_resource type="Resource" path="res://resources/potions/defense_potion.tres" id="2"]
+[ext_resource type="Resource" path="res://resources/items/spectral_fluid_filled_elixir_vial.tres" id="3"]
+[ext_resource type="Resource" path="res://resources/items/stonebloom.tres" id="4"]
+[ext_resource type="Resource" path="res://resources/items/healing_moss.tres" id="5"]
+[ext_resource type="Resource" path="res://resources/items/storm_dust.tres" id="6"]
+
+[resource]
+script = ExtResource("1")
+id = "recipe_defense_potion"
+display_name = "Defense Potion Recipe"
+result = ExtResource("2")
+result_count = 1
+ingredients = [ExtResource("3"), ExtResource("4"), ExtResource("5"), ExtResource("6")]
+ingredient_counts = [1, 2, 1, 1]
+tier = 2
+required_alchemy_level = 15
+base_potency = 15
+potency_per_level = 2
+xp_reward = 60
+base_liquid = ExtResource("3")
+primary_ingredient = ExtResource("4")
+secondary_ingredient = ExtResource("5")
+catalyst = ExtResource("6")

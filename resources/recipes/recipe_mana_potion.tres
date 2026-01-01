@@ -1,8 +1,8 @@
-[gd_resource type="Resource" script_class="RecipeData" load_steps=5 format=3]
+[gd_resource type="Resource" script_class="PotionRecipeData" load_steps=6 format=3]
 
-[ext_resource type="Script" path="res://scripts/data/recipe_data.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/data/potion_recipe_data.gd" id="1"]
 [ext_resource type="Resource" path="res://resources/potions/mana_potion.tres" id="2"]
-[ext_resource type="Resource" path="res://resources/items/empty_elixir_vial.tres" id="3"]
+[ext_resource type="Resource" path="res://resources/items/water_filled_elixir_vial.tres" id="3"]
 [ext_resource type="Resource" path="res://resources/items/air_herb.tres" id="4"]
 [ext_resource type="Resource" path="res://resources/items/mana_crystal.tres" id="5"]
 
@@ -14,4 +14,12 @@ result = ExtResource("2")
 result_count = 1
 ingredients = [ExtResource("3"), ExtResource("4"), ExtResource("5")]
 ingredient_counts = [1, 2, 1]
-
+tier = 1
+required_alchemy_level = 1
+base_potency = 30
+potency_per_level = 3
+xp_reward = 25
+base_liquid = ExtResource("3")
+primary_ingredient = ExtResource("4")
+secondary_ingredient = null
+catalyst = ExtResource("5")

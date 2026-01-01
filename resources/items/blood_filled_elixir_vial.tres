@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/item_data.gd" id="1"]
+[ext_resource type="Texture2D" path="res://resources/assets/alchemy_tools/blood_filled_elixir_vial.png" id="2"]
+
+[resource]
+script = ExtResource("1")
+id = "blood_filled_elixir_vial"
+display_name = "Blood Filled Elixir Vial"
+description = "A vial filled with crimson blood essence. Used as the vital base for tier II health brews."
+icon = ExtResource("2")
+stackable = true
+max_stack = 99
+item_type = "alchemy_tool"
+weight = 0.2
